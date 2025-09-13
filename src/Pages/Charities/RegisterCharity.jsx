@@ -1,5 +1,5 @@
 import React from 'react';
-import { Helmet } from 'react-helmet-async';
+import { Helmet } from 'react-helmet';
 import { FaBuilding, FaUpload, FaCheck } from 'react-icons/fa';
 
 const RegisterCharity = () => {

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
+import { Helmet } from 'react-helmet';
 import { mockCampaigns } from '../../data/mockData';
 import { FaHeart, FaCreditCard, FaMobile, FaPaypal } from 'react-icons/fa';
 

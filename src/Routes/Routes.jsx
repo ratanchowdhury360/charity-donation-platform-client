@@ -126,5 +126,5 @@ export const router = createBrowserRouter([
     ]
   }
 ], {
-  basename: import.meta.env.DEV ? '/' : '/charity-donation-platform-client/'
+  basename: import.meta.env.DEV ? '/' : (import.meta.env.VITE_VERCEL ? '/' : '/charity-donation-platform-client/')
 });

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
+import { Helmet } from 'react-helmet';
 import { mockCharities } from '../../data/mockData';
 import { FaStar, FaUsers, FaHeart, FaBuilding, FaCalendarAlt, FaGlobe, FaEnvelope, FaPhone } from 'react-icons/fa';
 

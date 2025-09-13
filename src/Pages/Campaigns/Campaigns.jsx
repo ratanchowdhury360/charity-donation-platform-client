@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Helmet } from 'react-helmet';
+import { Helmet } from 'react-helmet-async';
 import { mockCampaigns, mockCategories } from '../../data/mockData';
 import { FaSearch, FaFilter, FaHeart, FaClock, FaUsers } from 'react-icons/fa';
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Helmet } from 'react-helmet';
+import { Helmet } from 'react-helmet-async';
 import { useAuth } from '../../provider/authProvider';
 import { FaUser, FaEnvelope, FaCalendarAlt, FaMapMarkerAlt, FaEdit } from 'react-icons/fa';
 

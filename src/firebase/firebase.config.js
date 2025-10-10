@@ -7,13 +7,21 @@ import { getStorage } from "firebase/storage";
 
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDRGA6Fqr2OWUGsGkHrQ5F_et48Q-kkei8",
-  authDomain: "charity-donation-platfor-2cb08.firebaseapp.com",
-  projectId: "charity-donation-platfor-2cb08",
-  storageBucket: "charity-donation-platfor-2cb08.firebasestorage.app",
-  messagingSenderId: "195950106674",
-  appId: "1:195950106674:web:31a00189454ca68920442b",
-  measurementId: "G-0GC82GFVD0"
+  // apiKey: "AIzaSyDRGA6Fqr2OWUGsGkHrQ5F_et48Q-kkei8",
+  // authDomain: "charity-donation-platfor-2cb08.firebaseapp.com",
+  // projectId: "charity-donation-platfor-2cb08",
+  // storageBucket: "charity-donation-platfor-2cb08.firebasestorage.app",
+  // messagingSenderId: "195950106674",
+  // appId: "1:195950106674:web:31a00189454ca68920442b",
+  // measurementId: "G-0GC82GFVD0"
+
+  apiKey: import.meta.env.VITE_apiKey,
+  authDomain: import.meta.env.VITE_authDomain,
+  projectId: import.meta.env.VITE_projectId,
+  storageBucket: import.meta.env.VITE_storageBucket,
+  messagingSenderId: import.meta.env.VITE_messagingSenderId,
+  appId: import.meta.env.VITE_appId,
+  measurementId: import.meta.env.VITE_measurementId
 };
 
 // Your web app's Firebase configuration

@@ -12,13 +12,22 @@ import Charities from "../Pages/Charities/Charities";
 import CharityDetails from "../Pages/Charities/CharityDetails";
 import RegisterCharity from "../Pages/Charities/RegisterCharity";
 import DonorDashboard from "../Pages/Dashboard/DonorDashboard";
+import MyDonations from "../Pages/Dashboard/MyDonations";
+import SavedCampaigns from "../Pages/Dashboard/SavedCampaigns";
+import MyReviews from "../Pages/Dashboard/MyReviews";
+import Profile from "../Pages/Dashboard/Profile";
 import CharityDashboard from "../Pages/Dashboard/CharityDashboard";
 import AdminDashboard from "../Pages/Dashboard/AdminDashboard";
-import Profile from "../Pages/Profile/Profile";
+import AdminCampaignApproval from "../Pages/Dashboard/AdminCampaignApproval";
+import RoleDashboardIndex from "../Pages/Dashboard/RoleDashboardIndex";
+import MyCampaigns from "../Pages/Dashboard/MyCampaigns";
+import CreateCampaignForm from "../Pages/Campaigns/CreateCampaignForm";
 import About from "../Pages/About/About";
 import Contact from "../Pages/Contact/Contact";
 import ProtectedRoute from "../components/ProtectedRoute";
 import NotFound from "../Pages/NotFound/NotFound";
+import AdminUsers from "../Pages/Dashboard/AdminUsers";
+import AdminCharities from "../Pages/Dashboard/AdminCharities";
 
 export const router = createBrowserRouter([
   {
@@ -98,8 +107,8 @@ export const router = createBrowserRouter([
         ),
         children: [
           {
-            path: "/dashboard",
-            element: <DonorDashboard />
+            index: true,
+            element: <RoleDashboardIndex />
           },
           {
             path: "/dashboard/charity",
@@ -110,10 +119,114 @@ export const router = createBrowserRouter([
             )
           },
           {
+            path: "/dashboard/charity/campaigns",
+            element: (
+              <ProtectedRoute requiredRole="charity">
+                <MyCampaigns />
+              </ProtectedRoute>
+            )
+          },
+          {
+            path: "/dashboard/charity/campaigns/create",
+            element: (
+              <ProtectedRoute requiredRole="charity">
+                <CreateCampaignForm />
+              </ProtectedRoute>
+            )
+          },
+          {
+            path: "/dashboard/charity/reviews",
+            element: (
+              <ProtectedRoute requiredRole="charity">
+                <MyReviews />
+              </ProtectedRoute>
+            )
+          },
+          {
+            path: "/dashboard/charity/profile",
+            element: (
+              <ProtectedRoute requiredRole="charity">
+                <Profile />
+              </ProtectedRoute>
+            )
+          },
+          {
             path: "/dashboard/admin",
             element: (
               <ProtectedRoute requiredRole="admin">
                 <AdminDashboard />
+              </ProtectedRoute>
+            )
+          },
+          {
+            path: "/dashboard/admin/users",
+            element: (
+              <ProtectedRoute requiredRole="admin">
+                <AdminUsers />
+              </ProtectedRoute>
+            )
+          },
+          {
+            path: "/dashboard/admin/charities",
+            element: (
+              <ProtectedRoute requiredRole="admin">
+                <AdminCharities />
+              </ProtectedRoute>
+            )
+          },
+          {
+            path: "/dashboard/admin/campaigns",
+            element: (
+              <ProtectedRoute requiredRole="admin">
+                <AdminCampaignApproval />
+              </ProtectedRoute>
+            )
+          },
+          {
+            path: "/dashboard/admin/profile",
+            element: (
+              <ProtectedRoute requiredRole="admin">
+                <Profile />
+              </ProtectedRoute>
+            )
+          },
+          {
+            path: "/dashboard/donor",
+            element: (
+              <ProtectedRoute requiredRole="donor">
+                <DonorDashboard />
+              </ProtectedRoute>
+            )
+          },
+          {
+            path: "/dashboard/donor/donations",
+            element: (
+              <ProtectedRoute requiredRole="donor">
+                <MyDonations />
+              </ProtectedRoute>
+            )
+          },
+          {
+            path: "/dashboard/donor/saved",
+            element: (
+              <ProtectedRoute requiredRole="donor">
+                <SavedCampaigns />
+              </ProtectedRoute>
+            )
+          },
+          {
+            path: "/dashboard/donor/reviews",
+            element: (
+              <ProtectedRoute requiredRole="donor">
+                <MyReviews />
+              </ProtectedRoute>
+            )
+          },
+          {
+            path: "/dashboard/donor/profile",
+            element: (
+              <ProtectedRoute requiredRole="donor">
+                <Profile />
               </ProtectedRoute>
             )
           }
@@ -126,5 +239,5 @@ export const router = createBrowserRouter([
     ]
   }
 ], {
-  basename: import.meta.env.DEV ? '/' : '/charity-donation-platform-client/'
+  basename: '/'
 });

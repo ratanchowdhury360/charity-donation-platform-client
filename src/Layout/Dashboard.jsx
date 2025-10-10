@@ -10,7 +10,8 @@ import {
   FaSignOutAlt,
   FaUser,
   FaBuilding,
-  FaShieldAlt
+  FaShieldAlt,
+  FaStar
 } from 'react-icons/fa';
 
 const Dashboard = () => {
@@ -26,40 +27,66 @@ const Dashboard = () => {
     };
 
     const getDashboardItems = () => {
-        switch (userRole) {
-            case 'donor':
-                return [
-                    { path: '/dashboard', icon: FaTachometerAlt, label: 'Overview', exact: true },
-                    { path: '/dashboard/donations', icon: FaHeart, label: 'My Donations' },
-                    { path: '/dashboard/saved', icon: FaHeart, label: 'Saved Campaigns' },
-                    { path: '/dashboard/profile', icon: FaUser, label: 'Profile' },
-                ];
-            case 'charity':
-                return [
-                    { path: '/dashboard/charity', icon: FaTachometerAlt, label: 'Overview', exact: true },
-                    { path: '/dashboard/campaigns', icon: FaHeart, label: 'My Campaigns' },
-                    { path: '/dashboard/create', icon: FaPlus, label: 'Create Campaign' },
-                    { path: '/dashboard/donations', icon: FaUsers, label: 'Donations' },
-                    { path: '/dashboard/profile', icon: FaUser, label: 'Profile' },
-                ];
-            case 'admin':
-                return [
-                    { path: '/dashboard/admin', icon: FaTachometerAlt, label: 'Overview', exact: true },
-                    { path: '/dashboard/users', icon: FaUsers, label: 'Users' },
-                    { path: '/dashboard/charities', icon: FaBuilding, label: 'Charities' },
-                    { path: '/dashboard/campaigns', icon: FaHeart, label: 'Campaigns' },
-                    { path: '/dashboard/verification', icon: FaShieldAlt, label: 'Verification' },
-                    { path: '/dashboard/settings', icon: FaCog, label: 'Settings' },
-                ];
-            default:
-                return [];
+        const basePath = userRole === 'donor' ? '/dashboard/donor' : 
+                        userRole === 'charity' ? '/dashboard/charity' : 
+                        userRole === 'admin' ? '/dashboard/admin' : '/dashboard';
+                        
+        const items = [
+            { path: basePath, icon: FaTachometerAlt, label: 'Overview', exact: true }
+        ];
+
+        if (userRole === 'donor') {
+            items.push(
+                { path: `${basePath}/donations`, icon: FaHeart, label: 'My Donations' },
+                { path: `${basePath}/saved`, icon: FaHeart, label: 'All Campaigns' },
+                { path: `${basePath}/reviews`, icon: FaStar, label: 'My Reviews' },
+                { path: `${basePath}/profile`, icon: FaUser, label: 'Profile' }
+            );
+        } else if (userRole === 'charity') {
+            items.push(
+                { path: `${basePath}/campaigns`, icon: FaHeart, label: 'My Campaigns' },
+                { path: `${basePath}/campaigns/create`, icon: FaPlus, label: 'Create Campaign' },
+                { path: `${basePath}/reviews`, icon: FaStar, label: 'My Reviews' },
+                { path: `${basePath}/profile`, icon: FaUser, label: 'Profile' }
+            );
+        } else if (userRole === 'admin') {
+            items.push(
+                { path: `${basePath}/users`, icon: FaUsers, label: 'Users' },
+                { path: `${basePath}/charities`, icon: FaBuilding, label: 'Charities' },
+                { path: `${basePath}/campaigns`, icon: FaHeart, label: 'Campaigns' },
+                { path: `${basePath}/settings`, icon: FaCog, label: 'Settings' },
+                { path: `${basePath}/profile`, icon: FaUser, label: 'Profile' }
+            );
         }
+
+        return items;
     };
 
     const dashboardItems = getDashboardItems();
 
     return (
         <div className="min-h-screen bg-base-200 pt-20">
+            <div className="navbar fixed top-0 left-0 right-0 bg-base-100 shadow z-50">
+                <div className="flex-1">
+                    <Link to="/" className="btn btn-ghost normal-case text-xl">
+                        Charity Platform
+                    </Link>
+                    <span className="ml-2 badge badge-primary badge-outline">
+                        {userRole === 'donor' && 'Donor Dashboard'}
+                        {userRole === 'charity' && 'Charity Dashboard'}
+                        {userRole === 'admin' && 'Admin Dashboard'}
+                    </span>
+                </div>
+                <div className="flex-none">
+                    <Link to="/" className="btn btn-ghost">Home</Link>
+                </div>
+                <div className="flex-none gap-2 pr-4">
+                    <button onClick={handleLogout} className="btn btn-ghost gap-2">
+                        <FaSignOutAlt />
+                        Sign Out
+                    </button>
+                </div>
+            </div>
             <div className="flex">
                 {/* Sidebar */}
                 <div className="w-64 bg-base-100 shadow-lg min-h-screen">

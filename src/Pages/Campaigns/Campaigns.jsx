@@ -1,14 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { mockCampaigns, mockCategories } from '../../data/mockData';
-import { FaSearch, FaFilter, FaHeart, FaClock, FaUsers } from 'react-icons/fa';
+import { getCampaignsByStatus } from '../../utils/campaignStorage';
+import { getAllCampaignDonorCounts } from '../../utils/donationStorage';
+import { FaSearch, FaFilter, FaHeart, FaClock, FaUsers, FaCheckCircle } from 'react-icons/fa';
 
 const Campaigns = () => {
+    const [campaigns, setCampaigns] = useState([]);
+    const [donorCounts, setDonorCounts] = useState({});
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('');
     const [sortBy, setSortBy] = useState('newest');
-    const [filteredCampaigns, setFilteredCampaigns] = useState(mockCampaigns);
+    const [filteredCampaigns, setFilteredCampaigns] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    // Get unique categories from campaigns
+    const categories = [...new Set(campaigns.map(c => c.category))];
+
+    useEffect(() => {
+        // Fetch approved campaigns from localStorage
+        const approvedCampaigns = getCampaignsByStatus('approved');
+        setCampaigns(approvedCampaigns);
+        setFilteredCampaigns(approvedCampaigns);
+        
+        // Get donor counts
+        const counts = getAllCampaignDonorCounts();
+        setDonorCounts(counts);
+        
+        setLoading(false);
+    }, []);
 
     const handleSearch = (e) => {
         const term = e.target.value.toLowerCase();
@@ -27,7 +47,7 @@ const Campaigns = () => {
     };
 
     const filterCampaigns = (search, category, sort) => {
-        let filtered = mockCampaigns.filter(campaign => {
+        let filtered = campaigns.filter(campaign => {
             const matchesSearch = campaign.title.toLowerCase().includes(search) ||
                                 campaign.description.toLowerCase().includes(search) ||
                                 campaign.category.toLowerCase().includes(search);
@@ -38,48 +58,43 @@ const Campaigns = () => {
         // Sort campaigns
         switch (sort) {
             case 'newest':
-                filtered.sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
+                filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
                 break;
             case 'oldest':
-                filtered.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+                filtered.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
                 break;
             case 'most_funded':
-                filtered.sort((a, b) => (b.raised / b.goal) - (a.raised / a.goal));
+                filtered.sort((a, b) => (b.currentAmount / b.goalAmount) - (a.currentAmount / a.goalAmount));
                 break;
             case 'least_funded':
-                filtered.sort((a, b) => (a.raised / a.goal) - (b.raised / b.goal));
+                filtered.sort((a, b) => (a.currentAmount / a.goalAmount) - (b.currentAmount / b.goalAmount));
                 break;
             case 'most_donors':
                 filtered.sort((a, b) => b.donors - a.donors);
                 break;
-            case 'urgent':
-                filtered.sort((a, b) => {
-                    const urgencyOrder = { high: 3, medium: 2, low: 1 };
-                    return urgencyOrder[b.urgency] - urgencyOrder[a.urgency];
-                });
+            case 'ending_soon':
+                filtered.sort((a, b) => new Date(a.endDate) - new Date(b.endDate));
                 break;
         }
 
         setFilteredCampaigns(filtered);
     };
 
-    const getUrgencyColor = (urgency) => {
-        switch (urgency) {
-            case 'high': return 'badge-error';
-            case 'medium': return 'badge-warning';
-            case 'low': return 'badge-success';
-            default: return 'badge-neutral';
-        }
+    const getDaysLeft = (endDate) => {
+        const end = new Date(endDate);
+        const now = new Date();
+        const diffTime = end - now;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays > 0 ? diffDays : 0;
     };
 
-    const getUrgencyText = (urgency) => {
-        switch (urgency) {
-            case 'high': return 'Urgent';
-            case 'medium': return 'Moderate';
-            case 'low': return 'Low Priority';
-            default: return 'Normal';
-        }
-    };
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-base-200 pt-20 flex items-center justify-center">
+                <span className="loading loading-spinner loading-lg text-primary"></span>
+            </div>
+        );
+    }
 
     return (
         <>
@@ -123,9 +138,9 @@ const Campaigns = () => {
                                     onChange={(e) => handleCategoryChange(e.target.value)}
                                 >
                                     <option value="">All Categories</option>
-                                    {mockCategories.map(category => (
-                                        <option key={category.id} value={category.name}>
-                                            {category.name}
+                                    {categories.map(category => (
+                                        <option key={category} value={category}>
+                                            {category.charAt(0).toUpperCase() + category.slice(1)}
                                         </option>
                                     ))}
                                 </select>
@@ -143,7 +158,7 @@ const Campaigns = () => {
                                     <option value="most_funded">Most Funded</option>
                                     <option value="least_funded">Least Funded</option>
                                     <option value="most_donors">Most Donors</option>
-                                    <option value="urgent">Most Urgent</option>
+                                    <option value="ending_soon">Ending Soon</option>
                                 </select>
                             </div>
                         </div>
@@ -158,45 +173,54 @@ const Campaigns = () => {
                                         src={campaign.image} 
                                         alt={campaign.title} 
                                         className="h-48 w-full object-cover"
+                                        onError={(e) => {
+                                            e.target.src = 'https://via.placeholder.com/400x200';
+                                        }}
                                     />
                                     <div className="absolute top-4 left-4 flex gap-2">
-                                        <span className="badge badge-primary">{campaign.category}</span>
-                                        <span className={`badge ${getUrgencyColor(campaign.urgency)}`}>
-                                            {getUrgencyText(campaign.urgency)}
+                                        <span className="badge badge-primary capitalize">{campaign.category}</span>
+                                        {getDaysLeft(campaign.endDate) <= 7 && getDaysLeft(campaign.endDate) > 0 && (
+                                            <span className="badge badge-error">
+                                                <FaClock className="mr-1" /> {getDaysLeft(campaign.endDate)} days left
+                                            </span>
+                                        )}
+                                    </div>
+                                    <div className="absolute top-4 right-4">
+                                        <span className="badge badge-success gap-1">
+                                            <FaCheckCircle /> Approved
                                         </span>
                                     </div>
-                                    {campaign.verified && (
-                                        <div className="absolute top-4 right-4">
-                                            <span className="badge badge-success">Verified</span>
-                                        </div>
-                                    )}
                                 </figure>
 
                                 <div className="card-body">
                                     <h3 className="card-title text-lg line-clamp-2">{campaign.title}</h3>
                                     <p className="text-gray-600 line-clamp-2">{campaign.description}</p>
                                     
+                                    <div className="text-sm text-gray-600 mb-2">
+                                        <p>By: <span className="font-medium">{campaign.charityName}</span></p>
+                                    </div>
+
                                     <div className="mt-4">
                                         <div className="flex justify-between text-sm mb-2">
                                             <span className="font-semibold">
-                                                {campaign.raised.toLocaleString()} BDT
+                                                ৳{campaign.currentAmount.toLocaleString()}
                                             </span>
                                             <span className="text-gray-500">
-                                                of {campaign.goal.toLocaleString()} BDT
+                                                of ৳{campaign.goalAmount.toLocaleString()}
                                             </span>
                                         </div>
                                         <progress 
                                             className="progress progress-primary w-full" 
-                                            value={campaign.raised} 
-                                            max={campaign.goal}
+                                            value={campaign.currentAmount} 
+                                            max={campaign.goalAmount}
                                         ></progress>
                                         <div className="flex justify-between text-sm mt-2">
                                             <span className="font-semibold">
-                                                {Math.round((campaign.raised / campaign.goal) * 100)}% funded
+                                                {Math.round((campaign.currentAmount / campaign.goalAmount) * 100)}% funded
                                             </span>
                                             <span className="text-gray-500 flex items-center gap-1">
                                                 <FaUsers className="text-xs" />
-                                                {campaign.donors} donors
+                                                {donorCounts[campaign.id] || 0} {(donorCounts[campaign.id] || 0) === 1 ? 'donor' : 'donors'}
                                             </span>
                                         </div>
                                     </div>
@@ -234,7 +258,7 @@ const Campaigns = () => {
                                     setSearchTerm('');
                                     setSelectedCategory('');
                                     setSortBy('newest');
-                                    setFilteredCampaigns(mockCampaigns);
+                                    setFilteredCampaigns(campaigns);
                                 }}
                                 className="btn btn-primary"
                             >
@@ -244,11 +268,13 @@ const Campaigns = () => {
                     )}
 
                     {/* Results Count */}
-                    <div className="text-center mt-8">
-                        <p className="text-gray-600">
-                            Showing {filteredCampaigns.length} of {mockCampaigns.length} campaigns
-                        </p>
-                    </div>
+                    {filteredCampaigns.length > 0 && (
+                        <div className="text-center mt-8">
+                            <p className="text-gray-600">
+                                Showing {filteredCampaigns.length} of {campaigns.length} approved campaigns
+                            </p>
+                        </div>
+                    )}
                 </div>
             </div>
         </>

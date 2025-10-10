@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '../../provider/authProvider';
 import { FaGoogle, FaEye, FaEyeSlash } from 'react-icons/fa';
+import { setUserRole } from '../../utils/userStorage';
 
 const SignUp = () => {
     const { signup, loginWithGoogle, setRole } = useAuth();
@@ -25,12 +26,27 @@ const SignUp = () => {
         try {
             setError('');
             setLoading(true);
+            // Sign up the user
             await signup(data.email, data.password, {
-                name: data.name,
+                displayName: data.name,
                 role: data.role
             });
-            setRole(data.role);
-            navigate('/dashboard');
+            
+            // Store the user's role by email (persistent storage)
+            setUserRole(data.email, data.role);
+            
+            // Set the user's role in the auth context
+            await setRole(data.role);
+            
+            // Redirect based on role
+            if (data.role === 'admin') {
+                navigate('/dashboard/admin', { replace: true });
+            } else if (data.role === 'charity') {
+                navigate('/dashboard/charity', { replace: true });
+            } else {
+                // Default to donor dashboard
+                navigate('/dashboard/donor', { replace: true });
+            }
         } catch (error) {
             setError('Failed to create account. Please try again.');
             console.error('Signup error:', error);
@@ -54,13 +70,6 @@ const SignUp = () => {
         }
     };
 
-    const validatePassword = (value) => {
-        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/;
-        if (!passwordRegex.test(value)) {
-            return 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character';
-        }
-        return true;
-    };
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10 py-12 px-4 sm:px-6 lg:px-8">
@@ -163,14 +172,13 @@ const SignUp = () => {
                                         {...register('password', {
                                             required: 'Password is required',
                                             minLength: {
-                                                value: 8,
-                                                message: 'Password must be at least 8 characters'
-                                            },
-                                            validate: validatePassword
+                                                value: 6,
+                                                message: 'Password must be at least 6 characters'
+                                            }
                                         })}
                                         type={showPassword ? 'text' : 'password'}
                                         className="input input-bordered w-full pr-10"
-                                        placeholder="Create a strong password"
+                                        placeholder="Enter your password (min 6 characters)"
                                     />
                                     <button
                                         type="button"

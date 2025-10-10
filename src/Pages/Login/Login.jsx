@@ -3,9 +3,10 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '../../provider/authProvider';
 import { FaGoogle, FaEye, FaEyeSlash } from 'react-icons/fa';
+import { getUserRole, setUserRole } from '../../utils/userStorage';
 
 const Login = () => {
-    const { login, loginWithGoogle } = useAuth();
+    const { login, signup, loginWithGoogle, setRole } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
     const [showPassword, setShowPassword] = useState(false);
@@ -24,10 +25,65 @@ const Login = () => {
         try {
             setError('');
             setLoading(true);
-            await login(data.email, data.password);
-            navigate(from, { replace: true });
+
+            const adminEmail = import.meta.env.VITE_ADMIN_EMAIL;
+            const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD;
+            const isAdminCreds = (
+                data?.email?.toLowerCase() === adminEmail?.toLowerCase() &&
+                data?.password === adminPassword
+            );
+
+            // Surface missing admin env configuration clearly
+            if (isAdminCreds && (!adminEmail || !adminPassword)) {
+                setError('Admin credentials are not configured. Set VITE_ADMIN_EMAIL and VITE_ADMIN_PASSWORD, then restart the dev server.');
+                return;
+            }
+
+            try {
+                await login(data.email, data.password);
+                
+                // Check if this is an admin login
+                if (isAdminCreds) {
+                    setUserRole(data.email, 'admin');
+                    await setRole('admin');
+                    navigate('/dashboard/admin', { replace: true });
+                } else {
+                    // For non-admin users, retrieve their role by email
+                    // This role was set during signup
+                    const storedRole = getUserRole(data.email) || 'donor';
+                    await setRole(storedRole);
+                    navigate(`/dashboard/${storedRole}`, { replace: true });
+                }
+                
+            } catch (err) {
+                // If admin credentials are provided but the account doesn't exist yet, create it
+                if (isAdminCreds && (err?.code === 'auth/user-not-found' || err?.code === 'auth/invalid-credential')) {
+                    try {
+                        await signup(data.email, data.password);
+                        await setRole('admin');
+                        navigate('/dashboard/admin', { replace: true });
+                        return;
+                    } catch (signupError) {
+                        console.error('Admin signup error:', signupError);
+                        throw signupError;
+                    }
+                }
+                throw err;
+            }
         } catch (error) {
-            setError('Failed to log in. Please check your credentials.');
+            if (error?.code === 'auth/operation-not-allowed') {
+                setError('Email/Password sign-in is disabled in Firebase. Enable it in Authentication > Sign-in method. (auth/operation-not-allowed)');
+            } else if (error?.code === 'auth/wrong-password') {
+                setError('Incorrect password. (auth/wrong-password)');
+            } else if (error?.code === 'auth/user-not-found') {
+                setError('User not found. (auth/user-not-found)');
+            } else if (error?.code === 'auth/invalid-credential') {
+                setError('Invalid email or password. (auth/invalid-credential)');
+            } else if (error?.code === 'auth/network-request-failed') {
+                setError('Network error. Check your internet connection and try again. (auth/network-request-failed)');
+            } else {
+                setError(`Failed to log in. Please check your credentials.${error?.code ? ` (${error.code})` : ''}`);
+            }
             console.error('Login error:', error);
         } finally {
             setLoading(false);
@@ -52,7 +108,7 @@ const Login = () => {
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10 py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-md w-full space-y-8">
                 <div className="text-center">
-                    <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
+                    <h2 className="mt-6 text-3xl font-extrabold text-white-500">
                         Sign in to your account
                     </h2>
                     <p className="mt-2 text-sm text-gray-600">

@@ -72,7 +72,8 @@ const Contact = () => {
                                             </div>
                                             <div>
                                                 <h3 className="font-bold">Phone</h3>
-                                                <p className="text-gray-600">+880-2-1234567</p>
+                                                <p className="text-gray-600">+880 1700-000000</p>
+                                                <p className="text-sm text-gray-500">Available 24/7</p>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-4">
@@ -81,7 +82,8 @@ const Contact = () => {
                                             </div>
                                             <div>
                                                 <h3 className="font-bold">Email</h3>
-                                                <p className="text-gray-600">support@charityplatform.com</p>
+                                                <p className="text-gray-600">support@charitydonation.bd</p>
+                                                <p className="text-sm text-gray-500">We reply within 24 hours</p>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-4">
@@ -91,8 +93,9 @@ const Contact = () => {
                                             <div>
                                                 <h3 className="font-bold">Address</h3>
                                                 <p className="text-gray-600">
-                                                    123 Charity Street<br />
-                                                    Dhaka 1000, Bangladesh
+                                                    Charity Donation Platform<br />
+                                                    Gulshan-1, Dhaka 1212<br />
+                                                    Bangladesh
                                                 </p>
                                             </div>
                                         </div>
@@ -101,10 +104,11 @@ const Contact = () => {
                                                 <FaClock className="text-white" />
                                             </div>
                                             <div>
-                                                <h3 className="font-bold">Business Hours</h3>
+                                                <h3 className="font-bold">Support Hours</h3>
                                                 <p className="text-gray-600">
-                                                    Monday - Friday: 9:00 AM - 6:00 PM<br />
-                                                    Saturday: 10:00 AM - 4:00 PM
+                                                    Sunday - Thursday: 9:00 AM - 8:00 PM<br />
+                                                    Friday - Saturday: 10:00 AM - 6:00 PM<br />
+                                                    <span className="text-sm text-primary">Emergency support available 24/7</span>
                                                 </p>
                                             </div>
                                         </div>

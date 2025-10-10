@@ -8,7 +8,8 @@ import {
     signOut,
     onAuthStateChanged
 } from 'firebase/auth';
-import { auth } from '../firebase/firebase.config';
+import { auth, db } from '../firebase/firebase.config';
+import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
                        
 
 const AuthContext = createContext();
@@ -29,7 +30,19 @@ export const AuthProvider = ({ children }) => {
     const signup = async (email, password, userData) => {
         try {
             const result = await createUserWithEmailAndPassword(auth, email, password);
-            // Here you would typically save additional user data to Firestore
+            // Save user profile to Firestore
+            const user = result.user;
+            const role = userData?.role || 'donor';
+            await setDoc(doc(db, 'users', user.uid), {
+                uid: user.uid,
+                email: user.email,
+                displayName: user.displayName || userData?.displayName || '',
+                photoURL: user.photoURL || userData?.photoURL || '',
+                role,
+                providerId: user.providerData?.[0]?.providerId || 'password',
+                createdAt: serverTimestamp(),
+                updatedAt: serverTimestamp()
+            }, { merge: true });
             return result;
         } catch (error) {
             throw error;
@@ -40,6 +53,24 @@ export const AuthProvider = ({ children }) => {
     const login = async (email, password) => {
         try {
             const result = await signInWithEmailAndPassword(auth, email, password);
+            // Ensure user profile exists in Firestore
+            const user = result.user;
+            const ref = doc(db, 'users', user.uid);
+            const snap = await getDoc(ref);
+            if (!snap.exists()) {
+                await setDoc(ref, {
+                    uid: user.uid,
+                    email: user.email,
+                    displayName: user.displayName || '',
+                    photoURL: user.photoURL || '',
+                    role: getRole() || 'donor',
+                    providerId: user.providerData?.[0]?.providerId || 'password',
+                    createdAt: serverTimestamp(),
+                    updatedAt: serverTimestamp()
+                });
+            } else {
+                await setDoc(ref, { updatedAt: serverTimestamp() }, { merge: true });
+            }
             return result;
         } catch (error) {
             throw error;
@@ -50,6 +81,30 @@ export const AuthProvider = ({ children }) => {
     const loginWithGoogle = async () => {
         try {
             const result = await signInWithPopup(auth, googleProvider);
+            // Ensure user profile exists/updated in Firestore
+            const user = result.user;
+            const ref = doc(db, 'users', user.uid);
+            const snap = await getDoc(ref);
+            if (!snap.exists()) {
+                await setDoc(ref, {
+                    uid: user.uid,
+                    email: user.email,
+                    displayName: user.displayName || '',
+                    photoURL: user.photoURL || '',
+                    role: getRole() || 'donor',
+                    providerId: user.providerData?.[0]?.providerId || 'google.com',
+                    createdAt: serverTimestamp(),
+                    updatedAt: serverTimestamp()
+                });
+            } else {
+                await setDoc(ref, {
+                    email: user.email,
+                    displayName: user.displayName || '',
+                    photoURL: user.photoURL || '',
+                    providerId: user.providerData?.[0]?.providerId || 'google.com',
+                    updatedAt: serverTimestamp()
+                }, { merge: true });
+            }
             return result;
         } catch (error) {
             throw error;

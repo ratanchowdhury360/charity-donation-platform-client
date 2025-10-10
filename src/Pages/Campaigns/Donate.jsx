@@ -1,15 +1,36 @@
-import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { mockCampaigns } from '../../data/mockData';
-import { FaHeart, FaCreditCard, FaMobile, FaPaypal } from 'react-icons/fa';
+import { getCampaigns, addDonationToCampaign } from '../../utils/campaignStorage';
+import { addDonation } from '../../utils/donationStorage';
+import { useAuth } from '../../provider/authProvider';
+import { FaHeart, FaCreditCard, FaMobile, FaPaypal, FaCheckCircle } from 'react-icons/fa';
 
 const Donate = () => {
     const { id } = useParams();
-    const campaign = mockCampaigns.find(c => c.id === parseInt(id));
+    const navigate = useNavigate();
+    const { currentUser } = useAuth();
+    const [campaign, setCampaign] = useState(null);
+    const [loading, setLoading] = useState(true);
     const [amount, setAmount] = useState('');
     const [paymentMethod, setPaymentMethod] = useState('bkash');
     const [anonymous, setAnonymous] = useState(false);
+    const [processing, setProcessing] = useState(false);
+
+    useEffect(() => {
+        const allCampaigns = getCampaigns();
+        const foundCampaign = allCampaigns.find(c => c.id === id);
+        setCampaign(foundCampaign);
+        setLoading(false);
+    }, [id]);
+
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-base-200 pt-20">
+                <span className="loading loading-spinner loading-lg text-primary"></span>
+            </div>
+        );
+    }
 
     if (!campaign) {
         return (
@@ -21,10 +42,54 @@ const Donate = () => {
         );
     }
 
-    const handleDonate = (e) => {
+    const handleDonate = async (e) => {
         e.preventDefault();
-        // Handle donation logic here
-        alert('Donation functionality will be implemented with backend integration');
+        
+        if (!currentUser) {
+            alert('Please login to make a donation');
+            navigate('/login');
+            return;
+        }
+        
+        if (!amount || parseInt(amount) < 100) {
+            alert('Minimum donation amount is 100 BDT');
+            return;
+        }
+
+        setProcessing(true);
+        
+        try {
+            // Simulate payment processing
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            const donationAmount = parseInt(amount);
+            
+            // Add donation to campaign (update campaign's currentAmount)
+            addDonationToCampaign(campaign.id, donationAmount);
+            
+            // Record user's donation
+            addDonation({
+                userId: currentUser.uid,
+                userEmail: currentUser.email,
+                userName: currentUser.displayName || 'Anonymous',
+                campaignId: campaign.id,
+                campaignTitle: campaign.title,
+                charityName: campaign.charityName,
+                amount: donationAmount,
+                paymentMethod: paymentMethod,
+                anonymous: anonymous
+            });
+            
+            // Show success message
+            alert(`Thank you for your donation of ৳${donationAmount.toLocaleString()}!\n\nYour contribution will make a real difference.`);
+            
+            // Redirect to campaign details
+            navigate(`/campaigns/${campaign.id}`);
+        } catch (error) {
+            console.error('Donation error:', error);
+            alert('Failed to process donation. Please try again.');
+            setProcessing(false);
+        }
     };
 
     return (
@@ -43,16 +108,19 @@ const Donate = () => {
                                 {/* Campaign Summary */}
                                 <div className="bg-base-200 rounded-lg p-4 mb-6">
                                     <h3 className="font-bold mb-2">{campaign.title}</h3>
-                                    <p className="text-sm text-gray-600 mb-2">{campaign.charityName}</p>
-                                    <div className="flex justify-between text-sm">
-                                        <span>Raised: {campaign.raised.toLocaleString()} BDT</span>
-                                        <span>Goal: {campaign.goal.toLocaleString()} BDT</span>
+                                    <p className="text-sm text-gray-600 mb-2">By: {campaign.charityName}</p>
+                                    <div className="flex justify-between text-sm mb-2">
+                                        <span>Raised: ৳{(campaign.currentAmount || 0).toLocaleString()}</span>
+                                        <span>Goal: ৳{campaign.goalAmount.toLocaleString()}</span>
                                     </div>
                                     <progress 
-                                        className="progress progress-primary w-full mt-2" 
-                                        value={campaign.raised} 
-                                        max={campaign.goal}
+                                        className="progress progress-primary w-full" 
+                                        value={campaign.currentAmount || 0} 
+                                        max={campaign.goalAmount}
                                     ></progress>
+                                    <div className="text-center text-sm text-gray-600 mt-2">
+                                        {Math.round(((campaign.currentAmount || 0) / campaign.goalAmount) * 100)}% funded
+                                    </div>
                                 </div>
 
                                 <form onSubmit={handleDonate} className="space-y-6">
@@ -167,10 +235,19 @@ const Donate = () => {
                                     <button
                                         type="submit"
                                         className="btn btn-primary w-full btn-lg"
-                                        disabled={!amount || parseInt(amount) < 100}
+                                        disabled={!amount || parseInt(amount) < 100 || processing}
                                     >
-                                        <FaHeart className="mr-2" />
-                                        Donate {amount ? `${parseInt(amount).toLocaleString()} BDT` : ''}
+                                        {processing ? (
+                                            <>
+                                                <span className="loading loading-spinner"></span>
+                                                Processing...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <FaHeart className="mr-2" />
+                                                Donate {amount ? `৳${parseInt(amount).toLocaleString()}` : ''}
+                                            </>
+                                        )}
                                     </button>
                                 </form>
 

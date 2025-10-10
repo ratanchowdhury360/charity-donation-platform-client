@@ -1,10 +1,55 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { mockCharities } from '../../data/mockData';
-import { FaStar, FaUsers, FaHeart, FaBuilding } from 'react-icons/fa';
+import { getCampaigns } from '../../utils/campaignStorage';
+import { FaStar, FaUsers, FaHeart, FaBuilding, FaCheckCircle } from 'react-icons/fa';
 
 const Charities = () => {
+    const [charities, setCharities] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        // Get all campaigns and group by charity
+        const allCampaigns = getCampaigns();
+        
+        // Group campaigns by charityId
+        const charityMap = {};
+        
+        allCampaigns.forEach(campaign => {
+            if (!charityMap[campaign.charityId]) {
+                charityMap[campaign.charityId] = {
+                    id: campaign.charityId,
+                    name: campaign.charityName,
+                    campaigns: [],
+                    totalRaised: 0,
+                    totalCampaigns: 0,
+                    approvedCampaigns: 0
+                };
+            }
+            
+            charityMap[campaign.charityId].campaigns.push(campaign);
+            charityMap[campaign.charityId].totalCampaigns++;
+            charityMap[campaign.charityId].totalRaised += campaign.currentAmount;
+            
+            if (campaign.status === 'approved') {
+                charityMap[campaign.charityId].approvedCampaigns++;
+            }
+        });
+        
+        // Convert to array
+        const charitiesArray = Object.values(charityMap);
+        setCharities(charitiesArray);
+        setLoading(false);
+    }, []);
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-base-200 pt-20 flex items-center justify-center">
+                <span className="loading loading-spinner loading-lg text-primary"></span>
+            </div>
+        );
+    }
+
     return (
         <>
             <Helmet>
@@ -21,63 +66,99 @@ const Charities = () => {
                         </p>
                     </div>
 
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {mockCharities.map((charity) => (
-                            <div key={charity.id} className="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow">
-                                <figure>
-                                    <img src={charity.coverImage} alt={charity.name} className="h-48 w-full object-cover" />
-                                </figure>
-                                <div className="card-body">
-                                    <div className="flex items-center gap-3 mb-4">
-                                        <img src={charity.logo} alt={charity.name} className="w-12 h-12 rounded-full" />
-                                        <div>
-                                            <h3 className="card-title text-lg">{charity.name}</h3>
-                                            <div className="flex items-center gap-1">
-                                                <FaStar className="text-yellow-400 text-sm" />
-                                                <span className="text-sm text-gray-600">{charity.rating}</span>
+                    {charities.length === 0 ? (
+                        <div className="text-center py-12">
+                            <div className="text-6xl mb-4">🏢</div>
+                            <h3 className="text-2xl font-bold mb-2">No Charities Yet</h3>
+                            <p className="text-gray-600 mb-6">
+                                Be the first charity to register and start making a difference!
+                            </p>
+                            <Link to="/charities/register" className="btn btn-primary">
+                                <FaBuilding className="mr-2" />
+                                Register Your Charity
+                            </Link>
+                        </div>
+                    ) : (
+                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {charities.map((charity) => (
+                                <div key={charity.id} className="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow">
+                                    <div className="card-body">
+                                        <div className="flex items-center gap-3 mb-4">
+                                            <div className="avatar placeholder">
+                                                <div className="bg-primary text-primary-content rounded-full w-16">
+                                                    <span className="text-2xl">{charity.name.charAt(0).toUpperCase()}</span>
+                                                </div>
+                                            </div>
+                                            <div className="flex-1">
+                                                <h3 className="card-title text-lg">{charity.name}</h3>
+                                                <div className="flex items-center gap-1">
+                                                    <FaCheckCircle className="text-success text-sm" />
+                                                    <span className="text-xs text-gray-600">Registered Charity</span>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    
-                                    <p className="text-gray-600 line-clamp-3 mb-4">{charity.description}</p>
-                                    
-                                    <div className="grid grid-cols-2 gap-4 mb-4">
-                                        <div className="text-center">
-                                            <div className="text-lg font-bold text-primary">{charity.totalCampaigns}</div>
-                                            <div className="text-xs text-gray-600">Campaigns</div>
+                                        
+                                        <div className="divider my-2"></div>
+                                        
+                                        <div className="grid grid-cols-3 gap-4 mb-4">
+                                            <div className="text-center">
+                                                <div className="text-2xl font-bold text-primary">{charity.totalCampaigns}</div>
+                                                <div className="text-xs text-gray-600">Total Campaigns</div>
+                                            </div>
+                                            <div className="text-center">
+                                                <div className="text-2xl font-bold text-success">{charity.approvedCampaigns}</div>
+                                                <div className="text-xs text-gray-600">Approved</div>
+                                            </div>
+                                            <div className="text-center">
+                                                <div className="text-2xl font-bold text-warning">{charity.totalCampaigns - charity.approvedCampaigns}</div>
+                                                <div className="text-xs text-gray-600">Pending</div>
+                                            </div>
                                         </div>
-                                        <div className="text-center">
-                                            <div className="text-lg font-bold text-secondary">{charity.totalRaised.toLocaleString()}</div>
-                                            <div className="text-xs text-gray-600">Raised (BDT)</div>
+
+                                        <div className="bg-gradient-to-r from-secondary/20 to-accent/20 p-4 rounded-lg">
+                                            <div className="text-center">
+                                                <div className="text-sm text-gray-600 mb-1">Total Amount Raised</div>
+                                                <div className="text-3xl font-bold text-secondary">৳{charity.totalRaised.toLocaleString()}</div>
+                                            </div>
                                         </div>
-                                    </div>
 
-                                    <div className="flex flex-wrap gap-1 mb-4">
-                                        {charity.categories.slice(0, 3).map((category, index) => (
-                                            <span key={index} className="badge badge-outline badge-sm">{category}</span>
-                                        ))}
-                                    </div>
-
-                                    <div className="card-actions justify-between">
-                                        <Link to={`/charities/${charity.id}`} className="btn btn-primary btn-sm flex-1">
-                                            View Profile
-                                        </Link>
-                                        <Link to={`/charities/${charity.id}/campaigns`} className="btn btn-outline btn-sm flex-1">
-                                            <FaHeart className="mr-1" />
-                                            Campaigns
-                                        </Link>
+                                        <div className="card-actions justify-center mt-4">
+                                            <Link 
+                                                to={`/campaigns?charity=${charity.id}`} 
+                                                className="btn btn-primary btn-block"
+                                            >
+                                                <FaHeart className="mr-2" />
+                                                View Campaigns
+                                            </Link>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
+                    )}
 
-                    <div className="text-center mt-12">
-                        <Link to="/charities/register" className="btn btn-primary btn-lg">
-                            <FaBuilding className="mr-2" />
-                            Register Your Charity
-                        </Link>
-                    </div>
+                    {charities.length > 0 && (
+                        <div className="text-center mt-12">
+                            <div className="stats shadow mb-6">
+                                <div className="stat">
+                                    <div className="stat-title">Total Charities</div>
+                                    <div className="stat-value text-primary">{charities.length}</div>
+                                </div>
+                                <div className="stat">
+                                    <div className="stat-title">Total Campaigns</div>
+                                    <div className="stat-value text-secondary">{charities.reduce((sum, c) => sum + c.totalCampaigns, 0)}</div>
+                                </div>
+                                <div className="stat">
+                                    <div className="stat-title">Total Raised</div>
+                                    <div className="stat-value text-accent">৳{charities.reduce((sum, c) => sum + c.totalRaised, 0).toLocaleString()}</div>
+                                </div>
+                            </div>
+                            {/* <Link to="/charities/register" className="btn btn-primary btn-lg">
+                                <FaBuilding className="mr-2" />
+                                Register Your Charity
+                            </Link> */}
+                        </div>
+                    )}
                 </div>
             </div>
         </>

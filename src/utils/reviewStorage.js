@@ -1,105 +1,130 @@
 // Review Storage Utility
-const STORAGE_KEY = 'charity_reviews';
+// This uses API calls to persist review data
 
-// Get all reviews
-export const getAllReviews = () => {
-    try {
-        const reviews = localStorage.getItem(STORAGE_KEY);
-        return reviews ? JSON.parse(reviews) : [];
-    } catch (error) {
-        console.error('Error getting reviews:', error);
-        return [];
-    }
+const API_BASE_URL = (import.meta.env && import.meta.env.VITE_API_URL) || 'http://localhost:3000';
+
+const normalizeReview = (review) => {
+    if (!review) return review;
+    return {
+        ...review,
+        id: review.id || (review._id ? review._id.toString() : undefined),
+    };
 };
 
-// Save review
-export const saveReview = (review) => {
-    try {
-        const reviews = getAllReviews();
-        const newReview = {
-            id: Date.now().toString(),
-            userId: review.userId,
-            userName: review.userName,
-            userEmail: review.userEmail,
-            rating: review.rating,
-            comment: review.comment,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-        };
-        reviews.push(newReview);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(reviews));
-        return newReview;
-    } catch (error) {
-        console.error('Error saving review:', error);
-        return null;
+const handleResponse = async (response) => {
+    if (!response.ok) {
+        const message = await response.text();
+        throw new Error(message || 'Request failed');
     }
+    return response.json();
 };
 
-// Update review
-export const updateReview = (reviewId, updates) => {
-    try {
-        const reviews = getAllReviews();
-        const index = reviews.findIndex(r => r.id === reviewId);
-        if (index !== -1) {
-            reviews[index] = {
-                ...reviews[index],
-                ...updates,
-                updatedAt: new Date().toISOString()
-            };
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(reviews));
-            return reviews[index];
-        }
-        return null;
-    } catch (error) {
-        console.error('Error updating review:', error);
-        return null;
-    }
+const buildQueryString = (params = {}) => {
+    const entries = Object.entries(params).filter(([, value]) => value !== undefined && value !== null && value !== '');
+    if (!entries.length) return '';
+    const searchParams = new URLSearchParams(entries);
+    return `?${searchParams.toString()}`;
 };
 
-// Delete review
-export const deleteReview = (reviewId) => {
-    try {
-        const reviews = getAllReviews();
-        const filteredReviews = reviews.filter(r => r.id !== reviewId);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(filteredReviews));
-        return true;
-    } catch (error) {
-        console.error('Error deleting review:', error);
-        return false;
-    }
+// Get all reviews with optional filters
+export const getAllReviews = async (params = {}) => {
+    const response = await fetch(`${API_BASE_URL}/reviews${buildQueryString(params)}`);
+    const data = await handleResponse(response);
+    return data.map(normalizeReview);
 };
 
 // Get reviews by user
-export const getReviewsByUser = (userId) => {
-    try {
-        const reviews = getAllReviews();
-        return reviews.filter(r => r.userId === userId);
-    } catch (error) {
-        console.error('Error getting user reviews:', error);
-        return [];
-    }
+export const getReviewsByUser = async (userId) => {
+    const response = await fetch(`${API_BASE_URL}/reviews/user/${userId}`);
+    const data = await handleResponse(response);
+    return data.map(normalizeReview);
 };
 
-// Get review by ID
-export const getReviewById = (reviewId) => {
-    try {
-        const reviews = getAllReviews();
-        return reviews.find(r => r.id === reviewId);
-    } catch (error) {
-        console.error('Error getting review:', error);
-        return null;
-    }
+// Get single review by ID
+export const getReviewById = async (reviewId) => {
+    const response = await fetch(`${API_BASE_URL}/reviews/${reviewId}`);
+    const data = await handleResponse(response);
+    return normalizeReview(data);
 };
 
-// Get average rating
-export const getAverageRating = () => {
+// Save review (create new)
+export const saveReview = async (reviewData) => {
+    const response = await fetch(`${API_BASE_URL}/reviews`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(reviewData),
+    });
+    const data = await handleResponse(response);
+    return normalizeReview(data);
+};
+
+// Update review
+export const updateReview = async (reviewId, updates) => {
+    const response = await fetch(`${API_BASE_URL}/reviews/${reviewId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updates),
+    });
+    const data = await handleResponse(response);
+    return normalizeReview(data);
+};
+
+// Update review rating only
+export const updateReviewRating = async (reviewId, rating) => {
+    const response = await fetch(`${API_BASE_URL}/reviews/${reviewId}/rating`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ rating }),
+    });
+    const data = await handleResponse(response);
+    return normalizeReview(data);
+};
+
+// Delete review
+export const deleteReview = async (reviewId) => {
+    const response = await fetch(`${API_BASE_URL}/reviews/${reviewId}`, {
+        method: 'DELETE',
+    });
+    await handleResponse(response);
+    return true;
+};
+
+// Get average rating and statistics
+export const getAverageRating = async () => {
     try {
-        const reviews = getAllReviews();
-        if (reviews.length === 0) return 0;
-        const sum = reviews.reduce((acc, r) => acc + r.rating, 0);
-        return (sum / reviews.length).toFixed(1);
+        const response = await fetch(`${API_BASE_URL}/reviews/stats/average`);
+        const data = await handleResponse(response);
+        return parseFloat(data.averageRating) || 0;
     } catch (error) {
-        console.error('Error calculating average rating:', error);
+        console.error('Error getting average rating:', error);
         return 0;
+    }
+};
+
+// Get review statistics
+export const getReviewStats = async () => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/reviews/stats/average`);
+        const data = await handleResponse(response);
+        return data;
+    } catch (error) {
+        console.error('Error getting review stats:', error);
+        return {
+            averageRating: 0,
+            totalReviews: 0,
+            ratingDistribution: {
+                5: 0,
+                4: 0,
+                3: 0,
+                2: 0,
+                1: 0
+            }
+        };
     }
 };

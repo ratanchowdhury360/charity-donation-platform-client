@@ -19,13 +19,22 @@ const MyReviews = () => {
     useEffect(() => {
         if (currentUser) {
             loadReviews();
+        } else {
+            setLoading(false);
         }
     }, [currentUser]);
 
-    const loadReviews = () => {
-        const userReviews = getReviewsByUser(currentUser.uid);
-        setReviews(userReviews);
-        setLoading(false);
+    const loadReviews = async () => {
+        try {
+            setLoading(true);
+            const userReviews = await getReviewsByUser(currentUser.uid);
+            setReviews(userReviews);
+        } catch (error) {
+            console.error('Error loading reviews:', error);
+            alert('Failed to load reviews. Please try again.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleRatingClick = (rating) => {
@@ -42,7 +51,7 @@ const MyReviews = () => {
         }
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         
         if (!formData.comment.trim()) {
@@ -50,25 +59,37 @@ const MyReviews = () => {
             return;
         }
 
-        if (editingReview) {
-            // Update existing review
-            updateReview(editingReview.id, {
-                rating: formData.rating,
-                comment: formData.comment
-            });
-        } else {
-            // Create new review
-            saveReview({
-                userId: currentUser.uid,
-                userName: currentUser.displayName || currentUser.email || 'Anonymous User',
-                userEmail: currentUser.email,
-                rating: formData.rating,
-                comment: formData.comment
-            });
-        }
+        try {
+            if (editingReview) {
+                // Update existing review
+                await updateReview(editingReview.id, {
+                    rating: formData.rating,
+                    comment: formData.comment
+                });
+                alert('Review updated successfully!');
+            } else {
+                // Create new review
+                await saveReview({
+                    userId: currentUser.uid,
+                    userName: currentUser.displayName || currentUser.email || 'Anonymous User',
+                    userEmail: currentUser.email,
+                    rating: formData.rating,
+                    comment: formData.comment
+                });
+                alert('Review submitted successfully!');
+            }
 
-        loadReviews();
-        closeModal();
+            await loadReviews();
+            closeModal();
+        } catch (error) {
+            console.error('Error saving review:', error);
+            const errorMessage = error.message || 'Failed to save review. Please try again.';
+            if (errorMessage.includes('already has a review')) {
+                alert('You already have a review. Please update your existing review instead.');
+            } else {
+                alert(errorMessage);
+            }
+        }
     };
 
     const handleEdit = (review) => {
@@ -82,10 +103,16 @@ const MyReviews = () => {
         setIsModalOpen(true);
     };
 
-    const handleDelete = (reviewId) => {
+    const handleDelete = async (reviewId) => {
         if (window.confirm('Are you sure you want to delete this review?')) {
-            deleteReview(reviewId);
-            loadReviews();
+            try {
+                await deleteReview(reviewId);
+                alert('Review deleted successfully!');
+                await loadReviews();
+            } catch (error) {
+                console.error('Error deleting review:', error);
+                alert('Failed to delete review. Please try again.');
+            }
         }
     };
 
@@ -175,8 +202,8 @@ const MyReviews = () => {
                                                 <span>•</span>
                                                 <span>ID: {review.userId.substring(0, 8)}...</span>
                                                 <span>•</span>
-                                                <span>{new Date(review.createdAt).toLocaleDateString()}</span>
-                                                {review.updatedAt !== review.createdAt && (
+                                                <span>{new Date(review.createdAt || review.date).toLocaleDateString()}</span>
+                                                {review.updatedAt && review.updatedAt !== review.createdAt && (
                                                     <>
                                                         <span>•</span>
                                                         <span className="text-info">Edited</span>

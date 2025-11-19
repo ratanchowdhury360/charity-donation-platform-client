@@ -30,11 +30,11 @@ const Home = () => {
                     getCampaigns(),
                     getCampaignsByStatus('approved')
                 ]);
-                
+
                 // Get donor counts for all campaigns
                 const counts = await getAllCampaignDonorCounts();
                 setDonorCounts(counts);
-                
+
                 // Calculate active campaigns (approved and end date not passed)
                 const now = new Date();
                 now.setHours(0, 0, 0, 0); // Reset time to start of day
@@ -43,13 +43,13 @@ const Home = () => {
                     endDate.setHours(23, 59, 59, 999); // Set to end of day
                     return endDate >= now;
                 });
-                
+
                 // Calculate total raised
                 const totalRaised = allCampaigns.reduce((sum, c) => sum + (c.currentAmount || 0), 0);
-                
+
                 // Count unique charities
                 const uniqueCharities = new Set(allCampaigns.map(c => c.charityId));
-                
+
                 // Get total users/donors from Firestore
                 let totalDonors = 0;
                 try {
@@ -59,26 +59,26 @@ const Home = () => {
                 } catch (error) {
                     console.error('Error fetching user count:', error);
                 }
-                
+
                 // Calculate success rate (campaigns that reached 100% or more)
-                const successfulCampaigns = allCampaigns.filter(c => 
+                const successfulCampaigns = allCampaigns.filter(c =>
                     c.currentAmount >= c.goalAmount
                 );
-                const successRate = allCampaigns.length > 0 
+                const successRate = allCampaigns.length > 0
                     ? Math.round((successfulCampaigns.length / allCampaigns.length) * 100)
                     : 0;
-                
+
                 // Get featured campaigns (top 3 by raised amount from approved)
                 const featured = approvedCampaigns
                     .sort((a, b) => (b.currentAmount || 0) - (a.currentAmount || 0))
                     .slice(0, 3);
-                
+
                 // Get all reviews and sort by most recent
-                const allReviews = getAllReviews();
+                const allReviews = await getAllReviews();
                 const sortedReviews = allReviews
-                    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                    .sort((a, b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date))
                     .slice(0, 6); // Show top 6 most recent reviews
-                
+
                 setStats({
                     totalRaised,
                     activeCampaigns: active.length,
@@ -94,7 +94,7 @@ const Home = () => {
                 setLoading(false);
             }
         };
-        
+
         fetchData();
     }, []);
 
@@ -106,7 +106,7 @@ const Home = () => {
             </Helmet>
 
             {/* Hero Section with Parallax */}
-           
+
 
             {/* Stats Section */}
             <section className="py-20 bg-base-200">
@@ -168,9 +168,9 @@ const Home = () => {
                             {featuredCampaigns.map((campaign) => (
                                 <div key={campaign.id} className="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow">
                                     <figure>
-                                        <img 
-                                            src={campaign.image} 
-                                            alt={campaign.title} 
+                                        <img
+                                            src={campaign.image}
+                                            alt={campaign.title}
                                             className="h-48 w-full object-cover"
                                             onError={(e) => {
                                                 e.target.src = 'https://via.placeholder.com/400x200';
@@ -185,15 +185,15 @@ const Home = () => {
                                         <h3 className="card-title text-lg">{campaign.title}</h3>
                                         <p className="text-sm text-gray-600 mb-1">By: {campaign.charityName}</p>
                                         <p className="text-gray-600 line-clamp-2">{campaign.description}</p>
-                                        
+
                                         <div className="mt-4">
                                             <div className="flex justify-between text-sm mb-2">
                                                 <span>Raised: ৳{(campaign.currentAmount || 0).toLocaleString()}</span>
                                                 <span>Goal: ৳{campaign.goalAmount.toLocaleString()}</span>
                                             </div>
-                                            <progress 
-                                                className="progress progress-primary w-full" 
-                                                value={campaign.currentAmount || 0} 
+                                            <progress
+                                                className="progress progress-primary w-full"
+                                                value={campaign.currentAmount || 0}
                                                 max={campaign.goalAmount}
                                             ></progress>
                                             <div className="flex justify-between text-sm mt-2">
@@ -291,8 +291,8 @@ const Home = () => {
                                         {/* Star Rating */}
                                         <div className="flex justify-center mb-4">
                                             {[1, 2, 3, 4, 5].map((star) => (
-                                                <FaStar 
-                                                    key={star} 
+                                                <FaStar
+                                                    key={star}
                                                     className={`text-xl ${star <= review.rating ? 'text-warning' : 'text-gray-300'}`}
                                                 />
                                             ))}
@@ -316,7 +316,7 @@ const Home = () => {
                                                     ID: {review.userId.substring(0, 8)}...
                                                 </div>
                                                 <div className="text-xs text-gray-400">
-                                                    {new Date(review.createdAt).toLocaleDateString()}
+                                                    {new Date(review.createdAt || review.date).toLocaleDateString()}
                                                 </div>
                                             </div>
                                         </div>
@@ -347,13 +347,16 @@ const Home = () => {
                         Join thousands of donors who are already making a positive impact in their communities
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <Link to="/signup" className="btn btn-secondary btn-lg">
+                        {/* 
+                         <Link to="/signup" className="btn btn-secondary btn-lg">
                             <FaUsers className="mr-2" />
                             Join as Donor
                         </Link>
                         <Link to="/charities/register" className="btn btn-outline btn-lg text-white border-white hover:bg-white hover:text-primary">
                             Register Charity
                         </Link>
+                         */}
+
                     </div>
                 </div>
             </section>

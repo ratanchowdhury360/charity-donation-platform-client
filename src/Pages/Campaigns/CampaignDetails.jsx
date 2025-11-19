@@ -19,7 +19,7 @@ const CampaignDetails = () => {
                 setCampaign(foundCampaign);
 
                 if (foundCampaign) {
-                    const count = getUniqueDonorCount(id);
+                    const count = await getUniqueDonorCount(id);
                     setDonorCount(count);
                 }
             } catch (error) {

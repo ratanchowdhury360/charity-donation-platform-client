@@ -1,115 +1,164 @@
 // Donation storage utility for tracking user donations
-// This uses localStorage to persist donation data
+// This uses API calls to persist donation data
 
-const STORAGE_KEY = 'user_donations';
+const API_BASE_URL = (import.meta.env && import.meta.env.VITE_API_URL) || 'http://localhost:3000';
 
-// Get all donations
-export const getAllDonations = () => {
-    try {
-        const data = localStorage.getItem(STORAGE_KEY);
-        return data ? JSON.parse(data) : [];
-    } catch (error) {
-        console.error('Error reading donations:', error);
-        return [];
-    }
-};
-
-// Get donations by user
-export const getDonationsByUser = (userId) => {
-    const donations = getAllDonations();
-    return donations.filter(donation => donation.userId === userId);
-};
-
-// Add a new donation
-export const addDonation = (donationData) => {
-    try {
-        const donations = getAllDonations();
-        const newDonation = {
-            ...donationData,
-            id: `donation_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-            createdAt: new Date().toISOString(),
-            status: 'completed'
-        };
-        donations.push(newDonation);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(donations));
-        return newDonation;
-    } catch (error) {
-        console.error('Error adding donation:', error);
-        throw error;
-    }
-};
-
-// Get user donation statistics
-export const getUserDonationStats = (userId) => {
-    const userDonations = getDonationsByUser(userId);
-    
-    // Calculate total donated
-    const totalDonated = userDonations.reduce((sum, d) => sum + d.amount, 0);
-    
-    // Count unique campaigns supported
-    const uniqueCampaigns = new Set(userDonations.map(d => d.campaignId));
-    const campaignsSupported = uniqueCampaigns.size;
-    
-    // Calculate impact (1 person per 1000 BDT)
-    const impact = Math.floor(totalDonated / 1000);
-    
-    // Calculate this month's donations
-    const now = new Date();
-    const currentMonth = now.getMonth();
-    const currentYear = now.getFullYear();
-    
-    const thisMonthDonations = userDonations.reduce((sum, donation) => {
-        const donationDate = new Date(donation.createdAt);
-        if (donationDate.getMonth() === currentMonth && donationDate.getFullYear() === currentYear) {
-            return sum + donation.amount;
-        }
-        return sum;
-    }, 0);
-    
+const normalizeDonation = (donation) => {
+    if (!donation) return donation;
     return {
-        totalDonated,
-        campaignsSupported,
-        impact,
-        thisMonth: thisMonthDonations,
-        donationCount: userDonations.length
+        ...donation,
+        id: donation.id || (donation._id ? donation._id.toString() : undefined),
     };
 };
 
+const handleResponse = async (response) => {
+    if (!response.ok) {
+        const message = await response.text();
+        throw new Error(message || 'Request failed');
+    }
+    return response.json();
+};
+
+const buildQueryString = (params = {}) => {
+    const entries = Object.entries(params).filter(([, value]) => value !== undefined && value !== null && value !== '');
+    if (!entries.length) return '';
+    const searchParams = new URLSearchParams(entries);
+    return `?${searchParams.toString()}`;
+};
+
+// Get all donations with optional filters
+export const getAllDonations = async (params = {}) => {
+    const response = await fetch(`${API_BASE_URL}/donations${buildQueryString(params)}`);
+    const data = await handleResponse(response);
+    return data.map(normalizeDonation);
+};
+
+// Get donations by user
+export const getDonationsByUser = async (userId) => {
+    const response = await fetch(`${API_BASE_URL}/donations/donor/${userId}`);
+    const data = await handleResponse(response);
+    return data.map(normalizeDonation);
+};
+
 // Get donations by campaign
-export const getDonationsByCampaign = (campaignId) => {
-    const donations = getAllDonations();
-    return donations.filter(donation => donation.campaignId === campaignId);
+export const getDonationsByCampaign = async (campaignId) => {
+    const response = await fetch(`${API_BASE_URL}/donations/campaign/${campaignId}`);
+    const data = await handleResponse(response);
+    return data.map(normalizeDonation);
+};
+
+// Get donations by charity
+export const getDonationsByCharity = async (charityId) => {
+    const response = await fetch(`${API_BASE_URL}/donations/charity/${charityId}`);
+    const data = await handleResponse(response);
+    return data.map(normalizeDonation);
+};
+
+// Get single donation by ID
+export const getDonationById = async (donationId) => {
+    const response = await fetch(`${API_BASE_URL}/donations/${donationId}`);
+    const data = await handleResponse(response);
+    return normalizeDonation(data);
+};
+
+// Add a new donation
+export const addDonation = async (donationData) => {
+    const response = await fetch(`${API_BASE_URL}/donations`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(donationData),
+    });
+    const data = await handleResponse(response);
+    return normalizeDonation(data);
+};
+
+// Update donation
+export const updateDonation = async (donationId, updates) => {
+    const response = await fetch(`${API_BASE_URL}/donations/${donationId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updates),
+    });
+    const data = await handleResponse(response);
+    return normalizeDonation(data);
+};
+
+// Update donation status
+export const updateDonationStatus = async (donationId, status) => {
+    const response = await fetch(`${API_BASE_URL}/donations/${donationId}/status`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status }),
+    });
+    const data = await handleResponse(response);
+    return normalizeDonation(data);
+};
+
+// Delete donation
+export const deleteDonation = async (donationId) => {
+    const response = await fetch(`${API_BASE_URL}/donations/${donationId}`, {
+        method: 'DELETE',
+    });
+    await handleResponse(response);
+    return true;
+};
+
+// Get user donation statistics
+export const getUserDonationStats = async (userId) => {
+    const response = await fetch(`${API_BASE_URL}/donations/donor/${userId}/stats`);
+    const data = await handleResponse(response);
+    return data;
+};
+
+// Get campaign donation statistics
+export const getCampaignDonationStats = async (campaignId) => {
+    const response = await fetch(`${API_BASE_URL}/donations/campaign/${campaignId}/stats`);
+    const data = await handleResponse(response);
+    return data;
 };
 
 // Get unique donor count for a campaign
-export const getUniqueDonorCount = (campaignId) => {
-    const campaignDonations = getDonationsByCampaign(campaignId);
-    const uniqueDonors = new Set(campaignDonations.map(d => d.userId));
-    return uniqueDonors.size;
+export const getUniqueDonorCount = async (campaignId) => {
+    const stats = await getCampaignDonationStats(campaignId);
+    return stats.donorCount || 0;
 };
 
-// Get all unique donor counts for all campaigns
-export const getAllCampaignDonorCounts = () => {
-    const donations = getAllDonations();
-    const donorCounts = {};
-    
-    donations.forEach(donation => {
-        if (!donorCounts[donation.campaignId]) {
-            donorCounts[donation.campaignId] = new Set();
-        }
-        donorCounts[donation.campaignId].add(donation.userId);
-    });
-    
-    // Convert Sets to counts
-    const counts = {};
-    Object.keys(donorCounts).forEach(campaignId => {
-        counts[campaignId] = donorCounts[campaignId].size;
-    });
-    
-    return counts;
+// Get all unique donor counts for all campaigns (helper function)
+export const getAllCampaignDonorCounts = async () => {
+    try {
+        const allDonations = await getAllDonations();
+        const donorCounts = {};
+        
+        allDonations.forEach(donation => {
+            if (!donorCounts[donation.campaignId]) {
+                donorCounts[donation.campaignId] = new Set();
+            }
+            donorCounts[donation.campaignId].add(donation.donorId);
+        });
+        
+        // Convert Sets to counts
+        const counts = {};
+        Object.keys(donorCounts).forEach(campaignId => {
+            counts[campaignId] = donorCounts[campaignId].size;
+        });
+        
+        return counts;
+    } catch (error) {
+        console.error('Error getting all campaign donor counts:', error);
+        return {};
+    }
 };
 
-// Clear all donations (for testing)
-export const clearAllDonations = () => {
-    localStorage.removeItem(STORAGE_KEY);
+// Clear all donations (for testing/admin purposes - not recommended for production)
+export const clearAllDonations = async () => {
+    // Note: This would require a bulk delete endpoint on the server
+    // For now, this is a placeholder
+    console.warn('clearAllDonations is not implemented via API');
+    return Promise.resolve();
 };

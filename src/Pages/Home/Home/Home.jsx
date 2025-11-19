@@ -32,7 +32,7 @@ const Home = () => {
                 ]);
                 
                 // Get donor counts for all campaigns
-                const counts = getAllCampaignDonorCounts();
+                const counts = await getAllCampaignDonorCounts();
                 setDonorCounts(counts);
                 
                 // Calculate active campaigns (approved and end date not passed)

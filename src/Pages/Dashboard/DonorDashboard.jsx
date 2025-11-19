@@ -35,13 +35,13 @@ const DonorDashboard = () => {
                 }
                 
                 // Get user-specific donation statistics
-                const userStats = getUserDonationStats(currentUser.uid);
+                const userStats = await getUserDonationStats(currentUser.uid);
                 
                 setStats({
-                    totalDonations: userStats.totalDonated,
-                    campaignsSupported: userStats.campaignsSupported,
-                    totalImpact: userStats.impact,
-                    thisMonth: userStats.thisMonth
+                    totalDonations: userStats.totalDonated || 0,
+                    campaignsSupported: userStats.campaignsSupported || 0,
+                    totalImpact: userStats.impact || 0,
+                    thisMonth: userStats.thisMonth || 0
                 });
                 
                 // Get active campaigns for display (approved and end date not passed)

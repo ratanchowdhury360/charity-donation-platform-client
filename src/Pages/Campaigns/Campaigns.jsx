@@ -24,7 +24,7 @@ const Campaigns = () => {
                 setCampaigns(approvedCampaigns);
                 setFilteredCampaigns(approvedCampaigns);
 
-                const counts = getAllCampaignDonorCounts();
+                const counts = await getAllCampaignDonorCounts();
                 setDonorCounts(counts);
             } catch (error) {
                 console.error('Failed to load campaigns', error);

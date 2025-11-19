@@ -73,22 +73,31 @@ const Donate = () => {
             
             const donationAmount = parseInt(amount);
             
+            // Generate transaction ID
+            const transactionId = `TXN${Date.now()}${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+            
+            // Record user's donation first
+            const donationData = {
+                donorId: currentUser.uid,
+                donorEmail: currentUser.email,
+                donorName: currentUser.displayName || 'Anonymous',
+                campaignId: campaign.id,
+                campaignTitle: campaign.title,
+                charityId: campaign.charityId,
+                charityName: campaign.charityName,
+                amount: donationAmount,
+                currency: 'BDT',
+                paymentMethod: paymentMethod,
+                transactionId: transactionId,
+                anonymous: anonymous,
+                status: 'completed'
+            };
+            
+            const newDonation = await addDonation(donationData);
+            
             // Add donation to campaign (update campaign's currentAmount)
             const updatedCampaign = await addDonationToCampaign(campaign.id, donationAmount);
             setCampaign(updatedCampaign);
-            
-            // Record user's donation
-            addDonation({
-                userId: currentUser.uid,
-                userEmail: currentUser.email,
-                userName: currentUser.displayName || 'Anonymous',
-                campaignId: campaign.id,
-                campaignTitle: campaign.title,
-                charityName: campaign.charityName,
-                amount: donationAmount,
-                paymentMethod: paymentMethod,
-                anonymous: anonymous
-            });
             
             // Show success message
             alert(`Thank you for your donation of ৳${donationAmount.toLocaleString()}!\n\nYour contribution will make a real difference.`);

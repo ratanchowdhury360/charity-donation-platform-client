@@ -72,7 +72,7 @@ const CharityDashboard = () => {
                 const pendingCampaigns = charityCampaigns.filter(c => c.status === 'pending').length;
 
                 // Calculate total unique donors across all charity campaigns
-                const donorCounts = getAllCampaignDonorCounts();
+                const donorCounts = await getAllCampaignDonorCounts();
                 const totalDonors = charityCampaigns.reduce((sum, campaign) => {
                     return sum + (donorCounts[campaign.id] || 0);
                 }, 0);

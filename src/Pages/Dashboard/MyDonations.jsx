@@ -33,9 +33,9 @@ const MyDonations = () => {
 
         const fetchDonations = async () => {
             try {
-                const userDonations = getDonationsByUser(currentUser.uid);
+                const userDonations = await getDonationsByUser(currentUser.uid);
                 const sortedDonations = userDonations.sort(
-                    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+                    (a, b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date)
                 );
 
                 const allCampaigns = await getCampaigns();
@@ -44,7 +44,7 @@ const MyDonations = () => {
                     campaignsMap[campaign.id] = campaign;
                 });
 
-                const totalDonated = userDonations.reduce((sum, d) => sum + d.amount, 0);
+                const totalDonated = userDonations.reduce((sum, d) => sum + (d.amount || 0), 0);
                 const uniqueCampaigns = new Set(userDonations.map(d => d.campaignId));
 
                 setDonations(sortedDonations);
@@ -165,12 +165,18 @@ const MyDonations = () => {
                                                     <div className="flex-1">
                                                         <div className="flex justify-between items-start mb-2">
                                                             <div>
-                                                                <h3 className="text-xl font-bold">{donation.campaignTitle}</h3>
-                                                                <p className="text-sm text-gray-600">By: {donation.charityName}</p>
+                                                            <h3 className="text-xl font-bold">{donation.campaignTitle || 'Unknown Campaign'}</h3>
+                                                            <p className="text-sm text-gray-600">By: {donation.charityName || 'Unknown Charity'}</p>
                                                             </div>
                                                             <div className="text-right">
-                                                                <p className="text-2xl font-bold text-primary">৳{donation.amount.toLocaleString()}</p>
-                                                                <span className="badge badge-success badge-sm">Completed</span>
+                                                                <p className="text-2xl font-bold text-primary">৳{(donation.amount || 0).toLocaleString()}</p>
+                                                                <span className={`badge badge-sm ${
+                                                                    donation.status === 'completed' ? 'badge-success' : 
+                                                                    donation.status === 'pending' ? 'badge-warning' : 
+                                                                    'badge-error'
+                                                                }`}>
+                                                                    {donation.status || 'completed'}
+                                                                </span>
                                                             </div>
                                                         </div>
                                                         
@@ -179,9 +185,9 @@ const MyDonations = () => {
                                                                 <FaCalendarAlt className="text-primary" />
                                                                 <div>
                                                                     <p className="text-xs text-gray-600">Date</p>
-                                                                    <p className="text-sm font-semibold">
-                                                                        {new Date(donation.createdAt).toLocaleDateString()}
-                                                                    </p>
+                                                                <p className="text-sm font-semibold">
+                                                                    {new Date(donation.createdAt || donation.date).toLocaleDateString()}
+                                                                </p>
                                                                 </div>
                                                             </div>
                                                             
@@ -240,6 +246,14 @@ const MyDonations = () => {
                                                             {campaign ? (
                                                                 <Link 
                                                                     to={`/campaigns/${campaign.id}`} 
+                                                                    className="btn btn-primary btn-sm"
+                                                                >
+                                                                    <FaEye className="mr-2" />
+                                                                    View Campaign
+                                                                </Link>
+                                                            ) : donation.campaignId ? (
+                                                                <Link 
+                                                                    to={`/campaigns/${donation.campaignId}`} 
                                                                     className="btn btn-primary btn-sm"
                                                                 >
                                                                     <FaEye className="mr-2" />

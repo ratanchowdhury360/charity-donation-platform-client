@@ -23,9 +23,11 @@ const AdminDashboard = () => {
     const fetchDashboardData = async () => {
         try {
             // Get all campaigns
-            const allCampaigns = getCampaigns();
-            const pending = getCampaignsByStatus('pending');
-            const approved = getCampaignsByStatus('approved');
+            const [allCampaigns, pending, approved] = await Promise.all([
+                getCampaigns(),
+                getCampaignsByStatus('pending'),
+                getCampaignsByStatus('approved')
+            ]);
             
             // Count active campaigns (approved and end date not passed)
             const now = new Date();

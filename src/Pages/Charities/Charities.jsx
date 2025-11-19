@@ -9,37 +9,41 @@ const Charities = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Get all campaigns and group by charity
-        const allCampaigns = getCampaigns();
-        
-        // Group campaigns by charityId
-        const charityMap = {};
-        
-        allCampaigns.forEach(campaign => {
-            if (!charityMap[campaign.charityId]) {
-                charityMap[campaign.charityId] = {
-                    id: campaign.charityId,
-                    name: campaign.charityName,
-                    campaigns: [],
-                    totalRaised: 0,
-                    totalCampaigns: 0,
-                    approvedCampaigns: 0
-                };
+        const loadCharities = async () => {
+            try {
+                const allCampaigns = await getCampaigns();
+                const charityMap = {};
+
+                allCampaigns.forEach(campaign => {
+                    if (!charityMap[campaign.charityId]) {
+                        charityMap[campaign.charityId] = {
+                            id: campaign.charityId,
+                            name: campaign.charityName,
+                            campaigns: [],
+                            totalRaised: 0,
+                            totalCampaigns: 0,
+                            approvedCampaigns: 0
+                        };
+                    }
+
+                    charityMap[campaign.charityId].campaigns.push(campaign);
+                    charityMap[campaign.charityId].totalCampaigns++;
+                    charityMap[campaign.charityId].totalRaised += campaign.currentAmount || 0;
+
+                    if (campaign.status === 'approved') {
+                        charityMap[campaign.charityId].approvedCampaigns++;
+                    }
+                });
+
+                setCharities(Object.values(charityMap));
+            } catch (error) {
+                console.error('Failed to load charities', error);
+            } finally {
+                setLoading(false);
             }
-            
-            charityMap[campaign.charityId].campaigns.push(campaign);
-            charityMap[campaign.charityId].totalCampaigns++;
-            charityMap[campaign.charityId].totalRaised += campaign.currentAmount;
-            
-            if (campaign.status === 'approved') {
-                charityMap[campaign.charityId].approvedCampaigns++;
-            }
-        });
-        
-        // Convert to array
-        const charitiesArray = Object.values(charityMap);
-        setCharities(charitiesArray);
-        setLoading(false);
+        };
+
+        loadCharities();
     }, []);
 
     if (loading) {

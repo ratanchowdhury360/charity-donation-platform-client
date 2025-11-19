@@ -26,8 +26,10 @@ const Home = () => {
         const fetchData = async () => {
             try {
                 // Get all campaigns
-                const allCampaigns = getCampaigns();
-                const approvedCampaigns = getCampaignsByStatus('approved');
+                const [allCampaigns, approvedCampaigns] = await Promise.all([
+                    getCampaigns(),
+                    getCampaignsByStatus('approved')
+                ]);
                 
                 // Get donor counts for all campaigns
                 const counts = getAllCampaignDonorCounts();

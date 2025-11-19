@@ -14,12 +14,14 @@ const MyCampaigns = () => {
         fetchMyCampaigns();
     }, [currentUser]);
 
-    const fetchMyCampaigns = () => {
+    const fetchMyCampaigns = async () => {
         try {
             setLoading(true);
             if (currentUser?.uid) {
-                const myCampaigns = getCampaignsByCharity(currentUser.uid);
+                const myCampaigns = await getCampaignsByCharity(currentUser.uid);
                 setCampaigns(myCampaigns);
+            } else {
+                setCampaigns([]);
             }
         } catch (error) {
             console.error('Error fetching campaigns:', error);

@@ -18,10 +18,19 @@ const Donate = () => {
     const [processing, setProcessing] = useState(false);
 
     useEffect(() => {
-        const allCampaigns = getCampaigns();
-        const foundCampaign = allCampaigns.find(c => c.id === id);
-        setCampaign(foundCampaign);
-        setLoading(false);
+        const loadCampaign = async () => {
+            try {
+                const allCampaigns = await getCampaigns();
+                const foundCampaign = allCampaigns.find(c => c.id === id);
+                setCampaign(foundCampaign);
+            } catch (error) {
+                console.error('Failed to load campaign for donation', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadCampaign();
     }, [id]);
 
     if (loading) {
@@ -65,7 +74,8 @@ const Donate = () => {
             const donationAmount = parseInt(amount);
             
             // Add donation to campaign (update campaign's currentAmount)
-            addDonationToCampaign(campaign.id, donationAmount);
+            const updatedCampaign = await addDonationToCampaign(campaign.id, donationAmount);
+            setCampaign(updatedCampaign);
             
             // Record user's donation
             addDonation({

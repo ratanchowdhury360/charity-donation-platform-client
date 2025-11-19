@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useAuth } from '../../provider/authProvider';
-import { getCampaigns, getCampaignsByStatus } from '../../utils/campaignStorage';
-import { getUserDonationStats, getDonationsByUser } from '../../utils/donationStorage';
+import { getCampaignsByStatus } from '../../utils/campaignStorage';
+import { getUserDonationStats } from '../../utils/donationStorage';
 import { 
   FaHeart, 
   FaDollarSign, 
@@ -27,7 +27,7 @@ const DonorDashboard = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchData = () => {
+        const fetchData = async () => {
             try {
                 if (!currentUser) {
                     setLoading(false);
@@ -45,7 +45,7 @@ const DonorDashboard = () => {
                 });
                 
                 // Get active campaigns for display (approved and end date not passed)
-                const approvedCampaigns = getCampaignsByStatus('approved');
+                const approvedCampaigns = await getCampaignsByStatus('approved');
                 const now = new Date();
                 now.setHours(0, 0, 0, 0); // Reset time to start of day
                 const active = approvedCampaigns.filter(campaign => {

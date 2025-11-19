@@ -1,103 +1,102 @@
-// Temporary storage utility for campaigns (until database is implemented)
-// This uses localStorage to persist data across page refreshes
+const API_BASE_URL = (import.meta.env && import.meta.env.VITE_API_URL) || 'http://localhost:3000';
 
-const STORAGE_KEY = 'charity_campaigns';
+const normalizeCampaign = (campaign) => {
+    if (!campaign) return campaign;
+    return {
+        ...campaign,
+        id: campaign.id || (campaign._id ? campaign._id.toString() : undefined),
+    };
+};
 
-// Get all campaigns
-export const getCampaigns = () => {
-    try {
-        const data = localStorage.getItem(STORAGE_KEY);
-        return data ? JSON.parse(data) : [];
-    } catch (error) {
-        console.error('Error reading campaigns:', error);
-        return [];
+const handleResponse = async (response) => {
+    if (!response.ok) {
+        const message = await response.text();
+        throw new Error(message || 'Request failed');
     }
+    return response.json();
 };
 
-// Get campaigns by status
-export const getCampaignsByStatus = (status) => {
-    const campaigns = getCampaigns();
-    return campaigns.filter(campaign => campaign.status === status);
+const buildQueryString = (params = {}) => {
+    const entries = Object.entries(params).filter(([, value]) => value !== undefined && value !== null && value !== '');
+    if (!entries.length) return '';
+    const searchParams = new URLSearchParams(entries);
+    return `?${searchParams.toString()}`;
 };
 
-// Add a new campaign
-export const addCampaign = (campaignData) => {
-    try {
-        const campaigns = getCampaigns();
-        const newCampaign = {
-            ...campaignData,
-            id: `campaign_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-        };
-        campaigns.push(newCampaign);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(campaigns));
-        return newCampaign;
-    } catch (error) {
-        console.error('Error adding campaign:', error);
-        throw error;
-    }
+export const getCampaigns = async (params = {}) => {
+    const response = await fetch(`${API_BASE_URL}/campaigns${buildQueryString(params)}`);
+    const data = await handleResponse(response);
+    return data.map(normalizeCampaign);
 };
 
-// Update campaign status
-export const updateCampaignStatus = (campaignId, status) => {
-    try {
-        const campaigns = getCampaigns();
-        const updatedCampaigns = campaigns.map(campaign => 
-            campaign.id === campaignId 
-                ? { ...campaign, status, updatedAt: new Date().toISOString() }
-                : campaign
-        );
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedCampaigns));
-        return true;
-    } catch (error) {
-        console.error('Error updating campaign status:', error);
-        throw error;
-    }
+export const getCampaignsByStatus = async (status) => {
+    return getCampaigns({ status });
 };
 
-// Delete a campaign
-export const deleteCampaign = (campaignId) => {
-    try {
-        const campaigns = getCampaigns();
-        const filteredCampaigns = campaigns.filter(campaign => campaign.id !== campaignId);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(filteredCampaigns));
-        return true;
-    } catch (error) {
-        console.error('Error deleting campaign:', error);
-        throw error;
-    }
+export const getCampaignsByCharity = async (charityId) => {
+    return getCampaigns({ charityId });
 };
 
-// Get campaigns by charity
-export const getCampaignsByCharity = (charityId) => {
-    const campaigns = getCampaigns();
-    return campaigns.filter(campaign => campaign.charityId === charityId);
+export const addCampaign = async (campaignData) => {
+    const response = await fetch(`${API_BASE_URL}/campaigns`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(campaignData),
+    });
+    const data = await handleResponse(response);
+    return normalizeCampaign(data);
 };
 
-// Update campaign donation amount
-export const addDonationToCampaign = (campaignId, donationAmount) => {
-    try {
-        const campaigns = getCampaigns();
-        const updatedCampaigns = campaigns.map(campaign => {
-            if (campaign.id === campaignId) {
-                return {
-                    ...campaign,
-                    currentAmount: (campaign.currentAmount || 0) + donationAmount,
-                    updatedAt: new Date().toISOString()
-                };
-            }
-            return campaign;
-        });
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedCampaigns));
-        return true;
-    } catch (error) {
-        console.error('Error adding donation to campaign:', error);
-        throw error;
-    }
+export const updateCampaign = async (campaignId, updates) => {
+    const response = await fetch(`${API_BASE_URL}/campaigns/${campaignId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updates),
+    });
+    const data = await handleResponse(response);
+    return normalizeCampaign(data);
 };
 
-// Clear all campaigns (for testing)
-export const clearAllCampaigns = () => {
-    localStorage.removeItem(STORAGE_KEY);
+export const updateCampaignStatus = async (campaignId, status) => {
+    const response = await fetch(`${API_BASE_URL}/campaigns/${campaignId}/status`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status }),
+    });
+    const data = await handleResponse(response);
+    return normalizeCampaign(data);
 };
+
+export const deleteCampaign = async (campaignId) => {
+    const response = await fetch(`${API_BASE_URL}/campaigns/${campaignId}`, {
+        method: 'DELETE',
+    });
+    await handleResponse(response);
+    return true;
+};
+
+export const addDonationToCampaign = async (campaignId, donationAmount, donorIncrement = 1) => {
+    const response = await fetch(`${API_BASE_URL}/campaigns/${campaignId}/progress`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            amount: donationAmount,
+            donorIncrement,
+        }),
+    });
+    const data = await handleResponse(response);
+    return normalizeCampaign(data);
+};
+
+export const clearAllCampaigns = async () => {
+    return Promise.resolve();
+};
+

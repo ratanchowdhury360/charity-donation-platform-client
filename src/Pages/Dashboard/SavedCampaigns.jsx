@@ -11,15 +11,18 @@ export default function SavedCampaigns() {
     const [loading, setLoading] = useState(true);
     
     useEffect(() => {
-        try {
-            // Get all approved campaigns
-            const approvedCampaigns = getCampaignsByStatus('approved');
-            setCampaigns(approvedCampaigns);
-            setLoading(false);
-        } catch (error) {
-            console.error('Error fetching campaigns:', error);
-            setLoading(false);
-        }
+        const loadCampaigns = async () => {
+            try {
+                const approvedCampaigns = await getCampaignsByStatus('approved');
+                setCampaigns(approvedCampaigns);
+            } catch (error) {
+                console.error('Error fetching campaigns:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadCampaigns();
     }, []);
 
     if (loading) {

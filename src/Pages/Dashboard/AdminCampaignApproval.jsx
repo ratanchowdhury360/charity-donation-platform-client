@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { FaCheckCircle, FaTimesCircle, FaEye, FaSpinner, FaUser, FaEnvelope, FaTrash } from 'react-icons/fa';
-import { getCampaignsByStatus, updateCampaignStatus, getCampaigns, deleteCampaign } from '../../utils/campaignStorage';
-import { getUserRole } from '../../utils/userStorage';
+import { updateCampaignStatus, getCampaigns, deleteCampaign } from '../../utils/campaignStorage';
 
 const AdminCampaignApproval = () => {
     const [campaigns, setCampaigns] = useState([]);
@@ -9,34 +8,50 @@ const AdminCampaignApproval = () => {
     const [selectedCampaign, setSelectedCampaign] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [statusFilter, setStatusFilter] = useState('all'); // 'all', 'pending', 'approved', 'rejected'
+    const [counts, setCounts] = useState({
+        all: 0,
+        pending: 0,
+        approved: 0,
+        rejected: 0,
+    });
+
+    const fetchCampaigns = useCallback(async () => {
+        try {
+            setLoading(true);
+            const allCampaigns = await getCampaigns();
+
+            const pendingCount = allCampaigns.filter(c => c.status === 'pending').length;
+            const approvedCount = allCampaigns.filter(c => c.status === 'approved').length;
+            const rejectedCount = allCampaigns.filter(c => c.status === 'rejected').length;
+
+            setCounts({
+                all: allCampaigns.length,
+                pending: pendingCount,
+                approved: approvedCount,
+                rejected: rejectedCount,
+            });
+
+            const filteredList =
+                statusFilter === 'all'
+                    ? allCampaigns
+                    : allCampaigns.filter(campaign => campaign.status === statusFilter);
+
+            setCampaigns(filteredList);
+        } catch (error) {
+            console.error('Error fetching campaigns:', error);
+        } finally {
+            setLoading(false);
+        }
+    }, [statusFilter]);
 
     useEffect(() => {
-        // Fetch campaigns from localStorage (temporary until database is implemented)
-        const fetchCampaigns = async () => {
-            try {
-                setLoading(true);
-                // Simulate API call delay
-                await new Promise(resolve => setTimeout(resolve, 500));
-                const campaignsList = statusFilter === 'all' ? getCampaigns() : getCampaignsByStatus(statusFilter);
-                setCampaigns(campaignsList);
-            } catch (error) {
-                console.error('Error fetching campaigns:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchCampaigns();
-    }, [statusFilter]);
+    }, [fetchCampaigns]);
 
     const handleApprove = async (campaignId) => {
         try {
-            // Update campaign status in localStorage
-            updateCampaignStatus(campaignId, 'approved');
-            console.log('Campaign approved:', campaignId);
-            // Remove from current view
-            setCampaigns(prev => prev.filter(c => c.id !== campaignId));
-            // Close modal if open
+            await updateCampaignStatus(campaignId, 'approved');
+            await fetchCampaigns();
             if (isModalOpen && selectedCampaign?.id === campaignId) {
                 closeModal();
             }
@@ -47,12 +62,8 @@ const AdminCampaignApproval = () => {
 
     const handleReject = async (campaignId) => {
         try {
-            // Update campaign status in localStorage
-            updateCampaignStatus(campaignId, 'rejected');
-            console.log('Campaign rejected:', campaignId);
-            // Remove from current view
-            setCampaigns(prev => prev.filter(c => c.id !== campaignId));
-            // Close modal if open
+            await updateCampaignStatus(campaignId, 'rejected');
+            await fetchCampaigns();
             if (isModalOpen && selectedCampaign?.id === campaignId) {
                 closeModal();
             }
@@ -62,18 +73,13 @@ const AdminCampaignApproval = () => {
     };
 
     const handleDelete = async (campaignId) => {
-        // Confirm deletion
         if (!window.confirm('Are you sure you want to permanently delete this campaign? This action cannot be undone.')) {
             return;
         }
-        
+
         try {
-            // Delete campaign from localStorage
-            deleteCampaign(campaignId);
-            console.log('Campaign deleted:', campaignId);
-            // Remove from current view
-            setCampaigns(prev => prev.filter(c => c.id !== campaignId));
-            // Close modal if open
+            await deleteCampaign(campaignId);
+            await fetchCampaigns();
             if (isModalOpen && selectedCampaign?.id === campaignId) {
                 closeModal();
             }
@@ -130,25 +136,25 @@ const AdminCampaignApproval = () => {
                         className={`tab ${statusFilter === 'all' ? 'tab-active' : ''}`}
                         onClick={() => setStatusFilter('all')}
                     >
-                        All ({getCampaigns().length})
+                        All ({counts.all})
                     </button>
                     <button 
                         className={`tab ${statusFilter === 'pending' ? 'tab-active' : ''}`}
                         onClick={() => setStatusFilter('pending')}
                     >
-                        Pending ({getCampaignsByStatus('pending').length})
+                        Pending ({counts.pending})
                     </button>
                     <button 
                         className={`tab ${statusFilter === 'approved' ? 'tab-active' : ''}`}
                         onClick={() => setStatusFilter('approved')}
                     >
-                        Approved ({getCampaignsByStatus('approved').length})
+                        Approved ({counts.approved})
                     </button>
                     <button 
                         className={`tab ${statusFilter === 'rejected' ? 'tab-active' : ''}`}
                         onClick={() => setStatusFilter('rejected')}
                     >
-                        Rejected ({getCampaignsByStatus('rejected').length})
+                        Rejected ({counts.rejected})
                     </button>
                 </div>
             </div>

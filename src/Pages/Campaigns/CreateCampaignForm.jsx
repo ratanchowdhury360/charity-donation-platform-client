@@ -53,6 +53,7 @@ const CreateCampaignForm = () => {
                 ...data,
                 charityId: currentUser.uid,
                 charityName: currentUser.displayName || currentUser.email || 'Unknown Charity',
+                charityEmail: currentUser.email || '',
                 status: 'pending', // pending, approved, or rejected
                 currentAmount: 0,
                 donors: 0,
@@ -61,8 +62,8 @@ const CreateCampaignForm = () => {
                 endDate: new Date(data.endDate).toISOString()
             };
 
-            // Save to localStorage (temporary storage until database is implemented)
-            const savedCampaign = addCampaign(campaignData);
+            // Save to database
+            const savedCampaign = await addCampaign(campaignData);
             console.log('Campaign submitted successfully:', savedCampaign);
             
             // Simulate API call delay

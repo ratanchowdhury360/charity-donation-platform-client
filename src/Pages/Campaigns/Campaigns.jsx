@@ -18,16 +18,22 @@ const Campaigns = () => {
     const categories = [...new Set(campaigns.map(c => c.category))];
 
     useEffect(() => {
-        // Fetch approved campaigns from localStorage
-        const approvedCampaigns = getCampaignsByStatus('approved');
-        setCampaigns(approvedCampaigns);
-        setFilteredCampaigns(approvedCampaigns);
-        
-        // Get donor counts
-        const counts = getAllCampaignDonorCounts();
-        setDonorCounts(counts);
-        
-        setLoading(false);
+        const fetchCampaigns = async () => {
+            try {
+                const approvedCampaigns = await getCampaignsByStatus('approved');
+                setCampaigns(approvedCampaigns);
+                setFilteredCampaigns(approvedCampaigns);
+
+                const counts = getAllCampaignDonorCounts();
+                setDonorCounts(counts);
+            } catch (error) {
+                console.error('Failed to load campaigns', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchCampaigns();
     }, []);
 
     const handleSearch = (e) => {

@@ -33,7 +33,7 @@ const CharityDashboard = () => {
     }, [location]);
 
     useEffect(() => {
-        const fetchCharityStats = () => {
+        const fetchCharityStats = async () => {
             try {
                 if (!currentUser) {
                     setLoading(false);
@@ -41,7 +41,7 @@ const CharityDashboard = () => {
                 }
 
                 // Get all campaigns
-                const allCampaigns = getCampaigns();
+                const allCampaigns = await getCampaigns();
                 
                 // Filter campaigns by this charity (using user's email or uid as charityId)
                 const charityCampaigns = allCampaigns.filter(

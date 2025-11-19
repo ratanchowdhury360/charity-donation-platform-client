@@ -31,38 +31,37 @@ const MyDonations = () => {
             return;
         }
 
-        try {
-            // Get user's donations
-            const userDonations = getDonationsByUser(currentUser.uid);
-            
-            // Sort by date (newest first)
-            const sortedDonations = userDonations.sort((a, b) => 
-                new Date(b.createdAt) - new Date(a.createdAt)
-            );
-            
-            // Get all campaigns
-            const allCampaigns = getCampaigns();
-            const campaignsMap = {};
-            allCampaigns.forEach(campaign => {
-                campaignsMap[campaign.id] = campaign;
-            });
-            
-            // Calculate stats
-            const totalDonated = userDonations.reduce((sum, d) => sum + d.amount, 0);
-            const uniqueCampaigns = new Set(userDonations.map(d => d.campaignId));
-            
-            setDonations(sortedDonations);
-            setCampaigns(campaignsMap);
-            setStats({
-                totalDonated,
-                totalDonations: userDonations.length,
-                campaignsSupported: uniqueCampaigns.size
-            });
-            setLoading(false);
-        } catch (error) {
-            console.error('Error fetching donations:', error);
-            setLoading(false);
-        }
+        const fetchDonations = async () => {
+            try {
+                const userDonations = getDonationsByUser(currentUser.uid);
+                const sortedDonations = userDonations.sort(
+                    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+                );
+
+                const allCampaigns = await getCampaigns();
+                const campaignsMap = {};
+                allCampaigns.forEach(campaign => {
+                    campaignsMap[campaign.id] = campaign;
+                });
+
+                const totalDonated = userDonations.reduce((sum, d) => sum + d.amount, 0);
+                const uniqueCampaigns = new Set(userDonations.map(d => d.campaignId));
+
+                setDonations(sortedDonations);
+                setCampaigns(campaignsMap);
+                setStats({
+                    totalDonated,
+                    totalDonations: userDonations.length,
+                    campaignsSupported: uniqueCampaigns.size
+                });
+            } catch (error) {
+                console.error('Error fetching donations:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchDonations();
     }, [currentUser]);
 
     if (loading) {

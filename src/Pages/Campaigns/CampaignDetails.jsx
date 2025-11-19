@@ -12,17 +12,24 @@ const CampaignDetails = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const allCampaigns = getCampaigns();
-        const foundCampaign = allCampaigns.find(c => c.id === id);
-        setCampaign(foundCampaign);
-        
-        // Get donor count for this campaign
-        if (foundCampaign) {
-            const count = getUniqueDonorCount(id);
-            setDonorCount(count);
-        }
-        
-        setLoading(false);
+        const loadCampaign = async () => {
+            try {
+                const allCampaigns = await getCampaigns();
+                const foundCampaign = allCampaigns.find(c => c.id === id);
+                setCampaign(foundCampaign);
+
+                if (foundCampaign) {
+                    const count = getUniqueDonorCount(id);
+                    setDonorCount(count);
+                }
+            } catch (error) {
+                console.error('Failed to load campaign details', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadCampaign();
     }, [id]);
 
     if (loading) {

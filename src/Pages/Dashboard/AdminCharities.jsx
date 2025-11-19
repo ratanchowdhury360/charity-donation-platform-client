@@ -13,10 +13,10 @@ const AdminCharities = () => {
     fetchCharities();
   }, []);
 
-  const fetchCharities = () => {
+  const fetchCharities = async () => {
     try {
       // Get all campaigns and group by charity
-      const allCampaigns = getCampaigns();
+      const allCampaigns = await getCampaigns();
       
       // Group campaigns by charityId
       const charityMap = {};

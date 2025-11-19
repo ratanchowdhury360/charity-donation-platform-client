@@ -1,22 +1,32 @@
 import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { FaUsers, FaSearch } from 'react-icons/fa';
-import { db } from '../../firebase/firebase.config';
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [qText, setQText] = useState('');
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const usersRef = collection(db, 'users');
-        const qy = query(usersRef, orderBy('createdAt', 'desc'));
-        const snap = await getDocs(qy);
-        const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        setUsers(data);
+        const res = await fetch(`${API_BASE_URL}/users`);
+        if (!res.ok) {
+          throw new Error(`Failed to load users: ${res.status}`);
+        }
+        const data = await res.json();
+        const normalized = data.map((u) => ({
+          id: u._id || u.id,
+          uid: u.uid,
+          email: u.email,
+          displayName: u.displayName || u.name,
+          photoURL: u.photoURL,
+          role: u.role || 'donor',
+          providerId: u.providerId || 'password',
+          createdAt: u.createdAt,
+        }));
+        setUsers(normalized);
       } catch (e) {
         console.error('Failed to load users:', e);
       } finally {
@@ -99,7 +109,7 @@ const AdminUsers = () => {
                           <span className="badge badge-outline">{u.role || 'donor'}</span>
                         </td>
                         <td>{u.providerId || 'password'}</td>
-                        <td>{u.createdAt?.toDate ? u.createdAt.toDate().toLocaleString() : '—'}</td>
+                        <td>{u.createdAt ? new Date(u.createdAt).toLocaleString() : '—'}</td>
                       </tr>
                     ))}
                     {!filtered.length && (

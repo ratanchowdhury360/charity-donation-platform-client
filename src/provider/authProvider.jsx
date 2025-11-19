@@ -11,8 +11,25 @@ import {
 import { auth, db } from '../firebase/firebase.config';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
                        
-
 const AuthContext = createContext();
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
+const syncUserWithServer = async (userPayload) => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/users`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(userPayload),
+        });
+        if (!response.ok && response.status !== 409) {
+            console.error('Server responded with an error while syncing user:', response.status);
+        }
+    } catch (error) {
+        console.error('Failed to sync user with server:', error);
+    }
+};
 
 export const useAuth = () => {
     return useContext(AuthContext);
@@ -33,16 +50,20 @@ export const AuthProvider = ({ children }) => {
             // Save user profile to Firestore
             const user = result.user;
             const role = userData?.role || 'donor';
-            await setDoc(doc(db, 'users', user.uid), {
+            const userPayload = {
                 uid: user.uid,
                 email: user.email,
                 displayName: user.displayName || userData?.displayName || '',
                 photoURL: user.photoURL || userData?.photoURL || '',
                 role,
                 providerId: user.providerData?.[0]?.providerId || 'password',
+            };
+            await setDoc(doc(db, 'users', user.uid), {
+                ...userPayload,
                 createdAt: serverTimestamp(),
                 updatedAt: serverTimestamp()
             }, { merge: true });
+            await syncUserWithServer(userPayload);
             return result;
         } catch (error) {
             throw error;
@@ -57,20 +78,24 @@ export const AuthProvider = ({ children }) => {
             const user = result.user;
             const ref = doc(db, 'users', user.uid);
             const snap = await getDoc(ref);
+            const userPayload = {
+                uid: user.uid,
+                email: user.email,
+                displayName: user.displayName || '',
+                photoURL: user.photoURL || '',
+                role: getRole() || 'donor',
+                providerId: user.providerData?.[0]?.providerId || 'password',
+            };
             if (!snap.exists()) {
                 await setDoc(ref, {
-                    uid: user.uid,
-                    email: user.email,
-                    displayName: user.displayName || '',
-                    photoURL: user.photoURL || '',
-                    role: getRole() || 'donor',
-                    providerId: user.providerData?.[0]?.providerId || 'password',
+                    ...userPayload,
                     createdAt: serverTimestamp(),
                     updatedAt: serverTimestamp()
                 });
             } else {
                 await setDoc(ref, { updatedAt: serverTimestamp() }, { merge: true });
             }
+            await syncUserWithServer(userPayload);
             return result;
         } catch (error) {
             throw error;
@@ -85,14 +110,17 @@ export const AuthProvider = ({ children }) => {
             const user = result.user;
             const ref = doc(db, 'users', user.uid);
             const snap = await getDoc(ref);
+            const userPayload = {
+                uid: user.uid,
+                email: user.email,
+                displayName: user.displayName || '',
+                photoURL: user.photoURL || '',
+                role: getRole() || 'donor',
+                providerId: user.providerData?.[0]?.providerId || 'google.com',
+            };
             if (!snap.exists()) {
                 await setDoc(ref, {
-                    uid: user.uid,
-                    email: user.email,
-                    displayName: user.displayName || '',
-                    photoURL: user.photoURL || '',
-                    role: getRole() || 'donor',
-                    providerId: user.providerData?.[0]?.providerId || 'google.com',
+                    ...userPayload,
                     createdAt: serverTimestamp(),
                     updatedAt: serverTimestamp()
                 });
@@ -105,6 +133,7 @@ export const AuthProvider = ({ children }) => {
                     updatedAt: serverTimestamp()
                 }, { merge: true });
             }
+            await syncUserWithServer(userPayload);
             return result;
         } catch (error) {
             throw error;

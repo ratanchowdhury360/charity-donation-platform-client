@@ -289,26 +289,34 @@ const DonorDashboard = () => {
                                 </div>
                             ) : (
                                 <div className="space-y-4">
-                                    {messageThreads.slice(0, 3).map((thread) => (
-                                        <div key={thread.id} className="border border-base-200 rounded-lg p-4">
-                                            <div className="flex justify-between text-sm text-gray-500 mb-2">
-                                                <span>{thread.subject}</span>
-                                                <span>{new Date(thread.updatedAt || thread.createdAt).toLocaleDateString()}</span>
-                                            </div>
-                                            <p className="text-gray-700 text-sm mb-2">{thread.message}</p>
-                                            {thread.replies?.length > 0 && (
-                                                <div className="bg-base-200 rounded p-3 text-sm text-gray-700">
-                                                    <p className="font-semibold text-primary mb-1">Latest reply</p>
-                                                    <p>{thread.replies[thread.replies.length - 1].message}</p>
+                                        {messageThreads.slice(0, 3).map((thread) => {
+                                            const latestReply = thread.replies?.[thread.replies.length - 1];
+                                            return (
+                                                <div key={thread.id} className="border border-base-200 rounded-lg p-4">
+                                                    <div className="flex justify-between text-sm text-gray-500 mb-2">
+                                                        <span>{thread.subject}</span>
+                                                        <span>{new Date(thread.updatedAt || thread.createdAt).toLocaleString()}</span>
+                                                    </div>
+                                                    <p className="text-gray-700 text-sm mb-2 line-clamp-2">{thread.message}</p>
+                                                    {latestReply ? (
+                                                        <div className="bg-base-200 rounded p-3 text-sm text-gray-700">
+                                                            <p className="font-semibold text-primary mb-1">
+                                                                {latestReply.actorType === 'admin' ? 'Admin' : 'You'} •{' '}
+                                                                {new Date(latestReply.createdAt).toLocaleString()}
+                                                            </p>
+                                                            <p className="line-clamp-3">{latestReply.message}</p>
+                                                        </div>
+                                                    ) : (
+                                                        <p className="text-xs text-gray-500">Awaiting admin response</p>
+                                                    )}
                                                 </div>
-                                            )}
-                                        </div>
-                                    ))}
-                                    <Link to="/contact" className="btn btn-sm btn-primary w-fit">
-                                        Continue conversation
-                                    </Link>
-                                </div>
-                            )}
+                                            );
+                                        })}
+                                        <Link to="/contact#inbox" className="btn btn-sm btn-primary w-fit">
+                                            Continue conversation
+                                        </Link>
+                                    </div>
+                                )}
                         </div>
                     </div>
                 )}

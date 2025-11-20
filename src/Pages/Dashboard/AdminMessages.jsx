@@ -57,6 +57,8 @@ const AdminMessages = () => {
             await replyToMessage(selectedMessage.id, {
                 reply: replyText.trim(),
                 adminName: 'Platform Admin',
+                adminId: 'admin',
+                actorType: 'admin',
             });
             setFeedback({ type: 'success', text: 'Reply sent successfully.' });
             closeModal();

@@ -1,14 +1,33 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../provider/authProvider';
-import { FaHeart, FaUser, FaSignOutAlt, FaPlus, FaTachometerAlt } from 'react-icons/fa';
+import { FaHeart, FaUser, FaSignOutAlt, FaTachometerAlt, FaMoon, FaSun } from 'react-icons/fa';
 
 const Navber = () => {
     const auth = useAuth();
     const navigate = useNavigate();
     const { currentUser, userRole, logout } = auth || {};
+    const [theme, setTheme] = useState(() => {
+        if (typeof window !== 'undefined') {
+            return localStorage.getItem('theme') || 'light';
+        }
+        return 'light';
+    });
     // no local navbar menu state currently required
+
+    useEffect(() => {
+        if (typeof document !== 'undefined') {
+            document.documentElement.setAttribute('data-theme', theme);
+        }
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('theme', theme);
+        }
+    }, [theme]);
+
+    const toggleTheme = () => {
+        setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
+    };
 
     const handleLogout = async () => {
         try {
@@ -113,6 +132,14 @@ const Navber = () => {
             </div>
             
             <div className="navbar-end">
+                <button
+                    onClick={toggleTheme}
+                    className="btn btn-ghost btn-circle mr-2"
+                    aria-label="Toggle color theme"
+                    title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+                >
+                    {theme === 'light' ? <FaMoon className="text-xl" /> : <FaSun className="text-xl" />}
+                </button>
                 {currentUser && (
                     <div className="dropdown dropdown-end mr-2 hidden md:block">
                         <Link 

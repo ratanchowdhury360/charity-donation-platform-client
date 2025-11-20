@@ -4,15 +4,19 @@ import { Helmet } from 'react-helmet-async';
 import { useAuth } from '../../provider/authProvider';
 import { getCampaignsByStatus } from '../../utils/campaignStorage';
 import { getUserDonationStats } from '../../utils/donationStorage';
-import { 
-  FaHeart, 
-  FaDollarSign, 
-  FaChartLine, 
-  FaUsers, 
+import { getUserMessages } from '../../utils/messageStorage';
+import {
+  FaHeart,
+  FaDollarSign,
+  FaChartLine,
+  FaUsers,
   FaCalendarAlt,
   FaArrowRight,
   FaEye,
-  FaHandHoldingHeart
+  FaHandHoldingHeart,
+  FaCheckCircle,
+  FaHourglassEnd,
+  FaInbox
 } from 'react-icons/fa';
 
 const DonorDashboard = () => {
@@ -25,6 +29,8 @@ const DonorDashboard = () => {
     });
     const [activeCampaigns, setActiveCampaigns] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [campaignPulse, setCampaignPulse] = useState({ completed: 0, archived: 0 });
+    const [messageThreads, setMessageThreads] = useState([]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -53,6 +59,15 @@ const DonorDashboard = () => {
                     endDate.setHours(23, 59, 59, 999); // Set to end of day
                     return endDate >= now;
                 }).slice(0, 6); // Top 6 active campaigns
+
+                const completedCount = approvedCampaigns.filter(c => (c.currentAmount || 0) >= c.goalAmount).length;
+                const archivedCount = approvedCampaigns.filter(c => new Date(c.endDate) < now).length;
+                setCampaignPulse({ completed: completedCount, archived: archivedCount });
+
+                if (currentUser?.uid) {
+                    const inbox = await getUserMessages(currentUser.uid);
+                    setMessageThreads(inbox);
+                }
                 
                 setActiveCampaigns(active);
                 setLoading(false);
@@ -145,6 +160,37 @@ const DonorDashboard = () => {
                     </div>
                 </div>
 
+                {!loading && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <Link
+                            to="/campaigns?view=completed"
+                            className="card bg-base-100 shadow-lg border border-success/30 hover:shadow-2xl transition-shadow"
+                        >
+                            <div className="card-body flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm text-gray-500">Completed campaigns</p>
+                                    <p className="text-3xl font-bold text-success">{campaignPulse.completed}</p>
+                                    <p className="text-xs text-gray-400 mt-1">Targets reached across the platform</p>
+                                </div>
+                                <FaCheckCircle className="text-4xl text-success/70" />
+                            </div>
+                        </Link>
+                        <Link
+                            to="/campaigns?view=archived"
+                            className="card bg-base-100 shadow-lg border border-warning/30 hover:shadow-2xl transition-shadow"
+                        >
+                            <div className="card-body flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm text-gray-500">Ended timelines</p>
+                                    <p className="text-3xl font-bold text-warning">{campaignPulse.archived}</p>
+                                    <p className="text-xs text-gray-400 mt-1">Campaigns waiting for admin extension</p>
+                                </div>
+                                <FaHourglassEnd className="text-4xl text-warning/70" />
+                            </div>
+                        </Link>
+                    </div>
+                )}
+
                 {/* Active Campaigns */}
                 <div className="card bg-base-100 shadow-xl">
                     <div className="card-body">
@@ -226,6 +272,46 @@ const DonorDashboard = () => {
                         )}
                     </div>
                 </div>
+
+                {currentUser && (
+                    <div className="card bg-base-100 shadow-lg">
+                        <div className="card-body">
+                            <div className="flex items-center gap-3 mb-4">
+                                <FaInbox className="text-primary text-2xl" />
+                                <div>
+                                    <h2 className="card-title mb-0">Messages from Admin</h2>
+                                    <p className="text-sm text-gray-500">Replies land here after you use the contact form</p>
+                                </div>
+                            </div>
+                            {messageThreads.length === 0 ? (
+                                <div className="text-center py-6 text-gray-500">
+                                    No replies yet. <Link to="/contact" className="link link-primary">Send us a message</Link> to get help.
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    {messageThreads.slice(0, 3).map((thread) => (
+                                        <div key={thread.id} className="border border-base-200 rounded-lg p-4">
+                                            <div className="flex justify-between text-sm text-gray-500 mb-2">
+                                                <span>{thread.subject}</span>
+                                                <span>{new Date(thread.updatedAt || thread.createdAt).toLocaleDateString()}</span>
+                                            </div>
+                                            <p className="text-gray-700 text-sm mb-2">{thread.message}</p>
+                                            {thread.replies?.length > 0 && (
+                                                <div className="bg-base-200 rounded p-3 text-sm text-gray-700">
+                                                    <p className="font-semibold text-primary mb-1">Latest reply</p>
+                                                    <p>{thread.replies[thread.replies.length - 1].message}</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                    <Link to="/contact" className="btn btn-sm btn-primary w-fit">
+                                        Continue conversation
+                                    </Link>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
 
                 {/* Quick Actions */}
                 <div className="card bg-base-100 shadow-lg">

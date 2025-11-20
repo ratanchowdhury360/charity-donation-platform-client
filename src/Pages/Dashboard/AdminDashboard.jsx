@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
-import { FaUsers, FaBuilding, FaHeart, FaShieldAlt, FaChartLine, FaClock, FaMoneyBillWave } from 'react-icons/fa';
+import { FaUsers, FaBuilding, FaHeart, FaShieldAlt, FaChartLine, FaClock, FaMoneyBillWave, FaCheckCircle, FaHourglassEnd } from 'react-icons/fa';
 import { getCampaignsByStatus, getCampaigns } from '../../utils/campaignStorage';
-import { auth, db } from '../../firebase/firebase.config';
-import { getAuth } from 'firebase/auth';
+import { db } from '../../firebase/firebase.config';
 import { collection, getCountFromServer } from 'firebase/firestore';
 
 const AdminDashboard = () => {
@@ -12,9 +11,10 @@ const AdminDashboard = () => {
     const [totalCharities, setTotalCharities] = useState(0);
     const [activeCampaigns, setActiveCampaigns] = useState(0);
     const [pendingCount, setPendingCount] = useState(0);
-    const [approvedCount, setApprovedCount] = useState(0);
     const [totalRaised, setTotalRaised] = useState(0);
     const [loading, setLoading] = useState(true);
+    const [completedCount, setCompletedCount] = useState(0);
+    const [archivedCount, setArchivedCount] = useState(0);
 
     useEffect(() => {
         fetchDashboardData();
@@ -48,12 +48,16 @@ const AdminDashboard = () => {
             const coll = collection(db, 'users');
             const snapshot = await getCountFromServer(coll);
             
+            const completed = allCampaigns.filter(c => (c.currentAmount || 0) >= c.goalAmount);
+            const archived = allCampaigns.filter(c => new Date(c.endDate) < now);
+
             setTotalUsers(snapshot.data().count || 0);
             setTotalCharities(uniqueCharities.size);
             setActiveCampaigns(active.length);
             setPendingCount(pending.length);
-            setApprovedCount(approved.length);
             setTotalRaised(totalRaisedAmount);
+            setCompletedCount(completed.length);
+            setArchivedCount(archived.length);
             setLoading(false);
         } catch (error) {
             console.error('Error fetching dashboard data:', error);
@@ -73,7 +77,7 @@ const AdminDashboard = () => {
                     <p className="text-lg opacity-90">Manage platform operations and oversee all activities</p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-6">
                     <div className="card bg-gradient-to-br from-success to-success/80 text-white shadow-xl hover:shadow-2xl transition-shadow">
                         <div className="card-body">
                             <div className="flex items-center justify-between">
@@ -91,7 +95,7 @@ const AdminDashboard = () => {
                         </div>
                     </div>
 
-                    <div className="card bg-base-100 shadow-lg hover:shadow-xl transition-shadow">
+                    <div className="card bg-red-100 shadow-lg hover:shadow-xl transition-shadow">
                         <div className="card-body">
                             <div className="flex items-center justify-between">
                                 <div>
@@ -108,7 +112,7 @@ const AdminDashboard = () => {
                         </div>
                     </div>
 
-                    <div className="card bg-base-100 shadow-lg hover:shadow-xl transition-shadow">
+                    <div className="card bg-green-200 shadow-lg hover:shadow-xl transition-shadow">
                         <div className="card-body">
                             <div className="flex items-center justify-between">
                                 <div>
@@ -125,9 +129,9 @@ const AdminDashboard = () => {
                         </div>
                     </div>
 
-                    <div className="card bg-base-100 shadow-lg hover:shadow-xl transition-shadow">
-                        <div className="card-body">
-                            <div className="flex items-center justify-between">
+                    <div className="card bg-red-200 shadow-lg hover:shadow-xl transition-shadow">
+                        <div className="card-body bg-gradient-to-br">
+                            <div className="flex bg-gradient-to-br items-center justify-between">
                                 <div>
                                     <p className="text-sm text-gray-600">Active Campaigns</p>
                                     {loading ? (
@@ -142,7 +146,7 @@ const AdminDashboard = () => {
                         </div>
                     </div>
 
-                    <div className="card bg-base-100 shadow-lg hover:shadow-xl transition-shadow">
+                    <div className="card bg-green-200 shadow-lg hover:shadow-xl transition-shadow">
                         <div className="card-body">
                             <div className="flex items-center justify-between">
                                 <div>
@@ -156,10 +160,44 @@ const AdminDashboard = () => {
                     </div>
                 </div>
 
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <Link
+                        to="/campaigns?view=completed"
+                        className="card bg-base-100 shadow-lg border border-success/30 hover:shadow-2xl transition-shadow"
+                    >
+                        <div className="card-body">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm text-gray-500">Completed Campaigns</p>
+                                    <p className="text-3xl font-bold text-success">{completedCount}</p>
+                                    <p className="text-xs text-gray-400 mt-1">Targets achieved across the platform</p>
+                                </div>
+                                <FaCheckCircle className="text-4xl text-success/70" />
+                            </div>
+                        </div>
+                    </Link>
+
+                    <Link
+                        to="/dashboard/admin/campaigns/archived"
+                        className="card bg-base-100 shadow-lg border border-warning/30 hover:shadow-2xl transition-shadow"
+                    >
+                        <div className="card-body">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm text-gray-500">Ended Campaigns</p>
+                                    <p className="text-3xl font-bold text-warning">{archivedCount}</p>
+                                    <p className="text-xs text-gray-400 mt-1">Awaiting extension & follow-up</p>
+                                </div>
+                                <FaHourglassEnd className="text-4xl text-warning/70" />
+                            </div>
+                        </div>
+                    </Link>
+                </div>
+
                 <div className="card bg-base-100 shadow-lg">
                     <div className="card-body">
                         <h2 className="card-title mb-4">Quick Actions</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <Link 
                                 to="/dashboard/admin/campaigns" 
                                 className="btn btn-warning btn-lg justify-start"
@@ -171,13 +209,23 @@ const AdminDashboard = () => {
                                 </div>
                             </Link>
                             <Link 
-                                to="/dashboard/admin/campaigns" 
+                                to="/dashboard/admin/campaigns/archived" 
+                                className="btn btn-info btn-lg justify-start"
+                            >
+                                <FaHourglassEnd className="mr-2" />
+                                <div className="text-left">
+                                    <div>Manage Extensions</div>
+                                    <div className="text-xs opacity-70">{archivedCount} waiting to reopen</div>
+                                </div>
+                            </Link>
+                            <Link 
+                                to="/dashboard/admin/messages" 
                                 className="btn btn-success btn-lg justify-start"
                             >
                                 <FaChartLine className="mr-2" />
                                 <div className="text-left">
-                                    <div>View Analytics</div>
-                                    <div className="text-xs opacity-70">{approvedCount} approved campaigns</div>
+                                    <div>Review Messages</div>
+                                    <div className="text-xs opacity-70">Stay on top of contact requests</div>
                                 </div>
                             </Link>
                         </div>

@@ -1,116 +1,281 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock } from 'react-icons/fa';
+import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock, FaPaperPlane, FaInfoCircle, FaCommentDots } from 'react-icons/fa';
+import { useAuth } from '../../provider/authProvider';
+import { createMessage } from '../../utils/messageStorage';
+
+const subjectOptions = [
+    'General Inquiry',
+    'Donation Support',
+    'Charity Registration',
+    'Technical Issue',
+    'Partnership Opportunity',
+];
 
 const Contact = () => {
+    const { currentUser, userRole } = useAuth();
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        subject: subjectOptions[0],
+        message: '',
+        wantsReply: false,
+    });
+    const [submitting, setSubmitting] = useState(false);
+    const [feedback, setFeedback] = useState({ type: '', text: '' });
+
+    useEffect(() => {
+        if (currentUser) {
+            setFormData((prev) => ({
+                ...prev,
+                name: currentUser.displayName || prev.name,
+                email: currentUser.email || prev.email,
+                wantsReply: true,
+            }));
+        }
+    }, [currentUser]);
+
+    const handleChange = (event) => {
+        const { name, value, type, checked } = event.target;
+        setFeedback({ type: '', text: '' });
+        setFormData((prev) => ({
+            ...prev,
+            [name]: type === 'checkbox' ? checked : value,
+        }));
+    };
+
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+        if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
+            setFeedback({ type: 'error', text: 'Please complete every required field.' });
+            return;
+        }
+
+        setSubmitting(true);
+        try {
+            await createMessage({
+                senderName: formData.name.trim(),
+                senderEmail: formData.email.trim(),
+                subject: formData.subject,
+                message: formData.message.trim(),
+                userId: currentUser?.uid || null,
+                userRole: userRole || 'guest',
+                wantsReply: Boolean(formData.wantsReply && currentUser),
+            });
+            setFeedback({ type: 'success', text: 'Your message has been delivered to the admin team.' });
+            setFormData((prev) => ({
+                ...prev,
+                message: '',
+                wantsReply: Boolean(currentUser),
+            }));
+        } catch (error) {
+            console.error('Failed to send message', error);
+            setFeedback({ type: 'error', text: 'We could not send your message. Please try again.' });
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
     return (
         <>
             <Helmet>
                 <title>Contact Us - Charity Donation Platform</title>
-                <meta name="description" content="Get in touch with our team. We're here to help with any questions about donations, charity registration, or platform features." />
+                <meta
+                    name="description"
+                    content="Get in touch with our team. We're here to help with any questions about donations, charity registration, or platform features."
+                />
             </Helmet>
 
-            <div className="min-h-screen bg-base-200 pt-20">
-                <div className="container mx-auto px-4 py-12">
+            <div className="min-h-screen bg-gradient-to-b from-base-200 via-base-100 to-base-200 pt-24 pb-16">
+                <div className="container mx-auto px-4">
                     <div className="text-center mb-12">
-                        <h1 className="text-4xl font-bold mb-4">Contact Us</h1>
-                        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                            We're here to help! Reach out to us with any questions or concerns.
+                        <p className="badge badge-primary badge-lg mb-4">We usually reply in under 24 hours</p>
+                        <h1 className="text-4xl md:text-5xl font-black mb-3">Let's build impact together</h1>
+                        <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+                            Whether you're a donor, charity partner, or supporter, our team is here to help you keep campaigns healthy
+                            and communities supported.
                         </p>
                     </div>
 
-                    <div className="grid lg:grid-cols-2 gap-12">
-                        {/* Contact Form */}
-                        <div className="card bg-base-100 shadow-xl">
+                    <div className="grid lg:grid-cols-2 gap-10">
+                        <div className="card bg-base-100 shadow-xl border border-base-200">
                             <div className="card-body">
-                                <h2 className="card-title mb-6">Send us a message</h2>
-                                <form className="space-y-4">
-                                    <div className="form-control">
-                                        <label className="label">
-                                            <span className="label-text">Name</span>
-                                        </label>
-                                        <input type="text" className="input input-bordered" placeholder="Your name" />
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                                        <FaCommentDots className="text-xl" />
                                     </div>
-                                    <div className="form-control">
-                                        <label className="label">
-                                            <span className="label-text">Email</span>
-                                        </label>
-                                        <input type="email" className="input input-bordered" placeholder="your@email.com" />
+                                    <div>
+                                        <h2 className="card-title mb-0">Send us a message</h2>
+                                        <p className="text-sm text-gray-500">We'll respond as quickly as possible</p>
                                     </div>
+                                </div>
+
+                                {!currentUser && (
+                                    <div className="alert alert-warning mb-4">
+                                        <FaInfoCircle className="text-xl" />
+                                        <div>
+                                            <p className="font-semibold">Want a reply from admin?</p>
+                                            <p className="text-sm">
+                                                Please log in first. Guests can still contact us, but replies are only sent to registered users.
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {feedback.text && (
+                                    <div className={`alert ${feedback.type === 'success' ? 'alert-success' : 'alert-error'} mb-4`}>
+                                        {feedback.text}
+                                    </div>
+                                )}
+
+                                <form className="space-y-4" onSubmit={handleSubmit}>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="form-control">
+                                            <label className="label">
+                                                <span className="label-text font-semibold">Name</span>
+                                            </label>
+                                            <input
+                                                type="text"
+                                                name="name"
+                                                value={formData.name}
+                                                onChange={handleChange}
+                                                placeholder="Your full name"
+                                                className="input input-bordered focus:input-primary"
+                                                required
+                                            />
+                                        </div>
+                                        <div className="form-control">
+                                            <label className="label">
+                                                <span className="label-text font-semibold">Email</span>
+                                            </label>
+                                            <input
+                                                type="email"
+                                                name="email"
+                                                value={formData.email}
+                                                onChange={handleChange}
+                                                placeholder="you@email.com"
+                                                className="input input-bordered focus:input-primary"
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+
                                     <div className="form-control">
                                         <label className="label">
-                                            <span className="label-text">Subject</span>
+                                            <span className="label-text font-semibold">Subject</span>
                                         </label>
-                                        <select className="select select-bordered">
-                                            <option>General Inquiry</option>
-                                            <option>Donation Support</option>
-                                            <option>Charity Registration</option>
-                                            <option>Technical Issue</option>
-                                            <option>Other</option>
+                                        <select
+                                            name="subject"
+                                            value={formData.subject}
+                                            onChange={handleChange}
+                                            className="select select-bordered focus:select-primary"
+                                        >
+                                            {subjectOptions.map((option) => (
+                                                <option key={option} value={option}>
+                                                    {option}
+                                                </option>
+                                            ))}
                                         </select>
                                     </div>
+
                                     <div className="form-control">
                                         <label className="label">
-                                            <span className="label-text">Message</span>
+                                            <span className="label-text font-semibold">Message</span>
                                         </label>
-                                        <textarea className="textarea textarea-bordered h-32" placeholder="Your message"></textarea>
+                                        <textarea
+                                            name="message"
+                                            value={formData.message}
+                                            onChange={handleChange}
+                                            className="textarea textarea-bordered h-32 focus:textarea-primary"
+                                            placeholder="Share how we can support you..."
+                                            required
+                                        />
                                     </div>
-                                    <button className="btn btn-primary w-full">Send Message</button>
+
+                                    <div className="form-control">
+                                        <label className="label cursor-pointer justify-start gap-3">
+                                            <input
+                                                type="checkbox"
+                                                name="wantsReply"
+                                                className="checkbox checkbox-primary"
+                                                checked={Boolean(formData.wantsReply && currentUser)}
+                                                disabled={!currentUser}
+                                                onChange={handleChange}
+                                            />
+                                            <span className="label-text">
+                                                I'd like the admin team to follow up with me via my dashboard inbox
+                                            </span>
+                                        </label>
+                                        {!currentUser && (
+                                            <p className="text-xs text-error mt-1">Login required to receive replies.</p>
+                                        )}
+                                    </div>
+
+                                    <button className="btn btn-primary w-full" disabled={submitting}>
+                                        {submitting ? (
+                                            <>
+                                                <span className="loading loading-spinner"></span>
+                                                Sending...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <FaPaperPlane />
+                                                Send Message
+                                            </>
+                                        )}
+                                    </button>
                                 </form>
                             </div>
                         </div>
 
-                        {/* Contact Information */}
-                        <div className="space-y-8">
-                            <div className="card bg-base-100 shadow-xl">
-                                <div className="card-body">
-                                    <h2 className="card-title mb-6">Get in touch</h2>
-                                    <div className="space-y-6">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
-                                                <FaPhone className="text-white" />
-                                            </div>
-                                            <div>
-                                                <h3 className="font-bold">Phone</h3>
-                                                <p className="text-gray-600">+880 1700-000000</p>
-                                                <p className="text-sm text-gray-500">Available 24/7</p>
-                                            </div>
+                        <div className="space-y-6">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="card bg-gradient-to-br from-primary to-primary/80 text-white shadow-xl">
+                                    <div className="card-body">
+                                        <FaPhone className="text-3xl opacity-80" />
+                                        <p className="uppercase text-xs tracking-wide mt-4 opacity-80">Hotline</p>
+                                        <h3 className="text-2xl font-bold">+880 1700-000000</h3>
+                                        <p className="text-sm opacity-80">24/7 emergency support</p>
+                                    </div>
+                                </div>
+                                <div className="card bg-gradient-to-br from-secondary to-secondary/80 text-white shadow-xl">
+                                    <div className="card-body">
+                                        <FaEnvelope className="text-3xl opacity-80" />
+                                        <p className="uppercase text-xs tracking-wide mt-4 opacity-80">Email</p>
+                                        <h3 className="text-xl font-semibold break-all">support@charitydonation.bd</h3>
+                                        <p className="text-sm opacity-80">We reply within one business day</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="card bg-base-100 shadow-xl border border-base-200">
+                                <div className="card-body space-y-5">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-12 h-12 rounded-full bg-base-200 flex items-center justify-center">
+                                            <FaMapMarkerAlt className="text-primary" />
                                         </div>
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
-                                                <FaEnvelope className="text-white" />
-                                            </div>
-                                            <div>
-                                                <h3 className="font-bold">Email</h3>
-                                                <p className="text-gray-600">support@charitydonation.bd</p>
-                                                <p className="text-sm text-gray-500">We reply within 24 hours</p>
-                                            </div>
+                                        <div>
+                                            <h3 className="font-bold text-lg">Visit our hub</h3>
+                                            <p className="text-gray-600 leading-relaxed">
+                                                Charity Donation Platform<br />
+                                                Gulshan-1, Dhaka 1212<br />
+                                                Bangladesh
+                                            </p>
                                         </div>
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
-                                                <FaMapMarkerAlt className="text-white" />
-                                            </div>
-                                            <div>
-                                                <h3 className="font-bold">Address</h3>
-                                                <p className="text-gray-600">
-                                                    Charity Donation Platform<br />
-                                                    Gulshan-1, Dhaka 1212<br />
-                                                    Bangladesh
-                                                </p>
-                                            </div>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-12 h-12 rounded-full bg-base-200 flex items-center justify-center">
+                                            <FaClock className="text-primary" />
                                         </div>
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
-                                                <FaClock className="text-white" />
-                                            </div>
-                                            <div>
-                                                <h3 className="font-bold">Support Hours</h3>
-                                                <p className="text-gray-600">
-                                                    Sunday - Thursday: 9:00 AM - 8:00 PM<br />
-                                                    Friday - Saturday: 10:00 AM - 6:00 PM<br />
-                                                    <span className="text-sm text-primary">Emergency support available 24/7</span>
-                                                </p>
-                                            </div>
+                                        <div>
+                                            <h3 className="font-bold text-lg">Support hours</h3>
+                                            <p className="text-gray-600 leading-relaxed">
+                                                Sunday - Thursday: 9:00 AM - 8:00 PM
+                                                <br />
+                                                Friday - Saturday: 10:00 AM - 6:00 PM
+                                                <br />
+                                                <span className="text-primary text-sm">Emergency response available 24/7</span>
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
@@ -118,36 +283,25 @@ const Contact = () => {
 
                             <div className="card bg-base-100 shadow-xl">
                                 <div className="card-body">
-                                    <h2 className="card-title mb-4">Frequently Asked Questions</h2>
-                                    <div className="space-y-4">
-                                        <div className="collapse collapse-arrow bg-base-200">
-                                            <input type="radio" name="faq" />
-                                            <div className="collapse-title font-medium">
-                                                How do I verify a charity organization?
-                                            </div>
-                                            <div className="collapse-content">
-                                                <p>All charities on our platform go through a rigorous verification process including document review and background checks.</p>
-                                            </div>
-                                        </div>
-                                        <div className="collapse collapse-arrow bg-base-200">
-                                            <input type="radio" name="faq" />
-                                            <div className="collapse-title font-medium">
-                                                What payment methods do you accept?
-                                            </div>
-                                            <div className="collapse-content">
-                                                <p>We accept bKash, PayPal, Visa, Mastercard, and other major payment methods.</p>
-                                            </div>
-                                        </div>
-                                        <div className="collapse collapse-arrow bg-base-200">
-                                            <input type="radio" name="faq" />
-                                            <div className="collapse-title font-medium">
-                                                How can I track my donation impact?
-                                            </div>
-                                            <div className="collapse-content">
-                                                <p>You can track your donations and their impact through your donor dashboard.</p>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <h3 className="card-title mb-2">Support policy</h3>
+                                    <p className="text-sm text-gray-600 mb-4">
+                                        All contact messages instantly reach the admin dashboard. Replies appear inside your donor or charity
+                                        dashboard inbox as soon as an admin responds.
+                                    </p>
+                                    <ul className="space-y-2 text-sm">
+                                        <li className="flex items-start gap-2">
+                                            <FaInfoCircle className="mt-1 text-primary" />
+                                            <span>Log in before sending a message if you expect a reply.</span>
+                                        </li>
+                                        <li className="flex items-start gap-2">
+                                            <FaInfoCircle className="mt-1 text-primary" />
+                                            <span>Urgent donation or compliance issues automatically get priority handling.</span>
+                                        </li>
+                                        <li className="flex items-start gap-2">
+                                            <FaInfoCircle className="mt-1 text-primary" />
+                                            <span>We keep a full history of all conversations for transparency.</span>
+                                        </li>
+                                    </ul>
                                 </div>
                             </div>
                         </div>

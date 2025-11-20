@@ -4,7 +4,8 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../provider/authProvider';
 import { getCampaigns } from '../../utils/campaignStorage';
 import { getAllCampaignDonorCounts } from '../../utils/donationStorage';
-import { FaHeart, FaDollarSign, FaUsers, FaChartLine, FaPlus, FaCheckCircle } from 'react-icons/fa';
+import { getUserMessages } from '../../utils/messageStorage';
+import { FaHeart, FaDollarSign, FaUsers, FaChartLine, FaPlus, FaCheckCircle, FaHourglassEnd, FaInbox } from 'react-icons/fa';
 
 const CharityDashboard = () => {
     const location = useLocation();
@@ -20,6 +21,8 @@ const CharityDashboard = () => {
         approvedCampaigns: 0
     });
     const [loading, setLoading] = useState(true);
+    const [lifecycleCounts, setLifecycleCounts] = useState({ completed: 0, archived: 0 });
+    const [messageThreads, setMessageThreads] = useState([]);
 
     useEffect(() => {
         // Check for success message from navigation state
@@ -89,6 +92,13 @@ const CharityDashboard = () => {
                     ? Math.round(totalSuccessPercentage / charityCampaigns.length)
                     : 0;
 
+                const completedCount = charityCampaigns.filter(c => (c.currentAmount || 0) >= c.goalAmount).length;
+                const archivedCount = charityCampaigns.filter(c => {
+                    const endDate = new Date(c.endDate);
+                    endDate.setHours(23, 59, 59, 999);
+                    return endDate < now;
+                }).length;
+
                 setStats({
                     activeCampaigns,
                     totalRaised,
@@ -98,6 +108,12 @@ const CharityDashboard = () => {
                     pendingCampaigns,
                     approvedCampaigns
                 });
+                setLifecycleCounts({ completed: completedCount, archived: archivedCount });
+
+                if (currentUser?.uid) {
+                    const inbox = await getUserMessages(currentUser.uid);
+                    setMessageThreads(inbox);
+                }
                 setLoading(false);
             } catch (error) {
                 console.error('Error fetching charity stats:', error);
@@ -198,6 +214,31 @@ const CharityDashboard = () => {
                     </div>
                 )}
 
+                {!loading && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <Link to="/dashboard/charity/campaigns" className="card bg-base-100 shadow-lg border border-success/30 hover:shadow-xl transition-shadow">
+                            <div className="card-body flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm text-gray-500">Completed targets</p>
+                                    <p className="text-3xl font-bold text-success">{lifecycleCounts.completed}</p>
+                                    <p className="text-xs text-gray-400 mt-1">Great storytelling material</p>
+                                </div>
+                                <FaCheckCircle className="text-4xl text-success/70" />
+                            </div>
+                        </Link>
+                        <Link to="/dashboard/charity/campaigns" className="card bg-base-100 shadow-lg border border-warning/30 hover:shadow-xl transition-shadow">
+                            <div className="card-body flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm text-gray-500">Ended timelines</p>
+                                    <p className="text-3xl font-bold text-warning">{lifecycleCounts.archived}</p>
+                                    <p className="text-xs text-gray-400 mt-1">Request an extension from admin</p>
+                                </div>
+                                <FaHourglassEnd className="text-4xl text-warning/70" />
+                            </div>
+                        </Link>
+                    </div>
+                )}
+
                 {/* Campaign Overview */}
                 <div className="card bg-base-100 shadow-lg">
                     <div className="card-body">
@@ -226,6 +267,46 @@ const CharityDashboard = () => {
                         </div>
                     </div>
                 </div>
+
+                {currentUser && (
+                    <div className="card bg-base-100 shadow-lg">
+                        <div className="card-body">
+                            <div className="flex items-center gap-3 mb-4">
+                                <FaInbox className="text-primary text-2xl" />
+                                <div>
+                                    <h2 className="card-title mb-0">Admin Messages</h2>
+                                    <p className="text-sm text-gray-500">Platform updates and replies to your support requests</p>
+                                </div>
+                            </div>
+                            {messageThreads.length === 0 ? (
+                                <div className="text-center py-6 text-gray-500">
+                                    Nothing pending. <Link to="/contact" className="link link-primary">Reach out</Link> if you need anything.
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    {messageThreads.slice(0, 3).map((thread) => (
+                                        <div key={thread.id} className="border border-base-200 rounded-lg p-4">
+                                            <div className="flex justify-between text-sm text-gray-500 mb-2">
+                                                <span>{thread.subject}</span>
+                                                <span>{new Date(thread.updatedAt || thread.createdAt).toLocaleDateString()}</span>
+                                            </div>
+                                            <p className="text-gray-700 text-sm mb-2">{thread.message}</p>
+                                            {thread.replies?.length > 0 && (
+                                                <div className="bg-base-200 rounded p-3 text-sm text-gray-700">
+                                                    <p className="font-semibold text-primary mb-1">Latest reply</p>
+                                                    <p>{thread.replies[thread.replies.length - 1].message}</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                    <Link to="/contact" className="btn btn-sm btn-primary w-fit">
+                                        View all messages
+                                    </Link>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
 
                 {/* Quick Actions */}
                 <div className="card bg-base-100 shadow-lg">

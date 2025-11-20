@@ -1,17 +1,19 @@
 import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../provider/authProvider';
-import { 
-  FaTachometerAlt, 
-  FaHeart, 
-  FaPlus, 
-  FaUsers, 
-  FaCog, 
+import {
+  FaTachometerAlt,
+  FaHeart,
+  FaPlus,
+  FaUsers,
+  FaCog,
   FaSignOutAlt,
   FaUser,
   FaBuilding,
   FaShieldAlt,
-  FaStar
+  FaStar,
+  FaHourglassEnd,
+  FaInbox
 } from 'react-icons/fa';
 
 const Dashboard = () => {
@@ -54,6 +56,8 @@ const Dashboard = () => {
                 { path: `${basePath}/users`, icon: FaUsers, label: 'Users' },
                 { path: `${basePath}/charities`, icon: FaBuilding, label: 'Charities' },
                 { path: `${basePath}/campaigns`, icon: FaHeart, label: 'Campaigns' },
+                { path: `${basePath}/campaigns/archived`, icon: FaHourglassEnd, label: 'Archived' },
+                { path: `${basePath}/messages`, icon: FaInbox, label: 'Messages' },
                 { path: `${basePath}/settings`, icon: FaCog, label: 'Settings' },
                 { path: `${basePath}/profile`, icon: FaUser, label: 'Profile' }
             );

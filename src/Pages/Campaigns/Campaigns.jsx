@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { getCampaignsByStatus } from '../../utils/campaignStorage';
 import { getAllCampaignDonorCounts } from '../../utils/donationStorage';
@@ -13,6 +13,8 @@ const Campaigns = () => {
     const [sortBy, setSortBy] = useState('newest');
     const [filteredCampaigns, setFilteredCampaigns] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [searchParams, setSearchParams] = useSearchParams();
+    const [viewFilter, setViewFilter] = useState(searchParams.get('view') || 'active');
 
     // Get unique categories from campaigns
     const categories = [...new Set(campaigns.map(c => c.category))];
@@ -39,26 +41,46 @@ const Campaigns = () => {
     const handleSearch = (e) => {
         const term = e.target.value.toLowerCase();
         setSearchTerm(term);
-        filterCampaigns(term, selectedCategory, sortBy);
+        filterCampaigns(term, selectedCategory, sortBy, viewFilter);
     };
 
     const handleCategoryChange = (category) => {
         setSelectedCategory(category);
-        filterCampaigns(searchTerm, category, sortBy);
+        filterCampaigns(searchTerm, category, sortBy, viewFilter);
     };
 
     const handleSortChange = (sort) => {
         setSortBy(sort);
-        filterCampaigns(searchTerm, selectedCategory, sort);
+        filterCampaigns(searchTerm, selectedCategory, sort, viewFilter);
     };
 
-    const filterCampaigns = (search, category, sort) => {
+    const matchesView = (campaign, view) => {
+        const now = new Date();
+        const endDate = new Date(campaign.endDate);
+        const isArchived = endDate < now;
+        const isCompleted = (campaign.currentAmount || 0) >= campaign.goalAmount;
+
+        switch (view) {
+            case 'completed':
+                return isCompleted;
+            case 'archived':
+                return isArchived;
+            case 'all':
+                return true;
+            case 'active':
+            default:
+                return !isArchived;
+        }
+    };
+
+    const filterCampaigns = useCallback((search, category, sort, view = viewFilter) => {
         let filtered = campaigns.filter(campaign => {
             const matchesSearch = campaign.title.toLowerCase().includes(search) ||
                                 campaign.description.toLowerCase().includes(search) ||
                                 campaign.category.toLowerCase().includes(search);
             const matchesCategory = !category || campaign.category === category;
-            return matchesSearch && matchesCategory;
+            const matchesLifecycle = matchesView(campaign, view);
+            return matchesSearch && matchesCategory && matchesLifecycle;
         });
 
         // Sort campaigns
@@ -84,7 +106,25 @@ const Campaigns = () => {
         }
 
         setFilteredCampaigns(filtered);
+    }, [campaigns, viewFilter]);
+
+    const handleViewChange = (view) => {
+        setViewFilter(view);
+        const params = new URLSearchParams(searchParams);
+        if (view === 'active') {
+            params.delete('view');
+        } else {
+            params.set('view', view);
+        }
+        setSearchParams(params);
+        filterCampaigns(searchTerm, selectedCategory, sortBy, view);
     };
+
+    useEffect(() => {
+        const paramView = searchParams.get('view') || 'active';
+        setViewFilter(paramView);
+        filterCampaigns(searchTerm, selectedCategory, sortBy, paramView);
+    }, [searchParams, campaigns, searchTerm, selectedCategory, sortBy, filterCampaigns]);
 
     const getDaysLeft = (endDate) => {
         const end = new Date(endDate);
@@ -166,6 +206,31 @@ const Campaigns = () => {
                                     <option value="most_donors">Most Donors</option>
                                     <option value="ending_soon">Ending Soon</option>
                                 </select>
+                            </div>
+                        </div>
+
+                        <div className="mt-6">
+                            <p className="text-sm font-semibold text-gray-600 mb-2 flex items-center gap-2">
+                                <FaFilter />
+                                View campaigns by status
+                            </p>
+                            <div className="flex flex-wrap gap-2">
+                                {[
+                                    { key: 'active', label: 'Active' },
+                                    { key: 'completed', label: 'Completed' },
+                                    { key: 'archived', label: 'Ended' },
+                                    { key: 'all', label: 'All' },
+                                ].map((option) => (
+                                    <button
+                                        key={option.key}
+                                        onClick={() => handleViewChange(option.key)}
+                                        className={`btn btn-sm ${
+                                            viewFilter === option.key ? 'btn-primary' : 'btn-outline'
+                                        }`}
+                                    >
+                                        {option.label}
+                                    </button>
+                                ))}
                             </div>
                         </div>
                     </div>

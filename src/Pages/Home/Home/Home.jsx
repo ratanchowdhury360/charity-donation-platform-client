@@ -1,13 +1,73 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import Banner from "../Banner/Banner";
 import { getCampaigns, getCampaignsByStatus } from '../../../utils/campaignStorage';
-import { getAllCampaignDonorCounts } from '../../../utils/donationStorage';
+import { getAllCampaignDonorCounts, getAllDonations } from '../../../utils/donationStorage';
 import { getAllReviews } from '../../../utils/reviewStorage';
 import { db } from '../../../firebase/firebase.config';
 import { collection, getCountFromServer } from 'firebase/firestore';
-import { FaHeart, FaUsers, FaHandHoldingHeart, FaChartLine, FaArrowRight, FaStar, FaBuilding, FaUser } from 'react-icons/fa';
+import {
+    FaHeart,
+    FaUsers,
+    FaHandHoldingHeart,
+    FaChartLine,
+    FaArrowRight,
+    FaStar,
+    FaBuilding,
+    FaUser,
+    FaCheckCircle,
+    FaHourglassEnd
+} from 'react-icons/fa';
+
+const fundViewOrder = ['thisMonth', 'lastMonth', 'lastThreeMonths', 'lastYear'];
+
+const formatDateRange = (start, end) => {
+    return `${start.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} – ${end.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`;
+};
+
+const buildDonationTimeline = (donations = []) => {
+    const now = new Date();
+    const startOfCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+    const startOfThreeMonths = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+    const startOfYear = new Date(now);
+    startOfYear.setFullYear(startOfYear.getFullYear() - 1);
+
+    const template = {
+        thisMonth: { label: 'This Month', amount: 0, count: 0, rangeText: formatDateRange(startOfCurrentMonth, now) },
+        lastMonth: { label: 'Last Month', amount: 0, count: 0, rangeText: formatDateRange(startOfLastMonth, endOfLastMonth) },
+        lastThreeMonths: { label: 'Last 3 Months', amount: 0, count: 0, rangeText: formatDateRange(startOfThreeMonths, now) },
+        lastYear: { label: 'Last 12 Months', amount: 0, count: 0, rangeText: formatDateRange(startOfYear, now) },
+    };
+
+    donations.forEach((donation) => {
+        if (!donation?.createdAt) return;
+        const donationDate = new Date(donation.createdAt);
+        if (Number.isNaN(donationDate.getTime())) return;
+        const amount = Number(donation.amount) || 0;
+
+        if (donationDate >= startOfCurrentMonth) {
+            template.thisMonth.amount += amount;
+            template.thisMonth.count += 1;
+        }
+        if (donationDate >= startOfLastMonth && donationDate <= endOfLastMonth) {
+            template.lastMonth.amount += amount;
+            template.lastMonth.count += 1;
+        }
+        if (donationDate >= startOfThreeMonths) {
+            template.lastThreeMonths.amount += amount;
+            template.lastThreeMonths.count += 1;
+        }
+        if (donationDate >= startOfYear) {
+            template.lastYear.amount += amount;
+            template.lastYear.count += 1;
+        }
+    });
+
+    return template;
+};
 
 const Home = () => {
     const [stats, setStats] = useState({
@@ -15,20 +75,26 @@ const Home = () => {
         activeCampaigns: 0,
         totalDonors: 0,
         totalCharities: 0,
-        successRate: 0
+        successRate: 0,
+        completedCampaigns: 0,
+        archivedCampaigns: 0
     });
     const [featuredCampaigns, setFeaturedCampaigns] = useState([]);
     const [donorCounts, setDonorCounts] = useState({});
     const [reviews, setReviews] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [donationTrends, setDonationTrends] = useState(buildDonationTimeline());
+    const [fundView, setFundView] = useState('thisMonth');
+    const activeFundRange = donationTrends[fundView] || donationTrends.thisMonth;
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 // Get all campaigns
-                const [allCampaigns, approvedCampaigns] = await Promise.all([
+                const [allCampaigns, approvedCampaigns, donations] = await Promise.all([
                     getCampaigns(),
-                    getCampaignsByStatus('approved')
+                    getCampaignsByStatus('approved'),
+                    getAllDonations()
                 ]);
 
                 // Get donor counts for all campaigns
@@ -64,6 +130,7 @@ const Home = () => {
                 const successfulCampaigns = allCampaigns.filter(c =>
                     c.currentAmount >= c.goalAmount
                 );
+                const archivedCampaigns = allCampaigns.filter(c => new Date(c.endDate) < now);
                 const successRate = allCampaigns.length > 0
                     ? Math.round((successfulCampaigns.length / allCampaigns.length) * 100)
                     : 0;
@@ -84,10 +151,13 @@ const Home = () => {
                     activeCampaigns: active.length,
                     totalDonors,
                     totalCharities: uniqueCharities.size,
-                    successRate
+                    successRate,
+                    completedCampaigns: successfulCampaigns.length,
+                    archivedCampaigns: archivedCampaigns.length
                 });
                 setFeaturedCampaigns(featured);
                 setReviews(sortedReviews);
+                setDonationTrends(buildDonationTimeline(donations));
                 setLoading(false);
             } catch (error) {
                 console.error('Error fetching home data:', error);
@@ -107,6 +177,42 @@ const Home = () => {
 
             {/* Hero Section with Parallax */}
 
+
+            {/* Fund Pulse */}
+            <section className="pt-6 pb-10 mt-6 bg-base-100">
+                <div className="container mx-auto px-4">
+                    <div className="card shadow-2xl bg-gradient-to-r from-primary to-secondary text-white">
+                        <div className="card-body flex flex-col lg:flex-row gap-8 items-start lg:items-center">
+                            <div className="flex-1">
+                                <p className="uppercase text-sm tracking-widest text-white/70">Fundraising pulse</p>
+                                <h2 className="text-4xl md:text-5xl font-black mt-2">
+                                    ৳{(activeFundRange?.amount || 0).toLocaleString()}
+                                </h2>
+                                <p className="text-sm text-white/80 mt-1">{activeFundRange?.rangeText}</p>
+                                <p className="mt-4 text-sm">
+                                    <span className="font-semibold">{activeFundRange?.count || 0}</span> donations recorded in this window
+                                </p>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                                {fundViewOrder.map((key) => (
+                                    <button
+                                        key={key}
+                                        onClick={() => setFundView(key)}
+                                        className={`btn btn-sm border-0 ${
+                                            fundView === key ? 'btn-secondary text-white' : 'btn-ghost text-white/80 bg-white/10'
+                                        }`}
+                                    >
+                                        {donationTrends[key]?.label}
+                                    </button>
+                                ))}
+                            </div>
+                            <Link to="/dashboard" className="btn btn-outline btn-sm text-white border-white hover:bg-white hover:text-primary">
+                                View Insights
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
             {/* Stats Section */}
             <section className="py-20 bg-base-200">
@@ -137,6 +243,47 @@ const Home = () => {
                             <div className="text-3xl font-bold text-warning mb-2">{stats.successRate}%</div>
                             <div className="text-sm text-gray-600">Success Rate</div>
                         </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Campaign highlights */}
+            <section className="py-12 bg-gradient-to-b from-base-200 via-base-100 to-base-200">
+                <div className="container mx-auto px-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <Link
+                            to="/campaigns?view=completed"
+                            className="card bg-gradient-to-br from-success to-success/80 text-white shadow-xl hover:shadow-2xl transition-shadow"
+                        >
+                            <div className="card-body">
+                                <div className="flex justify-between items-center">
+                                    <div>
+                                        <p className="uppercase text-xs tracking-wide text-white/80">Completed targets</p>
+                                        <h3 className="text-4xl font-black mt-2">{stats.completedCampaigns}</h3>
+                                        <p className="text-sm text-white/80">Campaigns that hit 100% of their goals</p>
+                                    </div>
+                                    <FaCheckCircle className="text-5xl opacity-70" />
+                                </div>
+                                <p className="mt-4 text-sm">Tap to explore every successful campaign story</p>
+                            </div>
+                        </Link>
+
+                        <Link
+                            to="/campaigns?view=archived"
+                            className="card bg-gradient-to-br from-warning to-warning/80 text-white shadow-xl hover:shadow-2xl transition-shadow"
+                        >
+                            <div className="card-body">
+                                <div className="flex justify-between items-center">
+                                    <div>
+                                        <p className="uppercase text-xs tracking-wide text-white/80">Time-ended campaigns</p>
+                                        <h3 className="text-4xl font-black mt-2">{stats.archivedCampaigns}</h3>
+                                        <p className="text-sm text-white/80">Ready for admin review & extensions</p>
+                                    </div>
+                                    <FaHourglassEnd className="text-5xl opacity-70" />
+                                </div>
+                                <p className="mt-4 text-sm">Click to see which campaigns need a time extension</p>
+                            </div>
+                        </Link>
                     </div>
                 </div>
             </section>

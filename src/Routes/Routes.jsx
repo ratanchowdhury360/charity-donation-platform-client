@@ -19,6 +19,8 @@ import Profile from "../Pages/Dashboard/Profile";
 import CharityDashboard from "../Pages/Dashboard/CharityDashboard";
 import AdminDashboard from "../Pages/Dashboard/AdminDashboard";
 import AdminCampaignApproval from "../Pages/Dashboard/AdminCampaignApproval";
+import AdminArchivedCampaigns from "../Pages/Dashboard/AdminArchivedCampaigns";
+import AdminMessages from "../Pages/Dashboard/AdminMessages";
 import RoleDashboardIndex from "../Pages/Dashboard/RoleDashboardIndex";
 import MyCampaigns from "../Pages/Dashboard/MyCampaigns";
 import CreateCampaignForm from "../Pages/Campaigns/CreateCampaignForm";
@@ -179,6 +181,22 @@ export const router = createBrowserRouter([
             element: (
               <ProtectedRoute requiredRole="admin">
                 <AdminCampaignApproval />
+              </ProtectedRoute>
+            )
+          },
+          {
+            path: "/dashboard/admin/campaigns/archived",
+            element: (
+              <ProtectedRoute requiredRole="admin">
+                <AdminArchivedCampaigns />
+              </ProtectedRoute>
+            )
+          },
+          {
+            path: "/dashboard/admin/messages",
+            element: (
+              <ProtectedRoute requiredRole="admin">
+                <AdminMessages />
               </ProtectedRoute>
             )
           },

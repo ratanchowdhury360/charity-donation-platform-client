@@ -53,7 +53,7 @@ const About = () => {
                 </section>
 
                 {/* Values Section */}
-                <section className="py-20 bg-base-100">
+                <section className="py-20 border">
                     <div className="container mx-auto px-4">
                         <div className="text-center mb-16">
                             <h2 className="text-4xl font-bold mb-4">Our Values</h2>
@@ -62,7 +62,7 @@ const About = () => {
                             </p>
                         </div>
 
-                        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                        <div className="   grid  md:grid-cols-2 lg:grid-cols-4 gap-8">
                             <div className="text-center">
                                 <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-6">
                                     <FaShieldAlt className="text-3xl text-white" />
@@ -110,21 +110,21 @@ const About = () => {
                 <section className="py-20">
                     <div className="container mx-auto px-4">
                         <div className="text-center mb-16">
-                            <h2 className="text-4xl font-bold mb-4">Our Team</h2>
-                            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                            <h2 className="text-4xl  font-bold mb-4">Our Team</h2>
+                            <p className="text-xl text-white max-w-2xl mx-auto">
                                 Passionate individuals working together to make a difference
                             </p>
                         </div>
 
                         <div className="grid md:grid-cols-3 gap-8">
-                            <div className="card bg-base-100 shadow-xl">
+                            <div className="card bg-blue-300 shadow-xl">
                                 <div className="card-body text-center">
                                     <div className="avatar mb-4">
                                         <div className="w-24 rounded-full mx-auto">
                                             <img src="/api/placeholder/96/96" alt="Team Member" />
                                         </div>
                                     </div>
-                                    <h3 className="card-title justify-center">Sarah Ahmed</h3>
+                                    <h3 className="card-title text-black justify-center">Md. Ratan Chowdhury</h3>
                                     <p className="text-primary font-semibold">Founder & CEO</p>
                                     <p className="text-gray-600">
                                         Passionate about using technology to solve social problems and create positive change.
@@ -132,14 +132,14 @@ const About = () => {
                                 </div>
                             </div>
 
-                            <div className="card bg-base-100 shadow-xl">
+                            <div className="card bg-blue-300 shadow-xl">
                                 <div className="card-body text-center">
                                     <div className="avatar mb-4">
                                         <div className="w-24 rounded-full mx-auto">
                                             <img src="/api/placeholder/96/96" alt="Team Member" />
                                         </div>
                                     </div>
-                                    <h3 className="card-title justify-center">Mohammad Ali</h3>
+                                    <h3 className="card-title text-black justify-center">Nayeem Khan</h3>
                                     <p className="text-primary font-semibold">CTO</p>
                                     <p className="text-gray-600">
                                         Technology enthusiast focused on building secure and scalable solutions for social impact.
@@ -147,14 +147,14 @@ const About = () => {
                                 </div>
                             </div>
 
-                            <div className="card bg-base-100 shadow-xl">
+                            <div className="card bg-blue-300 shadow-xl">
                                 <div className="card-body text-center">
                                     <div className="avatar mb-4">
                                         <div className="w-24 rounded-full mx-auto">
                                             <img src="/api/placeholder/96/96" alt="Team Member" />
                                         </div>
                                     </div>
-                                    <h3 className="card-title justify-center">Fatima Begum</h3>
+                                    <h3 className="card-title text-black justify-center">Golam Rabbi</h3>
                                     <p className="text-primary font-semibold">Head of Operations</p>
                                     <p className="text-gray-600">
                                         Dedicated to ensuring smooth operations and maintaining the highest standards of service.
@@ -174,12 +174,12 @@ const About = () => {
                             we're here to help you make a difference.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                            <a href="/signup" className="btn btn-secondary btn-lg">
+                            <button className="btn btn-secondary btn-lg">
                                 Start Donating
-                            </a>
-                            <a href="/charities/register" className="btn btn-outline btn-lg text-white border-white hover:bg-white hover:text-primary">
+                            </button>
+                            <button className="btn btn-outline btn-lg text-white border-white hover:bg-white hover:text-primary">
                                 Register Charity
-                            </a>
+                            </button>
                         </div>
                     </div>
                 </section>

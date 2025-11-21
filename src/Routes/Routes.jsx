@@ -30,6 +30,7 @@ import ProtectedRoute from "../components/ProtectedRoute";
 import NotFound from "../Pages/NotFound/NotFound";
 import AdminUsers from "../Pages/Dashboard/AdminUsers";
 import AdminCharities from "../Pages/Dashboard/AdminCharities";
+import AdminSettings from "../Pages/Dashboard/AdminSettings";
 
 export const router = createBrowserRouter([
   {
@@ -197,6 +198,14 @@ export const router = createBrowserRouter([
             element: (
               <ProtectedRoute requiredRole="admin">
                 <AdminMessages />
+              </ProtectedRoute>
+            )
+          },
+          {
+            path: "/dashboard/admin/settings",
+            element: (
+              <ProtectedRoute requiredRole="admin">
+                <AdminSettings />
               </ProtectedRoute>
             )
           },

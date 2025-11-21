@@ -149,7 +149,7 @@ const Campaigns = () => {
                 <meta name="description" content="Browse all verified charity campaigns. Support education, healthcare, emergency relief, and more causes across Bangladesh." />
             </Helmet>
 
-            <div className="min-h-screen bg-base-200 pt-20">
+            <div className="min-h-screen  pt-20">
                 <div className="container mx-auto px-4 py-8">
                     {/* Header */}
                     <div className="text-center mb-12">
@@ -160,16 +160,16 @@ const Campaigns = () => {
                     </div>
 
                     {/* Search and Filters */}
-                    <div className="bg-base-100 rounded-lg shadow-lg p-6 mb-8">
+                    <div className="bg-gradient-to-r from-primary/20 via-secondary/15 to-primary/20 rounded-lg shadow-lg p-6 mb-8 border border-primary/30">
                         <div className="flex flex-col lg:flex-row gap-4">
                             {/* Search */}
-                            <div className="flex-1">
+                            <div className="flex-1 ">
                                 <div className="relative">
                                     <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                                     <input
                                         type="text"
                                         placeholder="Search campaigns..."
-                                        className="input input-bordered w-full pl-10"
+                                        className="input bg-black input-bordered w-full pl-10"
                                         value={searchTerm}
                                         onChange={handleSearch}
                                     />
@@ -179,7 +179,7 @@ const Campaigns = () => {
                             {/* Category Filter */}
                             <div className="lg:w-64">
                                 <select
-                                    className="select select-bordered w-full"
+                                    className="select bg-black select-bordered w-full"
                                     value={selectedCategory}
                                     onChange={(e) => handleCategoryChange(e.target.value)}
                                 >
@@ -195,7 +195,7 @@ const Campaigns = () => {
                             {/* Sort */}
                             <div className="lg:w-48">
                                 <select
-                                    className="select select-bordered w-full"
+                                    className="select bg-black select-bordered w-full"
                                     value={sortBy}
                                     onChange={(e) => handleSortChange(e.target.value)}
                                 >
@@ -210,7 +210,7 @@ const Campaigns = () => {
                         </div>
 
                         <div className="mt-6">
-                            <p className="text-sm font-semibold text-gray-600 mb-2 flex items-center gap-2">
+                            <p className="text-sm font-semibold text-white mb-2 flex items-center gap-2">
                                 <FaFilter />
                                 View campaigns by status
                             </p>
@@ -238,7 +238,7 @@ const Campaigns = () => {
                     {/* Campaigns Grid */}
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {filteredCampaigns.map((campaign) => (
-                            <div key={campaign.id} className="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300">
+                            <div key={campaign.id} className="card bg-gradient-to-br from-white via-primary/10 to-secondary/10 border-2 border-primary/20 shadow-xl hover:shadow-2xl hover:border-primary/40 hover:scale-[1.02] transition-all duration-300">
                                 <figure className="relative">
                                     <img 
                                         src={campaign.image} 
@@ -264,33 +264,33 @@ const Campaigns = () => {
                                 </figure>
 
                                 <div className="card-body">
-                                    <h3 className="card-title text-lg line-clamp-2">{campaign.title}</h3>
-                                    <p className="text-gray-600 line-clamp-2">{campaign.description}</p>
+                                    <h3 className="card-title text-lg line-clamp-2 text-base-content">{campaign.title}</h3>
+                                    <p className="text-base-content/70 line-clamp-2">{campaign.description}</p>
                                     
-                                    <div className="text-sm text-gray-600 mb-2">
-                                        <p>By: <span className="font-medium">{campaign.charityName}</span></p>
+                                    <div className="text-sm text-base-content/80 mb-2">
+                                        <p>By: <span className="font-semibold text-primary">{campaign.charityName}</span></p>
                                     </div>
 
-                                    <div className="mt-4">
+                                    <div className="mt-4 p-3 bg-gradient-to-r from-primary/10 via-secondary/5 to-primary/10 rounded-lg border border-primary/20">
                                         <div className="flex justify-between text-sm mb-2">
-                                            <span className="font-semibold">
+                                            <span className="font-bold text-success text-lg">
                                                 ৳{campaign.currentAmount.toLocaleString()}
                                             </span>
-                                            <span className="text-gray-500">
+                                            <span className="text-base-content/70 font-medium">
                                                 of ৳{campaign.goalAmount.toLocaleString()}
                                             </span>
                                         </div>
                                         <progress 
-                                            className="progress progress-primary w-full" 
+                                            className="progress progress-success w-full h-2" 
                                             value={campaign.currentAmount} 
                                             max={campaign.goalAmount}
                                         ></progress>
                                         <div className="flex justify-between text-sm mt-2">
-                                            <span className="font-semibold">
+                                            <span className="font-bold text-primary">
                                                 {Math.round((campaign.currentAmount / campaign.goalAmount) * 100)}% funded
                                             </span>
-                                            <span className="text-gray-500 flex items-center gap-1">
-                                                <FaUsers className="text-xs" />
+                                            <span className="text-base-content/70 flex items-center gap-1 font-medium">
+                                                <FaUsers className="text-primary" />
                                                 {donorCounts[campaign.id] || 0} {(donorCounts[campaign.id] || 0) === 1 ? 'donor' : 'donors'}
                                             </span>
                                         </div>
@@ -341,7 +341,7 @@ const Campaigns = () => {
                     {/* Results Count */}
                     {filteredCampaigns.length > 0 && (
                         <div className="text-center mt-8">
-                            <p className="text-gray-600">
+                            <p className="text-white">
                                 Showing {filteredCampaigns.length} of {campaigns.length} approved campaigns
                             </p>
                         </div>

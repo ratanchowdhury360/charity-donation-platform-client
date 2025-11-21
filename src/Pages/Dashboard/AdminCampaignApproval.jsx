@@ -50,25 +50,73 @@ const AdminCampaignApproval = () => {
 
     const handleApprove = async (campaignId) => {
         try {
+            // Optimistically update the UI immediately
+            setCampaigns(prevCampaigns => 
+                prevCampaigns.filter(c => c.id !== campaignId)
+            );
+            
+            // Update counts immediately
+            setCounts(prevCounts => ({
+                ...prevCounts,
+                pending: Math.max(0, prevCounts.pending - 1),
+                approved: prevCounts.approved + 1,
+            }));
+
+            // Update selected campaign in modal if it's open
+            if (isModalOpen && selectedCampaign?.id === campaignId) {
+                setSelectedCampaign(prev => prev ? { ...prev, status: 'approved' } : null);
+            }
+
+            // Update the actual status in storage
             await updateCampaignStatus(campaignId, 'approved');
+            
+            // Refetch to ensure consistency
             await fetchCampaigns();
+            
+            // Close modal if it was the approved campaign
             if (isModalOpen && selectedCampaign?.id === campaignId) {
                 closeModal();
             }
         } catch (error) {
             console.error('Error approving campaign:', error);
+            // Revert on error by refetching
+            await fetchCampaigns();
         }
     };
 
     const handleReject = async (campaignId) => {
         try {
+            // Optimistically update the UI immediately
+            setCampaigns(prevCampaigns => 
+                prevCampaigns.filter(c => c.id !== campaignId)
+            );
+            
+            // Update counts immediately
+            setCounts(prevCounts => ({
+                ...prevCounts,
+                pending: Math.max(0, prevCounts.pending - 1),
+                rejected: prevCounts.rejected + 1,
+            }));
+
+            // Update selected campaign in modal if it's open
+            if (isModalOpen && selectedCampaign?.id === campaignId) {
+                setSelectedCampaign(prev => prev ? { ...prev, status: 'rejected' } : null);
+            }
+
+            // Update the actual status in storage
             await updateCampaignStatus(campaignId, 'rejected');
+            
+            // Refetch to ensure consistency
             await fetchCampaigns();
+            
+            // Close modal if it was the rejected campaign
             if (isModalOpen && selectedCampaign?.id === campaignId) {
                 closeModal();
             }
         } catch (error) {
             console.error('Error rejecting campaign:', error);
+            // Revert on error by refetching
+            await fetchCampaigns();
         }
     };
 
@@ -78,14 +126,36 @@ const AdminCampaignApproval = () => {
         }
 
         try {
+            // Optimistically update the UI immediately
+            const campaignToDelete = campaigns.find(c => c.id === campaignId);
+            setCampaigns(prevCampaigns => 
+                prevCampaigns.filter(c => c.id !== campaignId)
+            );
+            
+            // Update counts immediately
+            if (campaignToDelete) {
+                setCounts(prevCounts => ({
+                    ...prevCounts,
+                    all: Math.max(0, prevCounts.all - 1),
+                    [campaignToDelete.status]: Math.max(0, prevCounts[campaignToDelete.status] - 1),
+                }));
+            }
+
+            // Delete from storage
             await deleteCampaign(campaignId);
+            
+            // Refetch to ensure consistency
             await fetchCampaigns();
+            
+            // Close modal if it was the deleted campaign
             if (isModalOpen && selectedCampaign?.id === campaignId) {
                 closeModal();
             }
         } catch (error) {
             console.error('Error deleting campaign:', error);
             alert('Failed to delete campaign. Please try again.');
+            // Revert on error by refetching
+            await fetchCampaigns();
         }
     };
 
@@ -131,7 +201,7 @@ const AdminCampaignApproval = () => {
             {/* Filter Tabs */}
             <div className="flex justify-between items-center">
                 <h2 className="text-xl font-semibold">Filter by Status</h2>
-                <div className="tabs tabs-boxed bg-base-100 shadow-md">
+                <div className="tabs tabs-boxed bg-gradient-to-r from-primary/10 to-secondary/10 shadow-md border border-primary/20">
                     <button 
                         className={`tab ${statusFilter === 'all' ? 'tab-active' : ''}`}
                         onClick={() => setStatusFilter('all')}
@@ -160,7 +230,7 @@ const AdminCampaignApproval = () => {
             </div>
 
             {campaigns.length === 0 ? (
-                <div className="card bg-base-100 shadow-lg">
+                <div className="card bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/5 shadow-lg border border-primary/20">
                     <div className="card-body text-center py-12">
                         <h3 className="text-xl font-medium">No {statusFilter} campaigns</h3>
                         <p className="text-gray-500">
@@ -173,7 +243,7 @@ const AdminCampaignApproval = () => {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {campaigns.map((campaign) => (
-                        <div key={campaign.id} className="card bg-base-100 shadow-lg">
+                        <div key={campaign.id} className="card bg-gradient-to-br from-white via-primary/10 to-secondary/10 shadow-xl border-2 border-primary/20 hover:border-primary/40 transition-all hover:shadow-2xl hover:scale-[1.02]">
                             <figure>
                                 <img 
                                     src={campaign.image} 

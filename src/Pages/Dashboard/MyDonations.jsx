@@ -125,7 +125,7 @@ const MyDonations = () => {
                 </div>
 
                 {/* Donations List */}
-                <div className="card bg-base-100 shadow-xl">
+                <div className="card bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/5 shadow-xl border border-primary/20">
                     <div className="card-body">
                         <h2 className="card-title text-2xl mb-4">Donation History</h2>
                         
@@ -144,12 +144,12 @@ const MyDonations = () => {
                                 {donations.map((donation) => {
                                     const campaign = campaigns[donation.campaignId];
                                     return (
-                                        <div key={donation.id} className="card bg-base-200 shadow-md hover:shadow-lg transition-shadow">
+                                        <div key={donation.id} className="card bg-gradient-to-br from-base-100 via-primary/10 to-secondary/5 shadow-lg border border-primary/20 hover:shadow-xl hover:border-primary/30 transition-all">
                                             <div className="card-body">
                                                 <div className="flex flex-col lg:flex-row gap-4">
                                                     {/* Campaign Image */}
                                                     {campaign && (
-                                                        <figure className="lg:w-48 h-32 rounded-lg overflow-hidden flex-shrink-0">
+                                                        <figure className="lg:w-48 h-32 rounded-lg overflow-hidden flex-shrink-0 border-2 border-primary/20 shadow-md">
                                                             <img 
                                                                 src={campaign.image} 
                                                                 alt={campaign.title}
@@ -163,14 +163,14 @@ const MyDonations = () => {
                                                     
                                                     {/* Donation Details */}
                                                     <div className="flex-1">
-                                                        <div className="flex justify-between items-start mb-2">
+                                                        <div className="flex justify-between items-start mb-3 p-3 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-lg border border-primary/20">
                                                             <div>
-                                                            <h3 className="text-xl font-bold">{donation.campaignTitle || 'Unknown Campaign'}</h3>
-                                                            <p className="text-sm text-gray-600">By: {donation.charityName || 'Unknown Charity'}</p>
+                                                            <h3 className="text-xl font-bold text-base-content">{donation.campaignTitle || 'Unknown Campaign'}</h3>
+                                                            <p className="text-sm text-black text-base-content/70 font-medium">By: {donation.charityName || 'Unknown Charity'}</p>
                                                             </div>
                                                             <div className="text-right">
-                                                                <p className="text-2xl font-bold text-primary">৳{(donation.amount || 0).toLocaleString()}</p>
-                                                                <span className={`badge badge-sm ${
+                                                                <p className="text-2xl font-black text-primary">৳{(donation.amount || 0).toLocaleString()}</p>
+                                                                <span className={`badge badge-sm font-semibold ${
                                                                     donation.status === 'completed' ? 'badge-success' : 
                                                                     donation.status === 'pending' ? 'badge-warning' : 
                                                                     'badge-error'
@@ -181,40 +181,40 @@ const MyDonations = () => {
                                                         </div>
                                                         
                                                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
-                                                            <div className="flex items-center gap-2">
-                                                                <FaCalendarAlt className="text-primary" />
+                                                            <div className="flex items-center gap-2 p-2 bg-primary/10 rounded-lg border border-primary/20">
+                                                                <FaCalendarAlt className="text-primary text-lg" />
                                                                 <div>
-                                                                    <p className="text-xs text-gray-600">Date</p>
-                                                                <p className="text-sm font-semibold">
+                                                                    <p className="text-xs text-base-content/60 font-medium">Date</p>
+                                                                <p className="text-sm font-bold text-base-content">
                                                                     {new Date(donation.createdAt || donation.date).toLocaleDateString()}
                                                                 </p>
                                                                 </div>
                                                             </div>
                                                             
-                                                            <div className="flex items-center gap-2">
-                                                                <FaCreditCard className="text-secondary" />
+                                                            <div className="flex items-center gap-2 p-2 bg-secondary/10 rounded-lg border border-secondary/20">
+                                                                <FaCreditCard className="text-secondary text-lg" />
                                                                 <div>
-                                                                    <p className="text-xs text-gray-600">Payment</p>
-                                                                    <p className="text-sm font-semibold capitalize">{donation.paymentMethod}</p>
+                                                                    <p className="text-xs text-base-content/60 font-medium">Payment</p>
+                                                                    <p className="text-sm font-bold capitalize text-base-content">{donation.paymentMethod}</p>
                                                                 </div>
                                                             </div>
                                                             
-                                                            <div className="flex items-center gap-2">
-                                                                <FaHeart className="text-accent" />
+                                                            <div className="flex items-center gap-2 p-2 bg-accent/10 rounded-lg border border-accent/20">
+                                                                <FaHeart className="text-accent text-lg" />
                                                                 <div>
-                                                                    <p className="text-xs text-gray-600">Visibility</p>
-                                                                    <p className="text-sm font-semibold">
+                                                                    <p className="text-xs text-base-content/60 font-medium">Visibility</p>
+                                                                    <p className="text-sm font-bold text-base-content">
                                                                         {donation.anonymous ? 'Anonymous' : 'Public'}
                                                                     </p>
                                                                 </div>
                                                             </div>
                                                             
                                                             {campaign && (
-                                                                <div className="flex items-center gap-2">
-                                                                    <FaChartLine className="text-info" />
+                                                                <div className="flex items-center gap-2 p-2 bg-info/10 rounded-lg border border-info/20">
+                                                                    <FaChartLine className="text-info text-lg" />
                                                                     <div>
-                                                                        <p className="text-xs text-gray-600">Campaign Status</p>
-                                                                        <p className="text-sm font-semibold capitalize">{campaign.status}</p>
+                                                                        <p className="text-xs text-base-content/60 font-medium">Campaign Status</p>
+                                                                        <p className="text-sm font-bold capitalize text-base-content">{campaign.status}</p>
                                                                     </div>
                                                                 </div>
                                                             )}
@@ -222,20 +222,20 @@ const MyDonations = () => {
                                                         
                                                         {/* Campaign Progress */}
                                                         {campaign && (
-                                                            <div className="mt-4">
-                                                                <div className="flex justify-between text-sm mb-1">
-                                                                    <span className="text-gray-600">Campaign Progress</span>
-                                                                    <span className="font-semibold">
+                                                            <div className="mt-4 p-3 bg-gradient-to-r from-success/20 via-primary/10 to-success/20 rounded-lg border border-success/30">
+                                                                <div className="flex justify-between text-sm mb-2">
+                                                                    <span className="font-semibold text-base-content">Campaign Progress</span>
+                                                                    <span className="font-bold text-success">
                                                                         {Math.round(((campaign.currentAmount || 0) / campaign.goalAmount) * 100)}% funded
                                                                     </span>
                                                                 </div>
                                                                 <progress 
-                                                                    className="progress progress-primary w-full" 
+                                                                    className="progress progress-success w-full h-3" 
                                                                     value={campaign.currentAmount || 0} 
                                                                     max={campaign.goalAmount}
                                                                 ></progress>
-                                                                <div className="flex justify-between text-xs text-gray-500 mt-1">
-                                                                    <span>Raised: ৳{(campaign.currentAmount || 0).toLocaleString()}</span>
+                                                                <div className="flex  justify-between text-xs font-medium text-base-content/70 mt-2">
+                                                                    <span className='text-black'>Raised: ৳{(campaign.currentAmount || 0).toLocaleString()}</span>
                                                                     <span>Goal: ৳{campaign.goalAmount.toLocaleString()}</span>
                                                                 </div>
                                                             </div>

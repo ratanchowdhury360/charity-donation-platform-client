@@ -88,12 +88,12 @@ const CreateCampaignForm = () => {
     return (
         <div className="max-w-5xl mx-auto">
             {/* Header Section */}
-            <div className="bg-gradient-to-r from-primary to-secondary text-white rounded-lg p-8 mb-8 shadow-xl">
+            <div className="bg-gradient-to-r from-teal-600 via-cyan-500 to-teal-600 text-white rounded-lg p-8 mb-8 shadow-xl border-2 border-teal-400/30">
                 <h1 className="text-4xl font-bold mb-3">Create New Campaign</h1>
-                <p className="text-lg opacity-90">Fill in the details below to launch your fundraising campaign</p>
+                <p className="text-lg opacity-95">Fill in the details below to launch your fundraising campaign</p>
             </div>
 
-            <div className="bg-base-100 rounded-lg shadow-xl p-8">
+            <div className="bg-gradient-to-br from-teal-50 via-cyan-50 to-teal-50 rounded-lg shadow-xl p-8 border-2 border-teal-300">
             
                 {error && (
                     <div className="alert alert-error mb-6 shadow-lg">
@@ -106,15 +106,15 @@ const CreateCampaignForm = () => {
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
                     {/* Campaign Image */}
-                    <div className="card bg-gradient-to-br from-primary/5 to-secondary/5 shadow-md">
+                    <div className="card bg-gradient-to-br from-teal-100 via-cyan-100 to-teal-100 shadow-lg border-2 border-teal-300">
                         <div className="card-body">
                             <div className="flex items-center gap-2 mb-4">
-                                <FaImage className="text-2xl text-primary" />
-                                <h3 className="text-xl font-bold">Campaign Image</h3>
+                                <FaImage className="text-2xl text-teal-700" />
+                                <h3 className="text-xl font-bold text-teal-900">Campaign Image</h3>
                             </div>
                             <div className="flex flex-col md:flex-row items-center gap-6">
                                 <div className="avatar">
-                                    <div className="w-48 h-48 rounded-xl bg-base-200 border-4 border-primary/20 shadow-lg">
+                                    <div className="w-48 h-48 rounded-xl bg-teal-100 border-4 border-teal-300 shadow-lg">
                                         {imagePreview ? (
                                             <img src={imagePreview} alt="Campaign preview" className="w-full h-full object-cover rounded-lg" />
                                         ) : (
@@ -144,19 +144,19 @@ const CreateCampaignForm = () => {
                     </div>
 
                     {/* Campaign Details */}
-                    <div className="card bg-base-100 shadow-md border border-base-300">
+                    <div className="card bg-gradient-to-br from-teal-100 via-cyan-100 to-teal-100 shadow-lg border-2 border-teal-300">
                         <div className="card-body">
-                            <h3 className="text-xl font-bold mb-4 text-primary">Campaign Details</h3>
+                            <h3 className="text-xl font-bold mb-4 text-teal-900">Campaign Details</h3>
                             
                             {/* Campaign Title */}
                             <div className="form-control">
                                 <label className="label">
-                                    <span className="label-text font-semibold text-base">Campaign Title *</span>
+                                    <span className="label-text font-bold text-base text-teal-900">Campaign Title *</span>
                                 </label>
                                 <input
                                     type="text"
                                     {...register('title', { required: 'Title is required' })}
-                                    className="input input-bordered input-lg w-full focus:input-primary"
+                                    className="input input-bordered input-lg w-full  border-teal-300 focus:border-teal-500 focus:ring-teal-500 text-gray-900"
                                     placeholder="E.g., Help Build a School in Rural Area"
                                 />
                                 {errors.title && (
@@ -169,14 +169,14 @@ const CreateCampaignForm = () => {
                             {/* Description */}
                             <div className="form-control mt-4">
                                 <label className="label">
-                                    <span className="label-text font-semibold text-base">Campaign Description *</span>
+                                    <span className="label-text font-bold text-base text-teal-900">Campaign Description *</span>
                                 </label>
                                 <textarea
                                     {...register('description', { 
                                         required: 'Description is required',
-                                        minLength: { value: 100, message: 'Description should be at least 100 characters' }
+                                       // minLength: { value: 100, message: 'Description should be at least 100 characters' }
                                     })}
-                                    className="textarea textarea-bordered textarea-lg h-40 focus:textarea-primary"
+                                    className="textarea textarea-bordered textarea-lg h-40  border-teal-300 focus:border-teal-500 focus:ring-teal-500 text-gray-900"
                                     placeholder="Tell the story of your campaign... Why is this cause important? How will the funds be used?"
                                 ></textarea>
                                 {errors.description && (
@@ -189,28 +189,28 @@ const CreateCampaignForm = () => {
                     </div>
 
                     {/* Financial & Timeline Information */}
-                    <div className="card bg-base-100 shadow-md border border-base-300">
+                    <div className="card bg-gradient-to-br from-cyan-100 via-teal-100 to-cyan-100 shadow-lg border-2 border-cyan-300">
                         <div className="card-body">
-                            <h3 className="text-xl font-bold mb-4 text-secondary">Financial & Timeline Information</h3>
+                            <h3 className="text-xl font-bold mb-4 text-cyan-900">Financial & Timeline Information</h3>
                             
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 {/* Goal Amount */}
                                 <div className="form-control">
                                     <label className="label">
-                                        <span className="label-text font-semibold text-base flex items-center gap-2">
-                                            <FaMoneyBillWave className="text-success" />
+                                        <span className="label-text font-bold text-base text-cyan-900 flex items-center gap-2">
+                                            <FaMoneyBillWave className="text-emerald-600" />
                                             Goal Amount (BDT) *
                                         </span>
                                     </label>
                                     <div className="relative">
-                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg font-bold text-success">৳</span>
+                                        <span className="absolute left-4 top-1/2  -translate-y-1/2 text-lg font-bold text-emerald-600">৳</span>
                                         <input
                                             type="number"
                                             {...register('goalAmount', { 
                                                 required: 'Goal amount is required',
                                                 min: { value: 1000, message: 'Minimum amount is 1000 BDT' }
                                             })}
-                                            className="input input-bordered input-lg w-full pl-10 focus:input-success"
+                                            className="input input-bordered input-lg w-full pl-10  border-cyan-300 focus:border-emerald-500 focus:ring-emerald-500 text-gray-900"
                                             placeholder="50000"
                                             min="1000"
                                             step="100"
@@ -226,11 +226,11 @@ const CreateCampaignForm = () => {
                                 {/* Category */}
                                 <div className="form-control">
                                     <label className="label">
-                                        <span className="label-text font-semibold text-base">Category *</span>
+                                        <span className="label-text font-bold text-base text-cyan-900">Category *</span>
                                     </label>
                                     <select
                                         {...register('category', { required: 'Category is required' })}
-                                        className="select select-bordered select-lg w-full focus:select-primary"
+                                        className="select select-bordered select-lg w-full  border-cyan-300 focus:border-teal-500 focus:ring-teal-500 text-gray-900"
                                     >
                                         <option value="education">📚 Education</option>
                                         <option value="health">🏥 Health</option>
@@ -244,8 +244,8 @@ const CreateCampaignForm = () => {
                                 {/* End Date */}
                                 <div className="form-control">
                                     <label className="label">
-                                        <span className="label-text font-semibold text-base flex items-center gap-2">
-                                            <FaCalendarAlt className="text-info" />
+                                        <span className="label-text font-bold text-base text-cyan-900 flex items-center gap-2">
+                                            <FaCalendarAlt className="text-blue-600" />
                                             Campaign End Date *
                                         </span>
                                     </label>
@@ -260,7 +260,7 @@ const CreateCampaignForm = () => {
                                                 return selectedDate > today || 'End date must be in the future';
                                             }
                                         })}
-                                        className="input input-bordered input-lg w-full focus:input-info"
+                                        className="input input-bordered input-lg w-full  border-cyan-300 focus:border-blue-500 focus:ring-blue-500 text-gray-900"
                                         min={new Date().toISOString().split('T')[0]}
                                     />
                                     {errors.endDate && (
@@ -273,9 +273,9 @@ const CreateCampaignForm = () => {
                                 {/* Bank Account */}
                                 <div className="form-control">
                                     <label className="label">
-                                        <span className="label-text font-semibold text-base flex items-center gap-2">
-                                            <FaUniversity className="text-warning" />
-                                            Bank Account Number *
+                                        <span className="label-text font-bold text-base text-cyan-900 flex items-center gap-2">
+                                            <FaUniversity className="text-amber-600" />
+                                            Bank Account Number or Other Payment Number*
                                         </span>
                                     </label>
                                     <input
@@ -287,7 +287,7 @@ const CreateCampaignForm = () => {
                                                 message: 'Please enter a valid bank account number'
                                             }
                                         })}
-                                        className="input input-bordered input-lg w-full focus:input-warning"
+                                        className="input input-bordered input-lg w-full  border-cyan-300 focus:border-amber-500 focus:ring-amber-500 text-gray-900"
                                         placeholder="e.g., 1234-5678-9012-3456"
                                     />
                                     {errors.bankAccount && (
@@ -301,16 +301,16 @@ const CreateCampaignForm = () => {
                     </div>
 
                     {/* Terms and Conditions */}
-                    <div className="card bg-accent/10 border-2 border-accent/30 shadow-md">
+                    <div className="card bg-teal-100 border-2 border-teal-300 shadow-lg">
                         <div className="card-body">
                             <label className="label cursor-pointer justify-start gap-3">
                                 <input 
                                     type="checkbox" 
-                                    className="checkbox checkbox-accent checkbox-lg" 
+                                    className="checkbox checkbox-lg border-teal-500 checked:bg-teal-600" 
                                     required
                                 />
-                                <span className="label-text text-base">
-                                    I confirm that all information provided is accurate and I agree to the platform's <span className="text-accent font-semibold">terms and conditions</span>.
+                                <span className="label-text text-base text-teal-900 font-medium">
+                                    I confirm that all information provided is accurate and I agree to the platform's <span className="text-teal-700 font-bold">terms and conditions</span>.
                                 </span>
                             </label>
                         </div>
@@ -321,14 +321,14 @@ const CreateCampaignForm = () => {
                         <button 
                             type="button" 
                             onClick={() => navigate(-1)}
-                            className="btn btn-outline btn-lg"
+                            className="btn btn-outline btn-lg border-teal-400 text-teal-700 hover:bg-teal-100"
                             disabled={loading}
                         >
                             Cancel
                         </button>
                         <button 
                             type="submit" 
-                            className="btn btn-primary btn-lg shadow-lg hover:shadow-xl transition-all"
+                            className="btn bg-gradient-to-r from-teal-500 to-cyan-600 text-white border-0 btn-lg shadow-lg hover:shadow-xl hover:from-teal-600 hover:to-cyan-700 transition-all"
                             disabled={loading}
                         >
                             {loading ? (

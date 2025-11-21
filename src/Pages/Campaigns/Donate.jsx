@@ -93,7 +93,7 @@ const Donate = () => {
                 status: 'completed'
             };
             
-            const newDonation = await addDonation(donationData);
+            await addDonation(donationData);
             
             // Add donation to campaign (update campaign's currentAmount)
             const updatedCampaign = await addDonationToCampaign(campaign.id, donationAmount);
@@ -117,28 +117,45 @@ const Donate = () => {
                 <title>Donate to {campaign.title}</title>
             </Helmet>
 
-            <div className="min-h-screen bg-base-200 pt-20">
-                <div className="container mx-auto px-4 py-8">
+            <div className="min-h-screen bg-gradient-to-br from-primary/10 via-secondary/5 via-accent/5 to-primary/10 pt-20 relative overflow-hidden">
+                {/* Decorative background elements */}
+                <div className="absolute top-0 left-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
+                <div className="absolute bottom-0 right-0 w-96 h-96 bg-secondary/5 rounded-full blur-3xl translate-x-1/2 translate-y-1/2"></div>
+                <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-accent/5 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
+                <div className="container mx-auto px-4 py-8 relative z-10">
                     <div className="max-w-2xl mx-auto">
-                        <div className="card bg-base-100 shadow-xl">
-                            <div className="card-body">
-                                <h1 className="text-3xl font-bold mb-6 text-center">Make a Donation</h1>
-                                
+                        {/* Header Section */}
+                        <div className="text-center mb-8">
+                            <h1 className="text-4xl md:text-5xl font-black mb-3 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                                Make a Donation
+                            </h1>
+                            <p className="text-base-content/70 text-lg">Your generosity makes a real difference</p>
+                        </div>
+
+                        <div className="card bg-gradient-to-br from-white via-primary/5 to-white shadow-2xl border-2 border-primary/20 backdrop-blur-sm">
+                            <div className="card-body p-6 md:p-8">
                                 {/* Campaign Summary */}
-                                <div className="bg-base-200 rounded-lg p-4 mb-6">
-                                    <h3 className="font-bold mb-2">{campaign.title}</h3>
-                                    <p className="text-sm text-gray-600 mb-2">By: {campaign.charityName}</p>
-                                    <div className="flex justify-between text-sm mb-2">
-                                        <span>Raised: ৳{(campaign.currentAmount || 0).toLocaleString()}</span>
-                                        <span>Goal: ৳{campaign.goalAmount.toLocaleString()}</span>
-                                    </div>
-                                    <progress 
-                                        className="progress progress-primary w-full" 
-                                        value={campaign.currentAmount || 0} 
-                                        max={campaign.goalAmount}
-                                    ></progress>
-                                    <div className="text-center text-sm text-gray-600 mt-2">
-                                        {Math.round(((campaign.currentAmount || 0) / campaign.goalAmount) * 100)}% funded
+                                <div className="bg-gradient-to-r from-primary via-secondary to-primary text-white rounded-xl p-6 mb-8 shadow-lg relative overflow-hidden">
+                                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
+                                    <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full -ml-12 -mb-12"></div>
+                                    <div className="relative z-10">
+                                        <div className="flex items-center gap-2 mb-3">
+                                            <FaHeart className="text-2xl text-white/90" />
+                                            <h3 className="font-bold text-xl text-white">{campaign.title}</h3>
+                                        </div>
+                                        <p className="text-sm text-white/90 mb-4">By: {campaign.charityName}</p>
+                                        <div className="flex justify-between text-sm mb-3 font-semibold text-white">
+                                            <span className="bg-white/20 px-3 py-1 rounded-lg">Raised: ৳{(campaign.currentAmount || 0).toLocaleString()}</span>
+                                            <span className="bg-white/20 px-3 py-1 rounded-lg">Goal: ৳{campaign.goalAmount.toLocaleString()}</span>
+                                        </div>
+                                        <progress 
+                                            className="progress progress-white w-full h-3 mb-2" 
+                                            value={campaign.currentAmount || 0} 
+                                            max={campaign.goalAmount}
+                                        ></progress>
+                                        <div className="text-center text-base font-bold text-white mt-2">
+                                            {Math.round(((campaign.currentAmount || 0) / campaign.goalAmount) * 100)}% funded
+                                        </div>
                                     </div>
                                 </div>
 
@@ -146,40 +163,49 @@ const Donate = () => {
                                     {/* Amount Selection */}
                                     <div className="form-control">
                                         <label className="label">
-                                            <span className="label-text font-semibold">Donation Amount (BDT)</span>
+                                            <span className="label-text font-bold text-lg text-base-content">Donation Amount (BDT)</span>
                                         </label>
-                                        <div className="grid grid-cols-4 gap-2 mb-4">
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
                                             {[1000, 2500, 5000, 10000].map((presetAmount) => (
                                                 <button
                                                     key={presetAmount}
                                                     type="button"
                                                     onClick={() => setAmount(presetAmount.toString())}
-                                                    className={`btn btn-outline ${
-                                                        amount === presetAmount.toString() ? 'btn-primary' : ''
+                                                    className={`btn  transition-all font-semibold ${
+                                                        amount === presetAmount.toString() 
+                                                            ? 'btn-primary text-white shadow-lg scale-105' 
+                                                            : 'btn-outline btn-primary hover:bg-primary/10'
                                                     }`}
                                                 >
-                                                    {presetAmount.toLocaleString()}
+                                                    ৳{presetAmount.toLocaleString()}
                                                 </button>
                                             ))}
                                         </div>
                                         <input
                                             type="number"
-                                            placeholder="Enter custom amount"
-                                            className="input input-bordered w-full"
+                                            placeholder="Enter custom amount (min: ৳100)"
+                                            className="input text-blue-500 input-bordered w-full focus:input-primary focus:outline-none border-2 text-lg font-medium"
                                             value={amount}
                                             onChange={(e) => setAmount(e.target.value)}
                                             min="100"
                                             required
                                         />
+                                        <label className="label">
+                                            <span className="label-text-alt text-base-content/60">Minimum donation: ৳100</span>
+                                        </label>
                                     </div>
 
                                     {/* Payment Method */}
                                     <div className="form-control">
                                         <label className="label">
-                                            <span className="label-text font-semibold">Payment Method</span>
+                                            <span className="label-text font-bold text-lg text-base-content">Payment Method</span>
                                         </label>
-                                        <div className="space-y-2">
-                                            <label className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-base-200">
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                            <label className={`flex flex-col items-center gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all hover:scale-105 ${
+                                                paymentMethod === 'bkash' 
+                                                    ? 'bg-gradient-to-br from-primary/30 to-primary/10 border-primary shadow-lg' 
+                                                    : 'hover:bg-primary/5 border-base-300'
+                                            }`}>
                                                 <input
                                                     type="radio"
                                                     name="payment"
@@ -188,10 +214,14 @@ const Donate = () => {
                                                     onChange={(e) => setPaymentMethod(e.target.value)}
                                                     className="radio radio-primary"
                                                 />
-                                                <FaMobile className="text-primary" />
-                                                <span>bKash</span>
+                                                <FaMobile className={`text-3xl ${paymentMethod === 'bkash' ? 'text-primary' : 'text-base-content/60'}`} />
+                                                <span className="font-semibold text-base-content">bKash</span>
                                             </label>
-                                            <label className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-base-200">
+                                            <label className={`flex flex-col items-center gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all hover:scale-105 ${
+                                                paymentMethod === 'paypal' 
+                                                    ? 'bg-gradient-to-br from-primary/30 to-primary/10 border-primary shadow-lg' 
+                                                    : 'hover:bg-primary/5 border-base-300'
+                                            }`}>
                                                 <input
                                                     type="radio"
                                                     name="payment"
@@ -200,10 +230,14 @@ const Donate = () => {
                                                     onChange={(e) => setPaymentMethod(e.target.value)}
                                                     className="radio radio-primary"
                                                 />
-                                                <FaPaypal className="text-primary" />
-                                                <span>PayPal</span>
+                                                <FaPaypal className={`text-3xl ${paymentMethod === 'paypal' ? 'text-primary' : 'text-base-content/60'}`} />
+                                                <span className="font-semibold text-base-content">PayPal</span>
                                             </label>
-                                            <label className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-base-200">
+                                            <label className={`flex flex-col items-center gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all hover:scale-105 ${
+                                                paymentMethod === 'card' 
+                                                    ? 'bg-gradient-to-br from-primary/30 to-primary/10 border-primary shadow-lg' 
+                                                    : 'hover:bg-primary/5 border-base-300'
+                                            }`}>
                                                 <input
                                                     type="radio"
                                                     name="payment"
@@ -212,67 +246,73 @@ const Donate = () => {
                                                     onChange={(e) => setPaymentMethod(e.target.value)}
                                                     className="radio radio-primary"
                                                 />
-                                                <FaCreditCard className="text-primary" />
-                                                <span>Credit/Debit Card</span>
+                                                <FaCreditCard className={`text-3xl ${paymentMethod === 'card' ? 'text-primary' : 'text-base-content/60'}`} />
+                                                <span className="font-semibold text-base-content">Card</span>
                                             </label>
                                         </div>
                                     </div>
 
                                     {/* Anonymous Donation */}
                                     <div className="form-control">
-                                        <label className="label cursor-pointer">
+                                        <label className="label cursor-pointer justify-start gap-3 p-4 bg-base-200/50 rounded-lg hover:bg-base-200 transition-colors">
                                             <input
                                                 type="checkbox"
-                                                className="checkbox checkbox-primary"
+                                                className="checkbox checkbox-primary checkbox-lg"
                                                 checked={anonymous}
                                                 onChange={(e) => setAnonymous(e.target.checked)}
                                             />
-                                            <span className="label-text">Make this donation anonymous</span>
+                                            <span className="label-text font-medium text-base-content">Make this donation anonymous</span>
                                         </label>
                                     </div>
 
                                     {/* Donation Summary */}
-                                    <div className="bg-primary/10 rounded-lg p-4">
-                                        <h3 className="font-bold mb-2">Donation Summary</h3>
-                                        <div className="flex justify-between">
-                                            <span>Amount:</span>
-                                            <span className="font-semibold">{amount ? `${parseInt(amount).toLocaleString()} BDT` : '0 BDT'}</span>
+                                    <div className="bg-gradient-to-br from-success/30 via-success/20 to-success/30 rounded-xl p-6 border-2 border-success/40 shadow-lg">
+                                        <div className="flex items-center gap-2 mb-4">
+                                            <FaCheckCircle className="text-success text-xl" />
+                                            <h3 className="font-bold text-xl text-base-content">Donation Summary</h3>
                                         </div>
-                                        <div className="flex justify-between">
-                                            <span>Payment Method:</span>
-                                            <span className="font-semibold capitalize">{paymentMethod}</span>
-                                        </div>
-                                        {anonymous && (
-                                            <div className="flex justify-between">
-                                                <span>Visibility:</span>
-                                                <span className="font-semibold">Anonymous</span>
+                                        <div className="space-y-3">
+                                            <div className="flex justify-between items-center p-3 bg-white/50 rounded-lg">
+                                                <span className="font-semibold text-base-content">Amount:</span>
+                                                <span className="font-black text-success text-2xl">{amount ? `৳${parseInt(amount).toLocaleString()}` : '৳0'}</span>
                                             </div>
-                                        )}
+                                            <div className="flex justify-between items-center p-3 bg-white/50 rounded-lg">
+                                                <span className="font-semibold text-base-content">Payment Method:</span>
+                                                <span className="font-bold capitalize text-primary text-lg">{paymentMethod}</span>
+                                            </div>
+                                            {anonymous && (
+                                                <div className="flex justify-between items-center p-3 bg-white/50 rounded-lg">
+                                                    <span className="font-semibold text-base-content">Visibility:</span>
+                                                    <span className="font-bold text-info text-lg">Anonymous</span>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
 
                                     {/* Submit Button */}
                                     <button
                                         type="submit"
-                                        className="btn btn-primary w-full btn-lg"
+                                        className="btn btn-primary w-full btn-lg text-white font-bold text-lg py-3 hover:btn-primary-focus transition-all shadow-xl hover:shadow-2xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                                         disabled={!amount || parseInt(amount) < 100 || processing}
                                     >
                                         {processing ? (
                                             <>
-                                                <span className="loading loading-spinner"></span>
-                                                Processing...
+                                                <span className="loading loading-spinner loading-lg"></span>
+                                                Processing Your Donation...
                                             </>
                                         ) : (
                                             <>
-                                                <FaHeart className="mr-2" />
-                                                Donate {amount ? `৳${parseInt(amount).toLocaleString()}` : ''}
+                                                <FaHeart className="mr-2 text-xl" />
+                                                Donate {amount ? `৳${parseInt(amount).toLocaleString()}` : 'Now'}
                                             </>
                                         )}
                                     </button>
                                 </form>
 
-                                <div className="text-center mt-6">
-                                    <p className="text-sm text-gray-600">
-                                        Your donation is secure and will be processed immediately.
+                                <div className="mt-8 p-4 bg-gradient-to-r from-success/20 to-success/10 rounded-lg border border-success/30">
+                                    <p className="text-sm text-blue-500 text-base-content/80 flex items-center justify-center gap-2 font-medium">
+                                        <FaCheckCircle className="text-success text-blue-500 text-lg" />
+                                        Your donation is secure and will be processed immediately
                                     </p>
                                 </div>
                             </div>

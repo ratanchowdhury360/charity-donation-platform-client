@@ -19,6 +19,21 @@ const AdminMessages = () => {
     const [feedback, setFeedback] = useState({ type: '', text: '' });
     const [processing, setProcessing] = useState(false);
 
+    const showAlert = useCallback((icon, title, text) => {
+        const swal = typeof window !== 'undefined' ? window.Swal : null;
+        if (swal) {
+            swal.fire({
+                icon,
+                title,
+                text,
+                timer: icon === 'success' ? 1800 : undefined,
+                showConfirmButton: icon !== 'success'
+            });
+        } else if (typeof window !== 'undefined' && window.alert) {
+            window.alert(`${title}${text ? `\n${text}` : ''}`);
+        }
+    }, []);
+
     const fetchMessages = useCallback(async () => {
         try {
             setLoading(true);
@@ -61,11 +76,13 @@ const AdminMessages = () => {
                 actorType: 'admin',
             });
             setFeedback({ type: 'success', text: 'Reply sent successfully.' });
+            showAlert('success', 'Reply sent!', 'The user will see it instantly.');
             closeModal();
             fetchMessages();
         } catch (error) {
             console.error('Failed to send reply', error);
             setFeedback({ type: 'error', text: 'Failed to send reply. Please try again.' });
+            showAlert('error', 'Reply failed', 'Please try sending again.');
             setProcessing(false);
         }
     };
@@ -73,10 +90,12 @@ const AdminMessages = () => {
     const handleStatusChange = async (messageId, status) => {
         try {
             await updateMessageStatus(messageId, status);
+            showAlert('success', 'Status updated', `Conversation marked as ${status}.`);
             fetchMessages();
         } catch (error) {
             console.error('Failed to update message status', error);
             setFeedback({ type: 'error', text: 'Could not update message status.' });
+            showAlert('error', 'Update failed', 'Unable to change status right now.');
         }
     };
 
@@ -98,11 +117,11 @@ const AdminMessages = () => {
                     </p>
                 </div>
 
-                <div className="card bg-base-100 shadow-md">
+                <div className="card bg-gradient-to-br from-white via-primary/10 to-secondary/10 shadow-xl border-2 border-primary/20">
                     <div className="card-body">
                         <div className="flex items-center gap-3 mb-4">
-                            <FaFilter className="text-primary" />
-                            <h2 className="card-title mb-0">Filter by status</h2>
+                            <FaFilter className="text-primary text-xl" />
+                            <h2 className="card-title mb-0 text-gray-900">Filter by status</h2>
                         </div>
                         <div className="tabs tabs-boxed w-fit">
                             {statusTabs.map((tab) => (
@@ -129,17 +148,17 @@ const AdminMessages = () => {
                         <span className="loading loading-spinner loading-lg text-primary"></span>
                     </div>
                 ) : messages.length === 0 ? (
-                    <div className="card bg-base-100 shadow-lg">
+                    <div className="card bg-gradient-to-br from-white via-primary/10 to-secondary/10 shadow-xl border-2 border-primary/20">
                         <div className="card-body text-center py-16">
-                            <FaInbox className="text-5xl text-gray-400 mx-auto mb-4" />
-                            <h3 className="text-xl font-semibold mb-2">No messages in this view</h3>
-                            <p className="text-gray-500">Try switching the filter to see other conversations.</p>
+                            <FaInbox className="text-5xl text-primary mx-auto mb-4" />
+                            <h3 className="text-xl font-semibold mb-2 text-gray-900">No messages in this view</h3>
+                            <p className="text-gray-700 font-medium">Try switching the filter to see other conversations.</p>
                         </div>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         {messages.map((message) => (
-                            <div key={message.id} className="card bg-base-100 shadow-xl">
+                            <div key={message.id} className="card bg-gradient-to-br from-white via-primary/10 to-secondary/10 shadow-xl border-2 border-primary/20 hover:border-primary/40 hover:shadow-2xl hover:scale-[1.02] transition-all">
                                 <div className="card-body">
                                     <div className="flex items-start justify-between gap-4">
                                         <div>
@@ -161,16 +180,16 @@ const AdminMessages = () => {
                                             {message.status}
                                         </span>
                                     </div>
-                                    <p className="mt-4 text-gray-700">{message.message}</p>
+                                    <p className="mt-4 text-gray-800 text-base leading-relaxed">{message.message}</p>
 
                                     {message.replies?.length > 0 && (
-                                        <div className="mt-4 p-3 rounded-lg bg-base-200 space-y-2 max-h-48 overflow-y-auto">
+                                        <div className="mt-4 p-3 rounded-xl bg-base-200/80 space-y-2 max-h-48 overflow-y-auto border border-base-300">
                                             {message.replies.map((reply, idx) => (
                                                 <div key={idx}>
                                                     <p className="text-sm font-semibold text-primary">
-                                                        Admin • {new Date(reply.createdAt).toLocaleString()}
+                                                        {reply.actorType === 'admin' ? 'Admin' : 'User'} • {new Date(reply.createdAt).toLocaleString()}
                                                     </p>
-                                                    <p className="text-sm text-gray-700">{reply.message}</p>
+                                                    <p className="text-sm text-gray-700 leading-relaxed">{reply.message}</p>
                                                 </div>
                                             ))}
                                         </div>
@@ -209,23 +228,23 @@ const AdminMessages = () => {
 
                 {selectedMessage && (
                     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                        <div className="bg-base-100 rounded-lg w-full max-w-xl shadow-2xl">
+                        <div className="bg-gradient-to-br from-white via-primary/10 to-secondary/10 rounded-lg w-full max-w-xl shadow-2xl border-2 border-primary/30">
                             <div className="p-6 space-y-4">
                                 <div className="flex justify-between items-center">
-                                    <h3 className="text-xl font-bold">Reply to {selectedMessage.senderName}</h3>
+                                    <h3 className="text-xl text-black font-bold">Reply to {selectedMessage.senderName}</h3>
                                     <button className="btn btn-sm btn-ghost" onClick={closeModal}>
                                         ✕
                                     </button>
                                 </div>
-                                <p className="text-sm text-gray-500">{selectedMessage.subject}</p>
-                                <p className="p-3 bg-base-200 rounded text-sm">{selectedMessage.message}</p>
+                                <p className="text-sm text-black">{selectedMessage.subject}</p>
+                                <p className="p-3 bg-base-200 text-black rounded text-sm">{selectedMessage.message}</p>
                                 <form className="space-y-4" onSubmit={handleReplySubmit}>
                                     <div className="form-control">
                                         <label className="label">
-                                            <span className="label-text font-semibold">Your reply</span>
+                                            <span className="label-text text-black font-semibold">Your reply</span>
                                         </label>
                                         <textarea
-                                            className="textarea textarea-bordered h-32"
+                                            className="textarea textarea-bordered text-black h-32"
                                             value={replyText}
                                             onChange={(e) => setReplyText(e.target.value)}
                                             required

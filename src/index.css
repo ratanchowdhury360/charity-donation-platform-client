@@ -2,6 +2,65 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Global dark background - Force dark theme everywhere */
+html, body {
+  background-color: #1a1d29 !important;
+  min-height: 100vh;
+  color: #e2e8f0;
+}
+
+#root {
+  min-height: 100vh;
+  background-color: #1a1d29 !important;
+}
+
+/* Ensure all main containers use dark background */
+.min-h-screen {
+  background-color: #1a1d29;
+}
+
+/* Override any white backgrounds */
+.bg-white {
+  background-color: #1e293b !important;
+}
+
+.bg-gray-50,
+.bg-gray-100,
+.bg-slate-50,
+.bg-zinc-50 {
+  background-color: #1a1d29 !important;
+}
+
+/* Navbar and menu dark backgrounds */
+.navbar {
+  background-color: #1e293b !important;
+}
+
+.menu,
+.menu li,
+.menu ul {
+  background-color: #1e293b !important;
+}
+
+.dropdown-content,
+.menu.dropdown-content {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+.menu-title {
+  color: #cbd5e1 !important;
+}
+
+.menu li > * {
+  color: #e2e8f0 !important;
+}
+
+.menu li > *:hover {
+  background-color: #334155 !important;
+  color: #ffffff !important;
+}
+
 /* Custom animations */
 @keyframes fadeIn {
   from {
@@ -119,22 +178,22 @@
   background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar - dark theme */
 ::-webkit-scrollbar {
   width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: #1a1d29;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #888;
+  background: #4a5568;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: #718096;
 }
 
 /* Loading spinner */

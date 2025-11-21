@@ -5,7 +5,7 @@ import Footer from "../Pages/Shared/Footer";
 
 const Main = () => {
     return (
-        <div>
+        <div className="min-h-screen bg-base-200">
             <Navber></Navber>
             <Outlet></Outlet>
             <Footer> </Footer>

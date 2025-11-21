@@ -179,10 +179,10 @@ const Home = () => {
 
 
             {/* Fund Pulse */}
-            <section className="pt-6 pb-10 mt-6 bg-base-100">
-                <div className="container mx-auto px-4">
-                    <div className="card shadow-2xl bg-gradient-to-r from-primary to-secondary text-white">
-                        <div className="card-body flex flex-col lg:flex-row gap-8 items-start lg:items-center">
+            <section className="pt-6 pb-10 mt-6 ">
+                <div className="container mt-10 mx-auto px-4">
+                    <div className="card mt-5 shadow-2xl bg-gradient-to-r from-primary to-secondary text-white">
+                        <div className="card-body mt-5 flex flex-col lg:flex-row gap-8 items-start lg:items-center">
                             <div className="flex-1">
                                 <p className="uppercase text-sm tracking-widest text-white/70">Fundraising pulse</p>
                                 <h2 className="text-4xl md:text-5xl font-black mt-2">
@@ -215,30 +215,30 @@ const Home = () => {
             </section>
 
             {/* Stats Section */}
-            <section className="py-20 bg-base-200">
+            <section className="py-10 ">
                 <div className="container mx-auto px-4">
                     <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
-                        <div className="text-center p-6 bg-base-100 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
+                        <div className="text-center p-6 bg-red-300 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
                             <FaHeart className="text-4xl text-primary mx-auto mb-3" />
                             <div className="text-3xl font-bold text-primary mb-2">৳{stats.totalRaised.toLocaleString()}</div>
                             <div className="text-sm text-gray-600">Total Raised</div>
                         </div>
-                        <div className="text-center p-6 bg-base-100 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
+                        <div className="text-center p-6 bg-green-300 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
                             <FaChartLine className="text-4xl text-secondary mx-auto mb-3" />
                             <div className="text-3xl font-bold text-secondary mb-2">{stats.activeCampaigns}</div>
                             <div className="text-sm text-gray-600">Active Campaigns</div>
                         </div>
-                        <div className="text-center p-6 bg-base-100 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
+                        <div className="text-center p-6 bg-yellow-300 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
                             <FaUsers className="text-4xl text-accent mx-auto mb-3" />
                             <div className="text-3xl font-bold text-accent mb-2">{stats.totalDonors}</div>
                             <div className="text-sm text-gray-600">Donors</div>
                         </div>
-                        <div className="text-center p-6 bg-base-100 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
+                        <div className="text-center p-6 bg-blue-300 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
                             <FaBuilding className="text-4xl text-info mx-auto mb-3" />
                             <div className="text-3xl font-bold text-info mb-2">{stats.totalCharities}</div>
                             <div className="text-sm text-gray-600">Charities</div>
                         </div>
-                        <div className="text-center p-6 bg-base-100 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
+                        <div className="text-center p-6 bg-green-300 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
                             <FaStar className="text-4xl text-warning mx-auto mb-3" />
                             <div className="text-3xl font-bold text-warning mb-2">{stats.successRate}%</div>
                             <div className="text-sm text-gray-600">Success Rate</div>
@@ -248,7 +248,7 @@ const Home = () => {
             </section>
 
             {/* Campaign highlights */}
-            <section className="py-12 bg-gradient-to-b from-base-200 via-base-100 to-base-200">
+            <section className="py-12 ">
                 <div className="container mx-auto px-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <Link
@@ -313,8 +313,8 @@ const Home = () => {
                     ) : (
                         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                             {featuredCampaigns.map((campaign) => (
-                                <div key={campaign.id} className="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow">
-                                    <figure>
+                                <div key={campaign.id} className="card border  shadow-xl hover:shadow-2xl transition-shadow">
+                                    <figure >
                                         <img
                                             src={campaign.image}
                                             alt={campaign.title}
@@ -330,8 +330,8 @@ const Home = () => {
                                             <span className="badge badge-success">Approved</span>
                                         </div>
                                         <h3 className="card-title text-lg">{campaign.title}</h3>
-                                        <p className="text-sm text-gray-600 mb-1">By: {campaign.charityName}</p>
-                                        <p className="text-gray-600 line-clamp-2">{campaign.description}</p>
+                                        <p className="text-sm text-white mb-1">By: {campaign.charityName}</p>
+                                        <p className="text-white line-clamp-2">{campaign.description}</p>
 
                                         <div className="mt-4">
                                             <div className="flex justify-between text-sm mb-2">
@@ -379,7 +379,7 @@ const Home = () => {
             </section>
 
             {/* How It Works */}
-            <section className="py-20 bg-base-200">
+            <section className="py-20 border ">
                 <div className="container mx-auto px-4">
                     <div className="text-center mb-16">
                         <h2 className="text-4xl font-bold mb-4">How It Works</h2>
@@ -421,10 +421,10 @@ const Home = () => {
             </section>
 
             {/* User Reviews */}
-            <section className="py-20 bg-base-200">
+            <section className="py-20 border ">
                 <div className="container mx-auto px-4">
                     <div className="text-center mb-16">
-                        <h2 className="text-4xl font-bold mb-4">What People Say</h2>
+                        <h2 className="text-4xl font-bold mb-4">What People Say (Reviews)</h2>
                         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
                             Real reviews from our community of donors and charities
                         </p>
@@ -433,7 +433,7 @@ const Home = () => {
                     {reviews.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                             {reviews.map((review) => (
-                                <div key={review.id} className="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow">
+                                <div key={review.id} className="card bg-red-500 shadow-xl hover:shadow-2xl transition-shadow">
                                     <div className="card-body">
                                         {/* Star Rating */}
                                         <div className="flex justify-center mb-4">
@@ -446,7 +446,7 @@ const Home = () => {
                                         </div>
 
                                         {/* Review Comment */}
-                                        <p className="text-gray-600 text-center mb-6 italic">
+                                        <p className="text-white text-center mb-6 italic">
                                             "{review.comment}"
                                         </p>
 
@@ -459,10 +459,10 @@ const Home = () => {
                                             </div>
                                             <div className="text-left">
                                                 <div className="font-bold text-sm">{review.userName}</div>
-                                                <div className="text-xs text-gray-500">
+                                                <div className="text-xs text-white">
                                                     ID: {review.userId.substring(0, 8)}...
                                                 </div>
-                                                <div className="text-xs text-gray-400">
+                                                <div className="text-xs text-white">
                                                     {new Date(review.createdAt || review.date).toLocaleDateString()}
                                                 </div>
                                             </div>

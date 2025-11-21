@@ -70,7 +70,7 @@ const Dashboard = () => {
 
     return (
         <div className="min-h-screen bg-base-200 pt-20">
-            <div className="navbar fixed top-0 left-0 right-0 bg-base-100 shadow z-50">
+            <div className="navbar fixed top-0 left-0 right-0 bg-gradient-to-r from-primary/90 via-secondary/80 to-primary/90 backdrop-blur-sm shadow-lg z-50">
                 <div className="flex-1">
                     <Link to="/" className="btn btn-ghost normal-case text-xl">
                         Charity Platform

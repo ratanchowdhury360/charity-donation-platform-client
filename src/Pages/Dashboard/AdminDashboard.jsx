@@ -163,14 +163,14 @@ const AdminDashboard = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <Link
                         to="/campaigns?view=completed"
-                        className="card bg-base-100 shadow-lg border border-success/30 hover:shadow-2xl transition-shadow"
+                        className="card bg-gradient-to-br from-success/20 via-success/10 to-success/5 shadow-lg border border-success/30 hover:shadow-2xl transition-all hover:scale-105"
                     >
                         <div className="card-body">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-gray-500">Completed Campaigns</p>
+                                    <p className="text-sm text-base-content/70 font-medium">Completed Campaigns</p>
                                     <p className="text-3xl font-bold text-success">{completedCount}</p>
-                                    <p className="text-xs text-gray-400 mt-1">Targets achieved across the platform</p>
+                                    <p className="text-xs text-base-content/60 mt-1">Targets achieved across the platform</p>
                                 </div>
                                 <FaCheckCircle className="text-4xl text-success/70" />
                             </div>
@@ -179,14 +179,14 @@ const AdminDashboard = () => {
 
                     <Link
                         to="/dashboard/admin/campaigns/archived"
-                        className="card bg-base-100 shadow-lg border border-warning/30 hover:shadow-2xl transition-shadow"
+                        className="card bg-gradient-to-br from-warning/20 via-warning/10 to-warning/5 shadow-lg border border-warning/30 hover:shadow-2xl transition-all hover:scale-105"
                     >
                         <div className="card-body">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-gray-500">Ended Campaigns</p>
+                                    <p className="text-sm text-base-content/70 font-medium">Ended Campaigns</p>
                                     <p className="text-3xl font-bold text-warning">{archivedCount}</p>
-                                    <p className="text-xs text-gray-400 mt-1">Awaiting extension & follow-up</p>
+                                    <p className="text-xs text-base-content/60 mt-1">Awaiting extension & follow-up</p>
                                 </div>
                                 <FaHourglassEnd className="text-4xl text-warning/70" />
                             </div>
@@ -194,7 +194,7 @@ const AdminDashboard = () => {
                     </Link>
                 </div>
 
-                <div className="card bg-base-100 shadow-lg">
+                <div className="card bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/5 shadow-lg border border-primary/20">
                     <div className="card-body">
                         <h2 className="card-title mb-4">Quick Actions</h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

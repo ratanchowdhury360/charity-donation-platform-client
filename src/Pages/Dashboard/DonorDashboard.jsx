@@ -164,26 +164,26 @@ const DonorDashboard = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <Link
                             to="/campaigns?view=completed"
-                            className="card bg-base-100 shadow-lg border border-success/30 hover:shadow-2xl transition-shadow"
+                            className="card bg-gradient-to-br from-success/20 via-success/10 to-success/5 shadow-lg border border-success/30 hover:shadow-2xl transition-all hover:scale-105"
                         >
                             <div className="card-body flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-gray-500">Completed campaigns</p>
+                                    <p className="text-sm text-base-content/70 font-medium">Completed campaigns</p>
                                     <p className="text-3xl font-bold text-success">{campaignPulse.completed}</p>
-                                    <p className="text-xs text-gray-400 mt-1">Targets reached across the platform</p>
+                                    <p className="text-xs text-base-content/60 mt-1">Targets reached across the platform</p>
                                 </div>
                                 <FaCheckCircle className="text-4xl text-success/70" />
                             </div>
                         </Link>
                         <Link
                             to="/campaigns?view=archived"
-                            className="card bg-base-100 shadow-lg border border-warning/30 hover:shadow-2xl transition-shadow"
+                            className="card bg-gradient-to-br from-warning/20 via-warning/10 to-warning/5 shadow-lg border border-warning/30 hover:shadow-2xl transition-all hover:scale-105"
                         >
                             <div className="card-body flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-gray-500">Ended timelines</p>
+                                    <p className="text-sm text-base-content/70 font-medium">Ended timelines</p>
                                     <p className="text-3xl font-bold text-warning">{campaignPulse.archived}</p>
-                                    <p className="text-xs text-gray-400 mt-1">Campaigns waiting for admin extension</p>
+                                    <p className="text-xs text-base-content/60 mt-1">Campaigns waiting for admin extension</p>
                                 </div>
                                 <FaHourglassEnd className="text-4xl text-warning/70" />
                             </div>
@@ -192,7 +192,7 @@ const DonorDashboard = () => {
                 )}
 
                 {/* Active Campaigns */}
-                <div className="card bg-base-100 shadow-xl">
+                <div className="card bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/5 shadow-xl border border-primary/20">
                     <div className="card-body">
                         <div className="flex justify-between items-center mb-6">
                             <div>
@@ -220,7 +220,7 @@ const DonorDashboard = () => {
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {activeCampaigns.map(campaign => (
-                                    <div key={campaign.id} className="card bg-base-100 shadow-lg hover:shadow-xl transition-shadow">
+                                    <div key={campaign.id} className="card bg-gradient-to-br from-white via-primary/10 to-secondary/10 shadow-lg border-2 border-primary/20 hover:shadow-xl hover:border-primary/40 hover:scale-[1.02] transition-all">
                                         <figure>
                                             <img 
                                                 src={campaign.image} 
@@ -236,20 +236,20 @@ const DonorDashboard = () => {
                                                 <span className="badge badge-primary capitalize">{campaign.category}</span>
                                                 <span className="badge badge-success">Active</span>
                                             </div>
-                                            <h3 className="card-title text-base">{campaign.title}</h3>
-                                            <p className="text-xs text-gray-600 mb-1">By: {campaign.charityName}</p>
-                                            <p className="text-sm text-gray-600 line-clamp-2">{campaign.description}</p>
-                                            <div className="mt-4">
+                                            <h3 className="card-title text-base text-base-content">{campaign.title}</h3>
+                                            <p className="text-xs text-base-content/70 mb-1 font-medium">By: <span className="text-primary font-semibold">{campaign.charityName}</span></p>
+                                            <p className="text-sm text-base-content/70 line-clamp-2">{campaign.description}</p>
+                                            <div className="mt-4 p-3 bg-gradient-to-r from-primary/10 via-secondary/5 to-primary/10 rounded-lg border border-primary/20">
                                                 <div className="flex justify-between text-sm mb-2">
-                                                    <span className="font-semibold">{Math.round(((campaign.currentAmount || 0) / campaign.goalAmount) * 100)}% funded</span>
-                                                    <span className="text-gray-600">৳{(campaign.currentAmount || 0).toLocaleString()}</span>
+                                                    <span className="font-bold text-primary">{Math.round(((campaign.currentAmount || 0) / campaign.goalAmount) * 100)}% funded</span>
+                                                    <span className="font-bold text-success text-lg">৳{(campaign.currentAmount || 0).toLocaleString()}</span>
                                                 </div>
                                                 <progress 
-                                                    className="progress progress-primary w-full" 
+                                                    className="progress progress-success w-full h-2" 
                                                     value={campaign.currentAmount || 0} 
                                                     max={campaign.goalAmount}
                                                 ></progress>
-                                                <div className="flex justify-between text-xs text-gray-500 mt-1">
+                                                <div className="flex justify-between text-xs text-base-content/70 mt-2 font-medium">
                                                     <span>Goal: ৳{campaign.goalAmount.toLocaleString()}</span>
                                                     <span>Ends: {new Date(campaign.endDate).toLocaleDateString()}</span>
                                                 </div>
@@ -274,7 +274,7 @@ const DonorDashboard = () => {
                 </div>
 
                 {currentUser && (
-                    <div className="card bg-base-100 shadow-lg">
+                    <div className="card bg-gradient-to-br from-info/10 via-primary/5 to-secondary/5 shadow-lg border border-info/20">
                         <div className="card-body">
                             <div className="flex items-center gap-3 mb-4">
                                 <FaInbox className="text-primary text-2xl" />
@@ -322,7 +322,7 @@ const DonorDashboard = () => {
                 )}
 
                 {/* Quick Actions */}
-                <div className="card bg-base-100 shadow-lg">
+                <div className="card bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/5 shadow-lg border border-primary/20">
                     <div className="card-body">
                         <h2 className="card-title mb-4">Quick Actions</h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

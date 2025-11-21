@@ -68,7 +68,7 @@ const AdminUsers = () => {
           </div>
         </div>
 
-        <div className="card bg-base-100 shadow">
+        <div className="card bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/5 shadow-lg border border-primary/20">
           <div className="card-body p-0">
             {loading ? (
               <div className="p-6">

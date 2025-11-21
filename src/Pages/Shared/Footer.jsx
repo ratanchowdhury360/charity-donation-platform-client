@@ -4,19 +4,19 @@ import { FaHeart, FaFacebook, FaTwitter, FaLinkedin, FaInstagram, FaEnvelope, Fa
 
 const Footer = () => {
     return (
-        <footer className="bg-base-300 text-base-content">
+        <footer className=" text-base-content">
             <div className="container mx-auto px-4 py-12">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                     {/* About Section */}
                     <div>
                         <div className="flex items-center gap-2 mb-4">
                             <FaHeart className="text-2xl text-primary" />
-                            <h3 className="text-xl font-bold">Charity Donation Platform</h3>
+                            <h3 className="text-xl text-white font-bold">Charity Donation Platform</h3>
                         </div>
-                        <p className="text-sm text-gray-600 mb-4">
+                        <p className="text-sm text-white mb-4">
                             Connecting generous donors with verified charity organizations to create meaningful impact across Bangladesh.
                         </p>
-                        <div className="flex gap-3">
+                        <div className="flex text-white gap-3">
                             <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="btn btn-circle btn-sm btn-ghost hover:btn-primary">
                                 <FaFacebook className="text-lg" />
                             </a>
@@ -34,8 +34,8 @@ const Footer = () => {
 
                     {/* Quick Links */}
                     <div>
-                        <h4 className="text-lg font-bold mb-4">Quick Links</h4>
-                        <ul className="space-y-2">
+                        <h4 className="text-lg text-white font-bold mb-4">Quick Links</h4>
+                        <ul className="space-y-2 text-white">
                             <li><Link to="/" className="link link-hover text-sm">Home</Link></li>
                             <li><Link to="/campaigns" className="link link-hover text-sm">Browse Campaigns</Link></li>
                             <li><Link to="/charities" className="link link-hover text-sm">Charities</Link></li>
@@ -46,8 +46,8 @@ const Footer = () => {
 
                     {/* For Users */}
                     <div>
-                        <h4 className="text-lg font-bold mb-4">For Users</h4>
-                        <ul className="space-y-2">
+                        <h4 className="text-lg text-white font-bold mb-4">For Users</h4>
+                        <ul className="space-y-2 text-white">
                             <li><Link to="/signup" className="link link-hover text-sm">Create Account</Link></li>
                             <li><Link to="/login" className="link link-hover text-sm">Login</Link></li>
                             <li><Link to="/charities/register" className="link link-hover text-sm">Register Charity</Link></li>
@@ -58,8 +58,8 @@ const Footer = () => {
 
                     {/* Contact Info */}
                     <div>
-                        <h4 className="text-lg font-bold mb-4">Contact Us</h4>
-                        <ul className="space-y-3">
+                        <h4 className="text-lg text-white font-bold mb-4">Contact Us</h4>
+                        <ul className="space-y-3 text-white">
                             <li className="flex items-start gap-2 text-sm">
                                 <FaMapMarkerAlt className="text-primary mt-1 flex-shrink-0" />
                                 <span>Gulshan-1, Dhaka 1212<br />Bangladesh</span>
@@ -79,7 +79,7 @@ const Footer = () => {
                 {/* Bottom Bar */}
                 <div className="divider"></div>
                 <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-white">
                         © {new Date().getFullYear()} Charity Donation Platform. All rights reserved.
                     </p>
                     <div className="flex gap-4 text-sm">

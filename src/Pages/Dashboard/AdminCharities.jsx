@@ -90,30 +90,30 @@ const AdminCharities = () => {
         </div>
 
         {/* Stats Overview */}
-        <div className="stats shadow w-full">
-          <div className="stat">
-            <div className="stat-title">Total Charities</div>
+        <div className="stats shadow-lg bg-gradient-to-br from-white via-primary/5 to-secondary/5 border-2 border-primary/20 w-full">
+          <div className="stat bg-gradient-to-br from-primary/10 to-primary/5 border-r-2 border-primary/20">
+            <div className="stat-title text-gray-700 font-semibold">Total Charities</div>
             <div className="stat-value text-primary">{charities.length}</div>
-            <div className="stat-desc">Registered organizations</div>
+            <div className="stat-desc text-gray-600">Registered organizations</div>
           </div>
-          <div className="stat">
-            <div className="stat-title">Total Campaigns</div>
+          <div className="stat bg-gradient-to-br from-secondary/10 to-secondary/5 border-r-2 border-secondary/20">
+            <div className="stat-title text-gray-700 font-semibold">Total Campaigns</div>
             <div className="stat-value text-secondary">
               {charities.reduce((sum, c) => sum + c.totalCampaigns, 0)}
             </div>
-            <div className="stat-desc">All campaigns combined</div>
+            <div className="stat-desc text-gray-600">All campaigns combined</div>
           </div>
-          <div className="stat">
-            <div className="stat-title">Total Raised</div>
+          <div className="stat bg-gradient-to-br from-accent/10 to-accent/5">
+            <div className="stat-title text-gray-700 font-semibold">Total Raised</div>
             <div className="stat-value text-accent">
               ৳{charities.reduce((sum, c) => sum + c.totalRaised, 0).toLocaleString()}
             </div>
-            <div className="stat-desc">Across all charities</div>
+            <div className="stat-desc text-gray-600">Across all charities</div>
           </div>
         </div>
 
         {/* Charities List */}
-        <div className="card bg-base-100 shadow">
+        <div className="card bg-gradient-to-br from-white via-primary/10 to-secondary/10 shadow-xl border-2 border-primary/20">
           <div className="card-body p-0">
             {loading ? (
               <div className="p-6 text-center">

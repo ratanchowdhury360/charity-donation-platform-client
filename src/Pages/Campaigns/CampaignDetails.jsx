@@ -65,7 +65,7 @@ const CampaignDetails = () => {
                         {/* Main Content */}
                         <div className="lg:col-span-2 space-y-8">
                             {/* Campaign Image */}
-                            <div className="card bg-base-100 shadow-xl">
+                            <div className="card bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/5 shadow-xl border border-primary/20">
                                 <figure>
                                     <img 
                                         src={campaign.image} 
@@ -79,7 +79,7 @@ const CampaignDetails = () => {
                             </div>
 
                             {/* Campaign Info */}
-                            <div className="card bg-base-100 shadow-xl">
+                            <div className="card bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/5 shadow-xl border border-primary/20">
                                 <div className="card-body">
                                     <div className="flex items-center gap-2 mb-4">
                                         <span className="badge badge-primary capitalize">{campaign.category}</span>
@@ -129,7 +129,7 @@ const CampaignDetails = () => {
                         {/* Sidebar */}
                         <div className="space-y-6">
                             {/* Donation Card */}
-                            <div className="card bg-base-100 shadow-xl sticky top-24">
+                            <div className="card bg-gradient-to-br from-success/20 via-primary/10 to-success/20 shadow-xl border-2 border-success/30 sticky top-24">
                                 <div className="card-body">
                                     <h2 className="card-title mb-4">Support This Campaign</h2>
                                     
@@ -187,7 +187,7 @@ const CampaignDetails = () => {
                             </div>
 
                             {/* Campaign Timeline */}
-                            <div className="card bg-base-100 shadow-xl">
+                            <div className="card bg-gradient-to-br from-info/10 via-primary/5 to-info/10 shadow-xl border border-info/20">
                                 <div className="card-body">
                                     <h3 className="card-title mb-4">Campaign Timeline</h3>
                                     <div className="space-y-4">
@@ -222,7 +222,7 @@ const CampaignDetails = () => {
                             </div>
 
                             {/* Charity Info */}
-                            <div className="card bg-base-100 shadow-xl">
+                            <div className="card bg-gradient-to-br from-secondary/10 via-primary/5 to-secondary/10 shadow-xl border border-secondary/20">
                                 <div className="card-body">
                                     <h3 className="card-title mb-4">Organized by</h3>
                                     <div className="flex items-center gap-3 mb-4">

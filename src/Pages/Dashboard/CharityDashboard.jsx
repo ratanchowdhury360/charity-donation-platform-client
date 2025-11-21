@@ -139,15 +139,15 @@ const CharityDashboard = () => {
                     </div>
                 )}
 
-                <div className="bg-gradient-to-r from-primary to-secondary text-white rounded-lg p-6">
+                <div className="bg-gradient-to-r from-teal-600 via-cyan-500 to-teal-600 text-white rounded-lg p-6 shadow-xl border-2 border-teal-400/30">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between">
                         <div>
                             <h1 className="text-3xl font-bold mb-2">Charity Dashboard</h1>
-                            <p className="text-lg opacity-90">Manage your campaigns and track donations</p>
+                            <p className="text-lg opacity-95">Manage your campaigns and track donations</p>
                         </div>
                         <Link 
                             to="/dashboard/charity/campaigns/create" 
-                            className="btn btn-accent mt-4 md:mt-0"
+                            className="btn bg-gradient-to-r from-pink-500 to-purple-600 text-white border-0 hover:from-pink-600 hover:to-purple-700 shadow-lg mt-4 md:mt-0"
                         >
                             <FaPlus className="mr-2" /> Create Campaign
                         </Link>
@@ -160,52 +160,52 @@ const CharityDashboard = () => {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        <div className="card bg-gradient-to-br from-primary to-primary/80 text-white shadow-xl hover:shadow-2xl transition-shadow">
+                        <div className="card bg-gradient-to-br from-teal-500 via-cyan-500 to-teal-600 text-white shadow-xl hover:shadow-2xl hover:scale-105 transition-all border-2 border-teal-400">
                             <div className="card-body">
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <p className="text-sm opacity-90">Active Campaigns</p>
-                                        <p className="text-3xl font-bold">{stats.activeCampaigns}</p>
-                                        <p className="text-xs opacity-75 mt-1">Approved & ongoing</p>
+                                        <p className="text-sm font-bold">Active Campaigns</p>
+                                        <p className="text-3xl font-black">{stats.activeCampaigns}</p>
+                                        <p className="text-xs opacity-90 mt-1">Approved & ongoing</p>
                                     </div>
                                     <FaHeart className="text-5xl opacity-30" />
                                 </div>
                             </div>
                         </div>
 
-                        <div className="card bg-gradient-to-br from-success to-success/80 text-white shadow-xl hover:shadow-2xl transition-shadow">
+                        <div className="card bg-gradient-to-br from-emerald-500 via-green-500 to-emerald-600 text-white shadow-xl hover:shadow-2xl hover:scale-105 transition-all border-2 border-emerald-400">
                             <div className="card-body">
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <p className="text-sm opacity-90">Total Raised</p>
-                                        <p className="text-3xl font-bold">৳{stats.totalRaised.toLocaleString()}</p>
-                                        <p className="text-xs opacity-75 mt-1">All campaigns</p>
+                                        <p className="text-sm font-bold">Total Raised</p>
+                                        <p className="text-3xl font-black">৳{stats.totalRaised.toLocaleString()}</p>
+                                        <p className="text-xs opacity-90 mt-1">All campaigns</p>
                                     </div>
                                     <FaDollarSign className="text-5xl opacity-30" />
                                 </div>
                             </div>
                         </div>
 
-                        <div className="card bg-gradient-to-br from-secondary to-secondary/80 text-white shadow-xl hover:shadow-2xl transition-shadow">
+                        <div className="card bg-gradient-to-br from-purple-500 via-pink-500 to-purple-600 text-white shadow-xl hover:shadow-2xl hover:scale-105 transition-all border-2 border-purple-400">
                             <div className="card-body">
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <p className="text-sm opacity-90">Total Donors</p>
-                                        <p className="text-3xl font-bold">{stats.totalDonors}</p>
-                                        <p className="text-xs opacity-75 mt-1">Unique contributors</p>
+                                        <p className="text-sm font-bold">Total Donors</p>
+                                        <p className="text-3xl font-black">{stats.totalDonors}</p>
+                                        <p className="text-xs opacity-90 mt-1">Unique contributors</p>
                                     </div>
                                     <FaUsers className="text-5xl opacity-30" />
                                 </div>
                             </div>
                         </div>
 
-                        <div className="card bg-gradient-to-br from-info to-info/80 text-white shadow-xl hover:shadow-2xl transition-shadow">
+                        <div className="card bg-gradient-to-br from-blue-500 via-indigo-500 to-blue-600 text-white shadow-xl hover:shadow-2xl hover:scale-105 transition-all border-2 border-blue-400">
                             <div className="card-body">
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <p className="text-sm opacity-90">Success Rate</p>
-                                        <p className="text-3xl font-bold">{stats.successRate}%</p>
-                                        <p className="text-xs opacity-75 mt-1">Goals reached</p>
+                                        <p className="text-sm font-bold">Success Rate</p>
+                                        <p className="text-3xl font-black">{stats.successRate}%</p>
+                                        <p className="text-xs opacity-90 mt-1">Goals reached</p>
                                     </div>
                                     <FaChartLine className="text-5xl opacity-30" />
                                 </div>
@@ -216,98 +216,98 @@ const CharityDashboard = () => {
 
                 {!loading && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <Link to="/dashboard/charity/campaigns" className="card bg-base-100 shadow-lg border border-success/30 hover:shadow-xl transition-shadow">
+                        <Link to="/dashboard/charity/campaigns" className="card bg-gradient-to-br from-emerald-200 via-green-200 to-emerald-200 shadow-lg border-2 border-emerald-400 hover:shadow-xl transition-all hover:scale-105">
                             <div className="card-body flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-gray-500">Completed targets</p>
-                                    <p className="text-3xl font-bold text-success">{lifecycleCounts.completed}</p>
-                                    <p className="text-xs text-gray-400 mt-1">Great storytelling material</p>
+                                    <p className="text-sm text-emerald-900 font-bold">Completed targets</p>
+                                    <p className="text-3xl font-black text-emerald-800">{lifecycleCounts.completed}</p>
+                                    <p className="text-xs text-emerald-700 mt-1 font-medium">Great storytelling material</p>
                                 </div>
-                                <FaCheckCircle className="text-4xl text-success/70" />
+                                <FaCheckCircle className="text-4xl text-emerald-600" />
                             </div>
                         </Link>
-                        <Link to="/dashboard/charity/campaigns" className="card bg-base-100 shadow-lg border border-warning/30 hover:shadow-xl transition-shadow">
+                        <Link to="/dashboard/charity/campaigns" className="card bg-gradient-to-br from-amber-200 via-orange-200 to-amber-200 shadow-lg border-2 border-amber-400 hover:shadow-xl transition-all hover:scale-105">
                             <div className="card-body flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-gray-500">Ended timelines</p>
-                                    <p className="text-3xl font-bold text-warning">{lifecycleCounts.archived}</p>
-                                    <p className="text-xs text-gray-400 mt-1">Request an extension from admin</p>
+                                    <p className="text-sm text-amber-900 font-bold">Ended timelines</p>
+                                    <p className="text-3xl font-black text-amber-800">{lifecycleCounts.archived}</p>
+                                    <p className="text-xs text-amber-700 mt-1 font-medium">Request an extension from admin</p>
                                 </div>
-                                <FaHourglassEnd className="text-4xl text-warning/70" />
+                                <FaHourglassEnd className="text-4xl text-amber-600" />
                             </div>
                         </Link>
                     </div>
                 )}
 
                 {/* Campaign Overview */}
-                <div className="card bg-base-100 shadow-lg">
+                <div className="card bg-gradient-to-br from-teal-100 via-cyan-100 to-teal-100 shadow-lg border-2 border-teal-300">
                     <div className="card-body">
-                        <h2 className="card-title mb-4">Campaign Overview</h2>
+                        <h2 className="card-title mb-4 text-teal-900 font-bold">Campaign Overview</h2>
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                            <div className="stat bg-base-200 rounded-lg p-4">
-                                <div className="stat-title text-sm">Total Campaigns</div>
-                                <div className="stat-value text-2xl text-primary">{stats.totalCampaigns}</div>
-                                <div className="stat-desc">All time</div>
+                            <div className="stat bg-gradient-to-br from-teal-200 to-cyan-200 rounded-lg p-4 border-2 border-teal-300 shadow-md">
+                                <div className="stat-title text-sm text-teal-900 font-bold">Total Campaigns</div>
+                                <div className="stat-value text-2xl text-teal-800 font-black">{stats.totalCampaigns}</div>
+                                <div className="stat-desc text-teal-700 font-medium">All time</div>
                             </div>
-                            <div className="stat bg-base-200 rounded-lg p-4">
-                                <div className="stat-title text-sm">Approved</div>
-                                <div className="stat-value text-2xl text-success">{stats.approvedCampaigns}</div>
-                                <div className="stat-desc">Live campaigns</div>
+                            <div className="stat bg-gradient-to-br from-emerald-200 to-green-200 rounded-lg p-4 border-2 border-emerald-300 shadow-md">
+                                <div className="stat-title text-sm text-emerald-900 font-bold">Approved</div>
+                                <div className="stat-value text-2xl text-emerald-800 font-black">{stats.approvedCampaigns}</div>
+                                <div className="stat-desc text-emerald-700 font-medium">Live campaigns</div>
                             </div>
-                            <div className="stat bg-base-200 rounded-lg p-4">
-                                <div className="stat-title text-sm">Pending</div>
-                                <div className="stat-value text-2xl text-warning">{stats.pendingCampaigns}</div>
-                                <div className="stat-desc">Awaiting approval</div>
+                            <div className="stat bg-gradient-to-br from-amber-200 to-orange-200 rounded-lg p-4 border-2 border-amber-300 shadow-md">
+                                <div className="stat-title text-sm text-amber-900 font-bold">Pending</div>
+                                <div className="stat-value text-2xl text-amber-800 font-black">{stats.pendingCampaigns}</div>
+                                <div className="stat-desc text-amber-700 font-medium">Awaiting approval</div>
                             </div>
-                            <div className="stat bg-base-200 rounded-lg p-4">
-                                <div className="stat-title text-sm">Active</div>
-                                <div className="stat-value text-2xl text-info">{stats.activeCampaigns}</div>
-                                <div className="stat-desc">Currently running</div>
+                            <div className="stat bg-gradient-to-br from-blue-200 to-indigo-200 rounded-lg p-4 border-2 border-blue-300 shadow-md">
+                                <div className="stat-title text-sm text-blue-900 font-bold">Active</div>
+                                <div className="stat-value text-2xl text-blue-800 font-black">{stats.activeCampaigns}</div>
+                                <div className="stat-desc text-blue-700 font-medium">Currently running</div>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 {currentUser && (
-                    <div className="card bg-base-100 shadow-lg">
+                    <div className="card bg-gradient-to-br from-blue-100 via-indigo-100 to-blue-100 shadow-lg border-2 border-blue-300">
                         <div className="card-body">
                             <div className="flex items-center gap-3 mb-4">
-                                <FaInbox className="text-primary text-2xl" />
+                                <FaInbox className="text-blue-600 text-2xl" />
                                 <div>
-                                    <h2 className="card-title mb-0">Admin Messages</h2>
-                                    <p className="text-sm text-gray-500">Platform updates and replies to your support requests</p>
+                                    <h2 className="card-title mb-0 text-blue-900 font-bold">Admin Messages</h2>
+                                    <p className="text-sm text-blue-700 font-medium">Platform updates and replies to your support requests</p>
                                 </div>
                             </div>
                             {messageThreads.length === 0 ? (
-                                <div className="text-center py-6 text-gray-500">
-                                    Nothing pending. <Link to="/contact" className="link link-primary">Reach out</Link> if you need anything.
+                                <div className="text-center py-6 text-blue-700 font-medium">
+                                    Nothing pending. <Link to="/contact" className="link text-blue-600 font-bold hover:text-blue-800">Reach out</Link> if you need anything.
                                 </div>
                             ) : (
                                 <div className="space-y-4">
                                     {messageThreads.slice(0, 3).map((thread) => {
                                         const latestReply = thread.replies?.[thread.replies.length - 1];
                                         return (
-                                            <div key={thread.id} className="border border-base-200 rounded-lg p-4">
-                                                <div className="flex justify-between text-sm text-gray-500 mb-2">
+                                            <div key={thread.id} className="border-2 border-blue-300 rounded-lg p-4 bg-white/50 backdrop-blur-sm">
+                                                <div className="flex justify-between text-sm text-blue-800 font-bold mb-2">
                                                     <span>{thread.subject}</span>
                                                     <span>{new Date(thread.updatedAt || thread.createdAt).toLocaleString()}</span>
                                                 </div>
-                                                <p className="text-gray-700 text-sm mb-2 line-clamp-2">{thread.message}</p>
+                                                <p className="text-blue-900 text-sm mb-2 line-clamp-2 font-medium">{thread.message}</p>
                                                 {latestReply ? (
-                                                    <div className="bg-base-200 rounded p-3 text-sm text-gray-700">
-                                                        <p className="font-semibold text-primary mb-1">
+                                                    <div className="bg-blue-100 rounded p-3 text-sm text-blue-900 border border-blue-300">
+                                                        <p className="font-bold text-blue-800 mb-1">
                                                             {latestReply.actorType === 'admin' ? 'Admin' : 'You'} •{' '}
                                                             {new Date(latestReply.createdAt).toLocaleString()}
                                                         </p>
-                                                        <p className="line-clamp-3">{latestReply.message}</p>
+                                                        <p className="line-clamp-3 font-medium">{latestReply.message}</p>
                                                     </div>
                                                 ) : (
-                                                    <p className="text-xs text-gray-500">Awaiting admin response</p>
+                                                    <p className="text-xs text-blue-700 font-medium">Awaiting admin response</p>
                                                 )}
                                             </div>
                                         );
                                     })}
-                                    <Link to="/contact#inbox" className="btn btn-sm btn-primary w-fit">
+                                    <Link to="/contact#inbox" className="btn btn-sm bg-gradient-to-r from-blue-500 to-indigo-600 text-white border-0 hover:from-blue-600 hover:to-indigo-700 shadow-lg w-fit">
                                         View all messages
                                     </Link>
                                 </div>
@@ -317,19 +317,19 @@ const CharityDashboard = () => {
                 )}
 
                 {/* Quick Actions */}
-                <div className="card bg-base-100 shadow-lg">
+                <div className="card bg-gradient-to-br from-teal-100 via-cyan-100 to-teal-100 shadow-lg border-2 border-teal-300">
                     <div className="card-body">
-                        <h2 className="card-title mb-4">Quick Actions</h2>
+                        <h2 className="card-title mb-4 text-teal-900 font-bold">Quick Actions</h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <Link to="/dashboard/charity/campaigns/create" className="btn btn-primary btn-lg">
+                            <Link to="/dashboard/charity/campaigns/create" className="btn bg-gradient-to-r from-teal-500 to-cyan-600 text-white border-0 btn-lg hover:from-teal-600 hover:to-cyan-700 shadow-lg">
                                 <FaPlus className="mr-2" />
                                 Create Campaign
                             </Link>
-                            <Link to="/dashboard/charity/campaigns" className="btn btn-outline btn-lg">
+                            <Link to="/dashboard/charity/campaigns" className="btn btn-outline btn-lg border-teal-400 text-teal-700 hover:bg-teal-100">
                                 <FaHeart className="mr-2" />
                                 View My Campaigns
                             </Link>
-                            <Link to="/dashboard/charity/profile" className="btn btn-outline btn-lg">
+                            <Link to="/dashboard/charity/profile" className="btn btn-outline btn-lg border-purple-400 text-purple-700 hover:bg-purple-100">
                                 <FaUsers className="mr-2" />
                                 Edit Profile
                             </Link>

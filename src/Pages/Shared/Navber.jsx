@@ -1,33 +1,14 @@
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../provider/authProvider';
-import { FaHeart, FaUser, FaSignOutAlt, FaTachometerAlt, FaMoon, FaSun } from 'react-icons/fa';
+import { FaHeart, FaUser, FaSignOutAlt, FaTachometerAlt } from 'react-icons/fa';
 
 const Navber = () => {
     const auth = useAuth();
     const navigate = useNavigate();
     const { currentUser, userRole, logout } = auth || {};
-    const [theme, setTheme] = useState(() => {
-        if (typeof window !== 'undefined') {
-            return localStorage.getItem('theme') || 'light';
-        }
-        return 'light';
-    });
     // no local navbar menu state currently required
-
-    useEffect(() => {
-        if (typeof document !== 'undefined') {
-            document.documentElement.setAttribute('data-theme', theme);
-        }
-        if (typeof window !== 'undefined') {
-            localStorage.setItem('theme', theme);
-        }
-    }, [theme]);
-
-    const toggleTheme = () => {
-        setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
-    };
 
     const handleLogout = async () => {
         try {
@@ -42,11 +23,11 @@ const Navber = () => {
 
     const navOptions = (
         <>
-            <li><Link to="/" className="hover:text-primary">Home</Link></li>
-            <li><Link to="/campaigns" className="hover:text-primary">Campaigns</Link></li>
-            <li><Link to="/charities" className="hover:text-primary">Charities</Link></li>
-            <li><Link to="/about" className="hover:text-primary">About</Link></li>
-            <li><Link to="/contact" className="hover:text-primary">Contact</Link></li>
+            <li><Link to="/" className="hover:text-primary-focus text-white transition-colors">Home</Link></li>
+            <li><Link to="/campaigns" className="hover:text-primary-focus text-white transition-colors">Campaigns</Link></li>
+            <li><Link to="/charities" className="hover:text-primary-focus text-white transition-colors">Charities</Link></li>
+            <li><Link to="/about" className="hover:text-primary-focus text-white transition-colors">About</Link></li>
+            <li><Link to="/contact" className="hover:text-primary-focus text-white font-semibold transition-colors">Contact</Link></li>
         </>
     );
 
@@ -73,13 +54,13 @@ const Navber = () => {
                     )}
                 </div>
             </div>
-            <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
+            <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow-lg bg-gradient-to-br from-primary/95 to-secondary/95 backdrop-blur-md rounded-box w-52 border border-primary/30">
                 <li className="menu-title">
-                    <div className="w-full truncate max-w-[180px] px-1">
+                    <div className="w-full truncate max-w-[180px] px-1 text-white">
                         {currentUser?.displayName || currentUser?.email || 'User'}
                     </div>
                 </li>
-                <li><button onClick={handleLogout} className="flex items-center gap-2 text-error"><FaSignOutAlt /> Logout</button></li>
+                <li><button onClick={handleLogout} className="flex items-center gap-2 text-error hover:bg-error/20"><FaSignOutAlt /> Logout</button></li>
             </ul>
         </div>
     ) : (
@@ -90,7 +71,7 @@ const Navber = () => {
     );
 
     return (
-        <div className="navbar fixed z-50 bg-base-100/95 backdrop-blur-sm shadow-lg">
+        <div className="navbar fixed z-50 bg-gradient-to-r from-primary/95 via-secondary/90 to-primary/95 backdrop-blur-md shadow-xl border-b border-primary/20">
             <div className="navbar-start">
                 <div className="dropdown">
                     <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
@@ -98,7 +79,7 @@ const Navber = () => {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h8m-8 6h16" />
                         </svg>
                     </div>
-                    <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
+                    <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow-lg bg-gradient-to-br from-primary/95 to-secondary/95 backdrop-blur-md rounded-box w-52 border border-primary/30">
                         {navOptions}
                         {currentUser && (
                             <>
@@ -106,60 +87,53 @@ const Navber = () => {
                                 <li>
                                     <Link to={userRole === 'donor' ? '/dashboard/donor' : 
                                              userRole === 'charity' ? '/dashboard/charity' : 
-                                             userRole === 'admin' ? '/dashboard/admin' : '/dashboard'}>
+                                             userRole === 'admin' ? '/dashboard/admin' : '/dashboard'}
+                                          className="text-white hover:bg-white/20">
                                         Dashboard
                                     </Link>
                                 </li>
-                                <li><Link to="/profile">Profile</Link></li>
+                                <li><Link to="/profile" className="text-white hover:bg-white/20">Profile</Link></li>
                                 {userRole === 'charity' && (
-                                    <li><Link to="/campaigns/create">Create Campaign</Link></li>
+                                    <li><Link to="/campaigns/create" className="text-white hover:bg-white/20">Create Campaign</Link></li>
                                 )}
-                                <li><button onClick={handleLogout} className="text-error">Logout</button></li>
+                                <li><button onClick={handleLogout} className="text-error hover:bg-error/20">Logout</button></li>
                             </>
                         )}
                     </ul>
                 </div>
-                <Link to="/" className="btn btn-ghost text-xl flex items-center gap-2">
-                    <FaHeart className="text-primary" />
-                    Charity Platform
+                <Link to="/" className="btn btn-ghost text-3xl text-white flex items-center gap-2 hover:bg-primary/20 transition-colors">
+                    <FaHeart className="text-white" />
+                    <span className="text-white font-bold">Charity Platform</span>
                 </Link>
             </div>
             
             <div className="navbar-center hidden lg:flex">
-                <ul className="menu menu-horizontal px-1">
+                <ul className="menu menu-horizontal px-1 text-white">
                     {navOptions}
                 </ul>
             </div>
             
             <div className="navbar-end">
-                <button
-                    onClick={toggleTheme}
-                    className="btn btn-ghost btn-circle mr-2"
-                    aria-label="Toggle color theme"
-                    title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
-                >
-                    {theme === 'light' ? <FaMoon className="text-xl" /> : <FaSun className="text-xl" />}
-                </button>
                 {currentUser && (
                     <div className="dropdown dropdown-end mr-2 hidden md:block">
                         <Link 
                             to={userRole === 'donor' ? '/dashboard/donor' : 
                                  userRole === 'charity' ? '/dashboard/charity' : 
                                  userRole === 'admin' ? '/dashboard/admin' : '/dashboard'}
-                            className="btn btn-outline flex items-center gap-2"
+                            className="btn btn-outline btn-primary border-white text-white hover:bg-white hover:text-primary flex items-center gap-2 transition-all"
                         >
                             <FaTachometerAlt />
                             Dashboard
                         </Link>
-                        <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-64">
+                        <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow-lg bg-gradient-to-br from-primary/95 to-secondary/95 backdrop-blur-md rounded-box w-64 border border-primary/30">
                             {/* Admin dashboard shortcuts */}
                             {userRole === 'admin' && (
                                 <>
-                                    <li className="menu-title"><span>Admin</span></li>
-                                    <li><Link to="/dashboard/admin">Overview</Link></li>
-                                    <li><Link to="/dashboard/admin/users">Users</Link></li>
-                                    <li><Link to="/dashboard/admin/charities">Charities</Link></li>
-                                    <li><Link to="/dashboard/admin/campaigns">Campaigns</Link></li>
+                                    <li className="menu-title"><span className="text-white">Admin</span></li>
+                                    <li><Link to="/dashboard/admin" className="text-white hover:bg-white/20">Overview</Link></li>
+                                    <li><Link to="/dashboard/admin/users" className="text-white hover:bg-white/20">Users</Link></li>
+                                    <li><Link to="/dashboard/admin/charities" className="text-white hover:bg-white/20">Charities</Link></li>
+                                    <li><Link to="/dashboard/admin/campaigns" className="text-white hover:bg-white/20">Campaigns</Link></li>
                                     {/* <li><Link to="/dashboard/settings">Settings</Link></li> */}
                                     <div className="divider my-1"></div>
                                 </>
@@ -168,8 +142,8 @@ const Navber = () => {
                             {/* Charity dashboard shortcuts */}
                             {userRole === 'charity' && (
                                 <>
-                                    <li className="menu-title"><span>Charity</span></li>
-                                    <li><Link to="/dashboard/charity">Overview</Link></li>
+                                    <li className="menu-title"><span className="text-white">Charity</span></li>
+                                    <li><Link to="/dashboard/charity" className="text-white hover:bg-white/20">Overview</Link></li>
                                     {/* <li><Link to="/dashboard/campaigns">My Campaigns</Link></li>
                                     <li><Link to="/dashboard/create">Create Campaign</Link></li>
                                     <li><Link to="/dashboard/donations">Donations</Link></li>
@@ -181,8 +155,8 @@ const Navber = () => {
                             {/* Donor dashboard shortcuts */}
                             {(!userRole || userRole === 'donor') && (
                                 <>
-                                    <li className="menu-title"><span>Donor</span></li>
-                                    <li><Link to="/dashboard">Overview</Link></li>
+                                    <li className="menu-title"><span className="text-white">Donor</span></li>
+                                    <li><Link to="/dashboard" className="text-white hover:bg-white/20">Overview</Link></li>
                                     {/* <li><Link to="/dashboard/donations">My Donations</Link></li>
                                     <li><Link to="/dashboard/saved">Saved Campaigns</Link></li>
                                     <li><Link to="/dashboard/profile">Profile</Link></li> */}

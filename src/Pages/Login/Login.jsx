@@ -105,21 +105,21 @@ const Login = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen flex items-center justify-center bg-base-200 py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-md w-full space-y-8">
                 <div className="text-center">
-                    <h2 className="mt-6 text-3xl font-extrabold text-white-500">
+                    <h2 className="mt-6 text-3xl font-extrabold text-primary">
                         Sign in to your account
                     </h2>
-                    <p className="mt-2 text-sm text-gray-600">
+                    <p className="mt-2 text-sm text-base-content/80">
                         Or{' '}
-                        <Link to="/signup" className="font-medium text-primary hover:text-primary/80">
+                        <Link to="/signup" className="font-medium text-primary hover:text-primary-focus underline">
                             create a new account
                         </Link>
                     </p>
                 </div>
 
-                <div className="card bg-base-100 shadow-xl">
+                <div className="card  shadow-2xl border border-base-300">
                     <div className="card-body">
                         {error && (
                             <div className="alert alert-error">
@@ -130,7 +130,7 @@ const Login = () => {
                             </div>
                         )}
 
-                        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 ">
                             <div className="form-control">
                                 <label className="label">
                                     <span className="label-text">Email address</span>
@@ -138,13 +138,13 @@ const Login = () => {
                                 <input
                                     {...register('email', {
                                         required: 'Email is required',
-                                        pattern: {
-                                            value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                                            message: 'Invalid email address'
-                                        }
+                                        // pattern: {
+                                        //     value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                                        //     message: 'Invalid email address'
+                                        // }
                                     })}
                                     type="email"
-                                    className="input input-bordered w-full"
+                                    className="input bg-gray-100 border-spacing-1 border-gray-300 input-bordered w-full focus:input-primary focus:outline-none"
                                     placeholder="Enter your email"
                                 />
                                 {errors.email && (
@@ -168,18 +168,18 @@ const Login = () => {
                                             }
                                         })}
                                         type={showPassword ? 'text' : 'password'}
-                                        className="input input-bordered w-full pr-10"
+                                        className="input bg-gray-100 border-spacing-1 border-gray-300 input-bordered w-full pr-10 focus:input-primary focus:outline-none"
                                         placeholder="Enter your password"
                                     />
                                     <button
                                         type="button"
-                                        className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                                        className="absolute inset-y-0 right-0 pr-3 flex items-center hover:text-primary transition-colors"
                                         onClick={() => setShowPassword(!showPassword)}
                                     >
                                         {showPassword ? (
-                                            <FaEyeSlash className="h-4 w-4 text-gray-400" />
+                                            <FaEyeSlash className="h-4 w-4 text-base-content/60" />
                                         ) : (
-                                            <FaEye className="h-4 w-4 text-gray-400" />
+                                            <FaEye className="h-4 w-4 text-base-content/60" />
                                         )}
                                     </button>
                                 </div>
@@ -203,7 +203,7 @@ const Login = () => {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="btn btn-primary w-full"
+                                className="btn btn-primary w-full text-white font-semibold hover:btn-primary-focus transition-all"
                             >
                                 {loading ? (
                                     <>
@@ -221,7 +221,7 @@ const Login = () => {
                         <button
                             onClick={handleGoogleLogin}
                             disabled={loading}
-                            className="btn btn-outline w-full flex items-center justify-center gap-2"
+                            className="btn btn-outline btn-primary w-full flex items-center justify-center gap-2 hover:btn-primary hover:text-white transition-all"
                         >
                             <FaGoogle className="h-5 w-5" />
                             Continue with Google

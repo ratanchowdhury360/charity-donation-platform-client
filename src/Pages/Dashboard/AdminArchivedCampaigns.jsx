@@ -90,17 +90,17 @@ const AdminArchivedCampaigns = () => {
                         <span className="loading loading-spinner loading-lg text-warning"></span>
                     </div>
                 ) : campaigns.length === 0 ? (
-                    <div className="card bg-base-100 shadow-lg">
+                    <div className="card bg-gradient-to-br from-white via-warning/10 to-warning/5 shadow-xl border-2 border-warning/20">
                         <div className="card-body text-center py-16">
                             <FaHourglassEnd className="text-5xl text-warning mx-auto mb-4" />
-                            <h3 className="text-2xl font-semibold mb-2">No ended campaigns 🎉</h3>
-                            <p className="text-gray-500">All approved campaigns are currently within their timeline.</p>
+                            <h3 className="text-2xl font-semibold mb-2 text-gray-900">No ended campaigns 🎉</h3>
+                            <p className="text-gray-700 font-medium">All approved campaigns are currently within their timeline.</p>
                         </div>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                         {campaigns.map((campaign) => (
-                            <div key={campaign.id} className="card bg-base-100 shadow-xl border border-warning/30">
+                            <div key={campaign.id} className="card bg-gradient-to-br from-white via-warning/10 to-warning/5 shadow-xl border-2 border-warning/30 hover:border-warning/50 hover:shadow-2xl hover:scale-[1.02] transition-all">
                                 <div className="card-body">
                                     <div className="flex items-center justify-between">
                                         <span className="badge badge-warning badge-outline">Ended</span>
@@ -140,7 +140,7 @@ const AdminArchivedCampaigns = () => {
 
                 {selectedCampaign && (
                     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                        <div className="bg-base-100 rounded-lg w-full max-w-md shadow-2xl">
+                        <div className="bg-gradient-to-br from-white via-warning/10 to-warning/5 rounded-lg w-full max-w-md shadow-2xl border-2 border-warning/30">
                             <div className="p-6 space-y-4">
                                 <div className="flex justify-between items-center">
                                     <h3 className="text-xl font-bold">Extend Campaign</h3>

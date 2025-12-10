@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useAuth } from '../../provider/authProvider';
@@ -19,6 +19,7 @@ const MyDonations = () => {
     const [donations, setDonations] = useState([]);
     const [campaigns, setCampaigns] = useState({});
     const [loading, setLoading] = useState(true);
+    const [filterRange, setFilterRange] = useState('all');
     const [stats, setStats] = useState({
         totalDonated: 0,
         totalDonations: 0,
@@ -63,6 +64,74 @@ const MyDonations = () => {
 
         fetchDonations();
     }, [currentUser]);
+
+    const periodRanges = useMemo(() => ({
+        all: { label: 'All time', start: null, end: null },
+        thisMonth: { label: 'This month', start: (() => {
+            const d = new Date();
+            return new Date(d.getFullYear(), d.getMonth(), 1);
+        })(), end: new Date() },
+        lastMonth: { label: 'Last month', start: (() => {
+            const d = new Date();
+            const start = new Date(d.getFullYear(), d.getMonth() - 1, 1);
+            return start;
+        })(), end: (() => {
+            const d = new Date();
+            return new Date(d.getFullYear(), d.getMonth(), 0, 23, 59, 59, 999);
+        })() },
+        lastYear: { label: 'Last 12 months', start: (() => {
+            const d = new Date();
+            return new Date(d.getFullYear() - 1, d.getMonth(), d.getDate());
+        })(), end: new Date() }
+    }), []);
+
+    const filteredDonations = useMemo(() => {
+        const range = periodRanges[filterRange];
+        if (!range || (!range.start && !range.end)) return donations;
+
+        return donations.filter((donation) => {
+            const dateValue = donation.createdAt || donation.date;
+            if (!dateValue) return false;
+            const donationDate = new Date(dateValue);
+            if (Number.isNaN(donationDate.getTime())) return false;
+
+            if (range.start && donationDate < range.start) return false;
+            if (range.end && donationDate > range.end) return false;
+            return true;
+        });
+    }, [donations, filterRange, periodRanges]);
+
+    const handleDownloadSlip = () => {
+        const list = filteredDonations;
+        if (!list.length) {
+            alert('No donations found for the selected period.');
+            return;
+        }
+
+        const header = ['Donation Date', 'Campaign', 'Charity', 'Amount (BDT)', 'Payment Method', 'Transaction ID', 'Status'];
+        const rows = list.map((donation) => {
+            const dateValue = new Date(donation.createdAt || donation.date).toLocaleString();
+            return [
+                `"${dateValue}"`,
+                `"${donation.campaignTitle || 'Unknown Campaign'}"`,
+                `"${donation.charityName || 'Unknown Charity'}"`,
+                donation.amount || 0,
+                `"${donation.paymentMethod || 'N/A'}"`,
+                `"${donation.transactionId || 'N/A'}"`,
+                `"${donation.status || 'completed'}"`
+            ].join(',');
+        });
+
+        const csvContent = [header.join(','), ...rows].join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `donations-${filterRange}.csv`;
+        link.click();
+        URL.revokeObjectURL(url);
+    };
 
     if (loading) {
         return (
@@ -127,21 +196,59 @@ const MyDonations = () => {
                 {/* Donations List */}
                 <div className="card bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/5 shadow-xl border border-primary/20">
                     <div className="card-body">
-                        <h2 className="card-title text-2xl mb-4">Donation History</h2>
+                        <div className="flex flex-col gap-4 mb-4">
+                            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                                <div>
+                                    <h2 className="card-title text-2xl mb-1">Donation History</h2>
+                                    <p className="text-sm text-gray-600">
+                                        Showing {filteredDonations.length} of {donations.length} donations
+                                    </p>
+                                </div>
+                                <div className="w-full md:w-auto">
+                                    <div className="bg-white/70 backdrop-blur border border-primary/20 rounded-lg p-3 flex flex-col sm:flex-row gap-3 items-start sm:items-center shadow-sm">
+                                        <div className="form-control w-full sm:w-auto">
+                                            <label className="label text-xs uppercase tracking-wide font-semibold text-gray-600 mb-1 px-3">Slip period</label>
+                                            <select
+                                                className="select select-bordered text-black select-sm w-full sm:w-48"
+                                                value={filterRange}
+                                                onChange={(e) => setFilterRange(e.target.value)}
+                                            >
+                                                {Object.entries(periodRanges).map(([key, range]) => (
+                                                    <option key={key} value={key}>{range.label}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <button 
+                                            onClick={handleDownloadSlip} 
+                                            className="btn btn-secondary btn-sm w-full sm:w-auto shadow-md"
+                                        >
+                                            Download Slip (CSV)
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="h-1 w-full bg-gradient-to-r from-primary/40 via-secondary/40 to-accent/40 rounded-full"></div>
+                        </div>
                         
-                        {donations.length === 0 ? (
+                        {filteredDonations.length === 0 ? (
                             <div className="text-center py-12">
                                 <FaHandHoldingHeart className="text-6xl text-gray-300 mx-auto mb-4" />
                                 <h3 className="text-xl font-bold mb-2">No Donations Yet</h3>
-                                <p className="text-gray-600 mb-6">Start making a difference by supporting a campaign!</p>
-                                <Link to="/campaigns" className="btn btn-primary">
-                                    <FaHeart className="mr-2" />
-                                    Browse Campaigns
-                                </Link>
+                                <p className="text-gray-600 mb-6">
+                                    {donations.length === 0
+                                        ? 'Start making a difference by supporting a campaign!'
+                                        : 'No donations match the selected period.'}
+                                </p>
+                                {donations.length === 0 && (
+                                    <Link to="/campaigns" className="btn btn-primary">
+                                        <FaHeart className="mr-2" />
+                                        Browse Campaigns
+                                    </Link>
+                                )}
                             </div>
                         ) : (
                             <div className="space-y-4">
-                                {donations.map((donation) => {
+                                {filteredDonations.map((donation) => {
                                     const campaign = campaigns[donation.campaignId];
                                     return (
                                         <div key={donation.id} className="card bg-gradient-to-br from-base-100 via-primary/10 to-secondary/5 shadow-lg border border-primary/20 hover:shadow-xl hover:border-primary/30 transition-all">

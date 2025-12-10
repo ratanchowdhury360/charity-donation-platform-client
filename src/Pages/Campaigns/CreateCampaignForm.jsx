@@ -62,6 +62,11 @@ const CreateCampaignForm = () => {
                 endDate: new Date(data.endDate).toISOString()
             };
 
+            if (!currentUser?.uid) {
+                setError('You must be signed in as a charity to create a campaign.');
+                return;
+            }
+
             // Save to database
             const savedCampaign = await addCampaign(campaignData);
             console.log('Campaign submitted successfully:', savedCampaign);
@@ -79,7 +84,10 @@ const CreateCampaignForm = () => {
             
         } catch (error) {
             console.error('Error creating campaign:', error);
-            setError('Failed to create campaign. Please try again.');
+            const message = error?.message || 'Failed to create campaign. Please try again.';
+            setError(message.includes('Missing required campaign fields') 
+                ? 'Please fill in all required fields and try again.' 
+                : message);
         } finally {
             setLoading(false);
         }

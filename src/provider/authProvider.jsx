@@ -12,7 +12,7 @@ import { auth, db } from '../firebase/firebase.config';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
                        
 const AuthContext = createContext();
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://charity-donation-platform-server.vercel.app';
 
 const syncUserWithServer = async (userPayload) => {
     try {

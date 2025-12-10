@@ -1,13 +1,8 @@
 const resolveApiBaseUrl = () => {
+    // Prefer explicit env; otherwise default to deployed API base
     const envUrl = (import.meta.env && import.meta.env.VITE_API_URL) || '';
-    if (envUrl) return envUrl.replace(/\/$/, '');
-
-    // Fallback: use current origin when available to avoid mixed-content localhost calls in production
-    if (typeof window !== 'undefined' && window.location?.origin) {
-        return window.location.origin.replace(/\/$/, '');
-    }
-
-    return 'http://localhost:3000';
+    const base = envUrl || 'https://charity-donation-platform-server.vercel.app';
+    return base.replace(/\/$/, '');
 };
 
 const API_BASE_URL = resolveApiBaseUrl();

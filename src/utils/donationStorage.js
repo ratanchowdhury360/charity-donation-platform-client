@@ -1,7 +1,7 @@
 // Donation storage utility for tracking user donations
 // This uses API calls to persist donation data
 
-const API_BASE_URL = (import.meta.env && import.meta.env.VITE_API_URL) || 'http://localhost:3000';
+const API_BASE_URL = (import.meta.env && import.meta.env.VITE_API_URL) || 'https://charity-donation-platform-server.vercel.app';
 
 const normalizeDonation = (donation) => {
     if (!donation) return donation;

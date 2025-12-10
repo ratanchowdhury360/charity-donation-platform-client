@@ -1,4 +1,4 @@
-const API_BASE_URL = (import.meta.env && import.meta.env.VITE_API_URL) || 'http://localhost:3000';
+const API_BASE_URL = (import.meta.env && import.meta.env.VITE_API_URL) || 'https://charity-donation-platform-server.vercel.app';
 
 const normalizeMessage = (message) => {
     if (!message) return message;

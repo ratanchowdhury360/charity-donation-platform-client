@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import {
     signInWithEmailAndPassword,
     createUserWithEmailAndPassword,
@@ -10,26 +10,9 @@ import {
 } from 'firebase/auth';
 import { auth, db } from '../firebase/firebase.config';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
-                       
-const AuthContext = createContext();
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://charity-donation-platform-server.vercel.app';
-
-const syncUserWithServer = async (userPayload) => {
-    try {
-        const response = await fetch(`${API_BASE_URL}/users`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(userPayload),
-        });
-        if (!response.ok && response.status !== 409) {
-            console.error('Server responded with an error while syncing user:', response.status);
-        }
-    } catch (error) {
-        console.error('Failed to sync user with server:', error);
-    }
-};
+import { syncUserWithServer } from './authSync';
+import { AuthContext } from './authContext';
+import { getStoredRole, persistRole } from './authRoleHelpers';
 
 export const useAuth = () => {
     return useContext(AuthContext);
@@ -43,156 +26,166 @@ export const AuthProvider = ({ children }) => {
     // Google Auth Provider
     const googleProvider = new GoogleAuthProvider();
 
+    // Helpers for role persistence
+    const getRole = () => getStoredRole();
+
+    const setRole = (role) => {
+        const normalized = persistRole(role);
+        setUserRole(normalized);
+    };
+
+    const hasRole = (role) => userRole === role;
+    const isAdmin = () => userRole === 'admin';
+    const isCharity = () => userRole === 'charity';
+    const isDonor = () => userRole === 'donor';
+
     // Sign up with email and password
     const signup = async (email, password, userData) => {
-        try {
-            const result = await createUserWithEmailAndPassword(auth, email, password);
-            // Save user profile to Firestore
-            const user = result.user;
-            const role = userData?.role || 'donor';
-            const userPayload = {
-                uid: user.uid,
-                email: user.email,
-                displayName: user.displayName || userData?.displayName || '',
-                photoURL: user.photoURL || userData?.photoURL || '',
-                role,
-                providerId: user.providerData?.[0]?.providerId || 'password',
-            };
-            await setDoc(doc(db, 'users', user.uid), {
-                ...userPayload,
-                createdAt: serverTimestamp(),
-                updatedAt: serverTimestamp()
-            }, { merge: true });
-            await syncUserWithServer(userPayload);
-            return result;
-        } catch (error) {
-            throw error;
-        }
+        const result = await createUserWithEmailAndPassword(auth, email, password);
+        // Save user profile to Firestore
+        const user = result.user;
+        const rawRole = userData?.role || 'donor';
+        const role = rawRole.toLowerCase();
+        const userPayload = {
+            uid: user.uid,
+            email: user.email,
+            displayName: user.displayName || userData?.displayName || '',
+            photoURL: user.photoURL || userData?.photoURL || '',
+            role,
+            providerId: user.providerData?.[0]?.providerId || 'password',
+        };
+        await setDoc(doc(db, 'users', user.uid), {
+            ...userPayload,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
+        }, { merge: true });
+        await syncUserWithServer(userPayload);
+        return result;
     };
 
     // Sign in with email and password
     const login = async (email, password) => {
-        try {
-            const result = await signInWithEmailAndPassword(auth, email, password);
-            // Ensure user profile exists in Firestore
-            const user = result.user;
-            const ref = doc(db, 'users', user.uid);
-            const snap = await getDoc(ref);
-            const userPayload = {
-                uid: user.uid,
-                email: user.email,
-                displayName: user.displayName || '',
-                photoURL: user.photoURL || '',
-                role: getRole() || 'donor',
-                providerId: user.providerData?.[0]?.providerId || 'password',
-            };
-            if (!snap.exists()) {
-                await setDoc(ref, {
-                    ...userPayload,
-                    createdAt: serverTimestamp(),
-                    updatedAt: serverTimestamp()
-                });
-            } else {
-                await setDoc(ref, { updatedAt: serverTimestamp() }, { merge: true });
-            }
-            await syncUserWithServer(userPayload);
-            return result;
-        } catch (error) {
-            throw error;
+        const result = await signInWithEmailAndPassword(auth, email, password);
+        const user = result.user;
+        const ref = doc(db, 'users', user.uid);
+        const snap = await getDoc(ref);
+
+        // Prefer role from Firestore; fall back to stored/local role or donor
+        let roleFromProfile = null;
+        if (snap.exists()) {
+            const data = snap.data() || {};
+            roleFromProfile = (data.role && data.role.toLowerCase()) || null;
         }
+        const role = (roleFromProfile || getRole() || 'donor').toLowerCase();
+
+        const userPayload = {
+            uid: user.uid,
+            email: user.email,
+            displayName: user.displayName || '',
+            photoURL: user.photoURL || '',
+            role,
+            providerId: user.providerData?.[0]?.providerId || 'password',
+        };
+        if (!snap.exists()) {
+            await setDoc(ref, {
+                ...userPayload,
+                createdAt: serverTimestamp(),
+                updatedAt: serverTimestamp()
+            });
+        } else {
+            await setDoc(ref, { updatedAt: serverTimestamp() }, { merge: true });
+        }
+        await syncUserWithServer(userPayload);
+        // Keep context/localStorage in sync
+        setRole(role);
+        return result;
     };
 
     // Sign in with Google
     const loginWithGoogle = async () => {
-        try {
-            const result = await signInWithPopup(auth, googleProvider);
-            // Ensure user profile exists/updated in Firestore
-            const user = result.user;
-            const ref = doc(db, 'users', user.uid);
-            const snap = await getDoc(ref);
-            const userPayload = {
-                uid: user.uid,
+        const result = await signInWithPopup(auth, googleProvider);
+        // Ensure user profile exists/updated in Firestore
+        const user = result.user;
+        const ref = doc(db, 'users', user.uid);
+        const snap = await getDoc(ref);
+
+        // Prefer role from Firestore; Google users default to donor if none
+        let roleFromProfile = null;
+        if (snap.exists()) {
+            const data = snap.data() || {};
+            roleFromProfile = (data.role && data.role.toLowerCase()) || null;
+        }
+        const role = (roleFromProfile || getRole() || 'donor').toLowerCase();
+
+        const userPayload = {
+            uid: user.uid,
+            email: user.email,
+            displayName: user.displayName || '',
+            photoURL: user.photoURL || '',
+            role,
+            providerId: user.providerData?.[0]?.providerId || 'google.com',
+        };
+        if (!snap.exists()) {
+            await setDoc(ref, {
+                ...userPayload,
+                createdAt: serverTimestamp(),
+                updatedAt: serverTimestamp()
+            });
+        } else {
+            await setDoc(ref, {
                 email: user.email,
                 displayName: user.displayName || '',
                 photoURL: user.photoURL || '',
-                role: getRole() || 'donor',
                 providerId: user.providerData?.[0]?.providerId || 'google.com',
-            };
-            if (!snap.exists()) {
-                await setDoc(ref, {
-                    ...userPayload,
-                    createdAt: serverTimestamp(),
-                    updatedAt: serverTimestamp()
-                });
-            } else {
-                await setDoc(ref, {
-                    email: user.email,
-                    displayName: user.displayName || '',
-                    photoURL: user.photoURL || '',
-                    providerId: user.providerData?.[0]?.providerId || 'google.com',
-                    updatedAt: serverTimestamp()
-                }, { merge: true });
-            }
-            await syncUserWithServer(userPayload);
-            return result;
-        } catch (error) {
-            throw error;
+                updatedAt: serverTimestamp()
+            }, { merge: true });
         }
+        await syncUserWithServer(userPayload);
+        setRole(role);
+        return result;
     };
 
     // Sign out
     const logout = async () => {
-        try {
-            await signOut(auth);
-            setUserRole(null);
-        } catch (error) {
-            throw error;
-        }
-    };
-
-    // Set user role (this would typically come from your database)
-    const setRole = (role) => {
-        setUserRole(role);
-        localStorage.setItem('userRole', role);
-    };
-
-    // Get user role from localStorage
-    const getRole = () => {
-        return localStorage.getItem('userRole');
-    };
-
-    // Check if user has specific role
-    const hasRole = (role) => {
-        return userRole === role;
-    };
-
-    // Check if user is admin
-    const isAdmin = () => {
-        return userRole === 'admin';
-    };
-
-    // Check if user is charity
-    const isCharity = () => {
-        return userRole === 'charity';
-    };
-
-    // Check if user is donor
-    const isDonor = () => {
-        return userRole === 'donor';
+        await signOut(auth);
+        setRole(null);
     };
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
             setCurrentUser(user);
-            if (user) {
-                // Get role from localStorage or set default
-                const role = getRole() || 'donor';
-                setUserRole(role);
-            } else {
+
+            if (!user) {
                 setUserRole(null);
                 localStorage.removeItem('userRole');
+                setLoading(false);
+                return;
             }
-            setLoading(false);
+
+            try {
+                // Load role from Firestore profile first
+                const ref = doc(db, 'users', user.uid);
+                const snap = await getDoc(ref);
+                let roleFromProfile = null;
+
+                if (snap.exists()) {
+                    const data = snap.data() || {};
+                    roleFromProfile = (data.role && data.role.toLowerCase()) || null;
+                }
+
+                const effectiveRole = (roleFromProfile || getRole() || 'donor').toLowerCase();
+                setUserRole(effectiveRole);
+                persistRole(effectiveRole);
+            } catch (error) {
+                console.error('Failed to load user role from Firestore:', error);
+                const fallbackRole = (getRole() || 'donor').toLowerCase();
+                setUserRole(fallbackRole);
+                if (fallbackRole) {
+                    persistRole(fallbackRole);
+                }
+            } finally {
+                setLoading(false);
+            }
         });
 
         return unsubscribe;

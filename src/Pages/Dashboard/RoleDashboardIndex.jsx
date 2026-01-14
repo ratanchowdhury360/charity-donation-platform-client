@@ -5,7 +5,9 @@ import { useAuth } from '../../provider/authProvider';
 const RoleDashboardIndex = () => {
     const { userRole, loading } = useAuth();
 
-    if (loading) {
+    // While auth state or role is being resolved, show a spinner instead of
+    // prematurely sending the user to the donor dashboard.
+    if (loading || !userRole) {
         return (
             <div className="flex flex-col items-center justify-center">
                 <h1 className="text-2xl font-semibold mb-4">Loading...</h1>

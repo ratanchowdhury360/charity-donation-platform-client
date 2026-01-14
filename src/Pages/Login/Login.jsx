@@ -1,19 +1,51 @@
 import React, { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '../../provider/authProvider';
 import { FaGoogle, FaEye, FaEyeSlash } from 'react-icons/fa';
-import { setUserRole } from '../../utils/userStorage';
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://charity-donation-platform-server.vercel.app';
+
+const resolveRoleFromServer = async (email) => {
+    if (!email) {
+        console.log('[resolveRoleFromServer] No email provided');
+        return null;
+    }
+
+    try {
+        console.log(`[resolveRoleFromServer] Fetching role for email: ${email}`);
+        const res = await fetch(`${API_BASE_URL}/users`);
+        
+        if (!res.ok) {
+            console.error(`[resolveRoleFromServer] API returned status: ${res.status}`);
+            return null;
+        }
+        
+        const list = await res.json();
+        console.log(`[resolveRoleFromServer] Received ${list?.length || 0} users from API`);
+        
+        const found = (list || []).find((u) => (u.email || '').toLowerCase() === email.toLowerCase());
+        
+        if (found) {
+            const role = (found.role || '').toLowerCase();
+            console.log(`[resolveRoleFromServer] Found user with role: ${role}`);
+            return role || null;
+        } else {
+            console.log(`[resolveRoleFromServer] User with email ${email} not found in database`);
+            return null;
+        }
+    } catch (err) {
+        console.error('[resolveRoleFromServer] Failed to resolve role from server:', err);
+        return null;
+    }
+};
 
 const Login = () => {
-    const { login, signup, loginWithGoogle, setRole } = useAuth();
+    const { login, loginWithGoogle } = useAuth();
     const navigate = useNavigate();
-    const location = useLocation();
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-
-    const from = location.state?.from?.pathname || '/dashboard';
 
     const {
         register,
@@ -26,45 +58,23 @@ const Login = () => {
             setError('');
             setLoading(true);
 
-            const adminEmail = import.meta.env.VITE_ADMIN_EMAIL;
-            const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD;
-            const isAdminCreds = (
-                data?.email?.toLowerCase() === adminEmail?.toLowerCase() &&
-                data?.password === adminPassword
-            );
+            const { result } = await login(data.email, data.password);
+            const userEmail = result?.user?.email || data.email;
+            console.log(`[Login] User logged in with email: ${userEmail}`);
 
-            // Surface missing admin env configuration clearly
-            if (isAdminCreds && (!adminEmail || !adminPassword)) {
-                setError('Admin credentials are not configured. Set VITE_ADMIN_EMAIL and VITE_ADMIN_PASSWORD, then restart the dev server.');
-                return;
-            }
+            const role = (await resolveRoleFromServer(userEmail)) || 'donor';
+            console.log(`[Login] Resolved role: ${role}`);
 
-            try {
-                await login(data.email, data.password);
-
-                // Check if this is an admin login
-                if (isAdminCreds) {
-                    setUserRole(data.email, 'admin');
-                    await setRole('admin');
-                }
-                // After login, redirect to home page
-                // User can click Dashboard in navbar to go to their role-specific dashboard
-                navigate('/', { replace: true });
-                
-            } catch (err) {
-                // If admin credentials are provided but the account doesn't exist yet, create it
-                if (isAdminCreds && (err?.code === 'auth/user-not-found' || err?.code === 'auth/invalid-credential')) {
-                    try {
-                        await signup(data.email, data.password);
-                        await setRole('admin');
-                        navigate('/', { replace: true });
-                        return;
-                    } catch (signupError) {
-                        console.error('Admin signup error:', signupError);
-                        throw signupError;
-                    }
-                }
-                throw err;
+            // Navigate based on role from backend
+            if (role === 'admin') {
+                console.log('[Login] Navigating to admin dashboard');
+                navigate('/dashboard/admin', { replace: true });
+            } else if (role === 'charity') {
+                console.log('[Login] Navigating to charity dashboard');
+                navigate('/dashboard/charity', { replace: true });
+            } else {
+                console.log('[Login] Navigating to donor dashboard');
+                navigate('/dashboard/donor', { replace: true });
             }
         } catch (error) {
             if (error?.code === 'auth/operation-not-allowed') {
@@ -90,10 +100,23 @@ const Login = () => {
         try {
             setError('');
             setLoading(true);
-            await loginWithGoogle();
-            // After Google login, redirect to home page
-            // User can click Dashboard in navbar to go to their role-specific dashboard
-            navigate('/', { replace: true });
+            const { result } = await loginWithGoogle();
+            const userEmail = result?.user?.email;
+            console.log(`[Google Login] User logged in with email: ${userEmail}`);
+
+            const role = (await resolveRoleFromServer(userEmail)) || 'donor';
+            console.log(`[Google Login] Resolved role: ${role}`);
+
+            if (role === 'admin') {
+                console.log('[Google Login] Navigating to admin dashboard');
+                navigate('/dashboard/admin', { replace: true });
+            } else if (role === 'charity') {
+                console.log('[Google Login] Navigating to charity dashboard');
+                navigate('/dashboard/charity', { replace: true });
+            } else {
+                console.log('[Google Login] Navigating to donor dashboard');
+                navigate('/dashboard/donor', { replace: true });
+            }
         } catch (error) {
             setError('Failed to log in with Google.');
             console.error('Google login error:', error);

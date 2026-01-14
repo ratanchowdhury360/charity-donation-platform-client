@@ -199,35 +199,60 @@ const AdminCampaignApproval = () => {
             )}
 
             {/* Filter Tabs */}
-            <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold">Filter by Status</h2>
-                <div className="tabs tabs-boxed bg-gradient-to-r from-primary/10 to-secondary/10 shadow-md border border-primary/20">
-                    <button 
-                        className={`tab ${statusFilter === 'all' ? 'tab-active' : ''}`}
-                        onClick={() => setStatusFilter('all')}
-                    >
-                        All ({counts.all})
-                    </button>
-                    <button 
-                        className={`tab ${statusFilter === 'pending' ? 'tab-active' : ''}`}
-                        onClick={() => setStatusFilter('pending')}
-                    >
-                        Pending ({counts.pending})
-                    </button>
-                    <button 
-                        className={`tab ${statusFilter === 'approved' ? 'tab-active' : ''}`}
-                        onClick={() => setStatusFilter('approved')}
-                    >
-                        Approved ({counts.approved})
-                    </button>
-                    <button 
-                        className={`tab ${statusFilter === 'rejected' ? 'tab-active' : ''}`}
-                        onClick={() => setStatusFilter('rejected')}
-                    >
-                        Rejected ({counts.rejected})
-                    </button>
-                </div>
-            </div>
+           <div className="flex justify-between items-center">
+  <h2 className="text-xl font-semibold text-gray-800">
+    Filter by Status
+  </h2>
+
+  <div className="tabs tabs-boxed bg-gradient-to-r from-primary/10 to-secondary/10 shadow-md border border-primary/20">
+    
+    <button
+      className={`tab transition-all duration-200 
+        ${statusFilter === 'all'
+          ? 'tab-active bg-primary !text-white'
+          : 'text-gray-700 hover:text-primary'
+        }`}
+      onClick={() => setStatusFilter('all')}
+    >
+      All ({counts.all})
+    </button>
+
+    <button
+      className={`tab transition-all duration-200 
+        ${statusFilter === 'pending'
+          ? 'tab-active bg-warning !text-white'
+          : 'text-gray-700 hover:text-warning'
+        }`}
+      onClick={() => setStatusFilter('pending')}
+    >
+      Pending ({counts.pending})
+    </button>
+
+    <button
+      className={`tab transition-all duration-200 
+        ${statusFilter === 'approved'
+          ? 'tab-active bg-success !text-white'
+          : 'text-gray-700 hover:text-success'
+        }`}
+      onClick={() => setStatusFilter('approved')}
+    >
+      Approved ({counts.approved})
+    </button>
+
+    <button
+      className={`tab transition-all duration-200 
+        ${statusFilter === 'rejected'
+          ? 'tab-active bg-error !text-white'
+          : 'text-gray-700 hover:text-error'
+        }`}
+      onClick={() => setStatusFilter('rejected')}
+    >
+      Rejected ({counts.rejected})
+    </button>
+
+  </div>
+</div>
+
 
             {campaigns.length === 0 ? (
                 <div className="card bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/5 shadow-lg border border-primary/20">

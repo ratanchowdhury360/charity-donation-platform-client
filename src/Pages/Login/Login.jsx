@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '../../provider/authProvider';
 import { FaGoogle, FaEye, FaEyeSlash } from 'react-icons/fa';
-import { getUserRole, setUserRole } from '../../utils/userStorage';
+import { setUserRole } from '../../utils/userStorage';
 
 const Login = () => {
     const { login, signup, loginWithGoogle, setRole } = useAuth();
@@ -41,19 +41,15 @@ const Login = () => {
 
             try {
                 await login(data.email, data.password);
-                
+
                 // Check if this is an admin login
                 if (isAdminCreds) {
                     setUserRole(data.email, 'admin');
                     await setRole('admin');
-                    navigate('/dashboard/admin', { replace: true });
-                } else {
-                    // For non-admin users, retrieve their role by email
-                    // This role was set during signup
-                    const storedRole = getUserRole(data.email) || 'donor';
-                    await setRole(storedRole);
-                    navigate(`/dashboard/${storedRole}`, { replace: true });
                 }
+                // After login, redirect to home page
+                // User can click Dashboard in navbar to go to their role-specific dashboard
+                navigate('/', { replace: true });
                 
             } catch (err) {
                 // If admin credentials are provided but the account doesn't exist yet, create it
@@ -61,7 +57,7 @@ const Login = () => {
                     try {
                         await signup(data.email, data.password);
                         await setRole('admin');
-                        navigate('/dashboard/admin', { replace: true });
+                        navigate('/', { replace: true });
                         return;
                     } catch (signupError) {
                         console.error('Admin signup error:', signupError);
@@ -95,7 +91,9 @@ const Login = () => {
             setError('');
             setLoading(true);
             await loginWithGoogle();
-            navigate(from, { replace: true });
+            // After Google login, redirect to home page
+            // User can click Dashboard in navbar to go to their role-specific dashboard
+            navigate('/', { replace: true });
         } catch (error) {
             setError('Failed to log in with Google.');
             console.error('Google login error:', error);

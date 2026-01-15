@@ -174,12 +174,12 @@ const About = () => {
                             we're here to help you make a difference.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                            <button className="btn btn-secondary btn-lg">
-                                Start Donating
-                            </button>
-                            <button className="btn btn-outline btn-lg text-white border-white hover:bg-white hover:text-primary">
-                                Register Charity
-                            </button>
+                            {/* <button className="btn btn-secondary btn-lg"> */}
+                                {/* Start Donating
+                            </button> */}
+                            {/* <button className="btn btn-outline btn-lg text-white border-white hover:bg-white hover:text-primary"> */}
+                                {/* Register Charity
+                            </button> */}
                         </div>
                     </div>
                 </section>

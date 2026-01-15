@@ -200,17 +200,17 @@ const AdminCampaignApproval = () => {
 
             {/* Filter Tabs */}
            <div className="flex justify-between items-center">
-  <h2 className="text-xl font-semibold text-gray-800">
+  <h2 className="text-xl font-semibold">
     Filter by Status
   </h2>
 
   <div className="tabs tabs-boxed bg-gradient-to-r from-primary/10 to-secondary/10 shadow-md border border-primary/20">
     
     <button
-      className={`tab transition-all duration-200 
+      className={`tab transition-all duration-200 !text-white
         ${statusFilter === 'all'
           ? 'tab-active bg-primary !text-white'
-          : 'text-gray-700 hover:text-primary'
+          : 'bg-base-300/50 hover:bg-base-300/70 !text-white'
         }`}
       onClick={() => setStatusFilter('all')}
     >
@@ -218,10 +218,10 @@ const AdminCampaignApproval = () => {
     </button>
 
     <button
-      className={`tab transition-all duration-200 
+      className={`tab transition-all duration-200 !text-white
         ${statusFilter === 'pending'
           ? 'tab-active bg-warning !text-white'
-          : 'text-gray-700 hover:text-warning'
+          : 'bg-base-300/50 hover:bg-base-300/70 !text-white'
         }`}
       onClick={() => setStatusFilter('pending')}
     >
@@ -229,10 +229,10 @@ const AdminCampaignApproval = () => {
     </button>
 
     <button
-      className={`tab transition-all duration-200 
+      className={`tab transition-all duration-200 !text-white
         ${statusFilter === 'approved'
           ? 'tab-active bg-success !text-white'
-          : 'text-gray-700 hover:text-success'
+          : 'bg-base-300/50 hover:bg-base-300/70 !text-white'
         }`}
       onClick={() => setStatusFilter('approved')}
     >
@@ -240,10 +240,10 @@ const AdminCampaignApproval = () => {
     </button>
 
     <button
-      className={`tab transition-all duration-200 
+      className={`tab transition-all duration-200 !text-white
         ${statusFilter === 'rejected'
           ? 'tab-active bg-error !text-white'
-          : 'text-gray-700 hover:text-error'
+          : 'bg-base-300/50 hover:bg-base-300/70 !text-white'
         }`}
       onClick={() => setStatusFilter('rejected')}
     >

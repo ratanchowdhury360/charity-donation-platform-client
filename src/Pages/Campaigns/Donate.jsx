@@ -6,6 +6,24 @@ import { addDonation } from '../../utils/donationStorage';
 import { useAuth } from '../../provider/authProvider';
 import { FaHeart, FaCreditCard, FaMobile, FaPaypal, FaCheckCircle } from 'react-icons/fa';
 
+const showAlert = (icon, title, text) => {
+    const swal = typeof window !== 'undefined' ? window.Swal : null;
+    if (swal) {
+        return swal.fire({
+            icon,
+            title,
+            text,
+            timer: icon === 'success' ? 3000 : undefined,
+            showConfirmButton: icon !== 'success',
+            confirmButtonColor: icon === 'success' ? '#10b981' : '#ef4444'
+        });
+    } else if (typeof window !== 'undefined' && window.alert) {
+        window.alert(`${title}${text ? `\n${text}` : ''}`);
+        return Promise.resolve();
+    }
+    return Promise.resolve();
+};
+
 const Donate = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -55,17 +73,20 @@ const Donate = () => {
         e.preventDefault();
         
         if (!currentUser) {
-            alert('Please login to make a donation');
+            await showAlert('warning', 'Login Required', 'Please login to make a donation');
             navigate('/login');
             return;
         }
         
         if (!amount || parseInt(amount) < 100) {
-            alert('Minimum donation amount is 100 BDT');
+            await showAlert('warning', 'Invalid Amount', 'Minimum donation amount is 100 BDT');
             return;
         }
 
         setProcessing(true);
+        
+        let donationAdded = false;
+        let campaignUpdated = false;
         
         try {
             // Simulate payment processing
@@ -93,20 +114,50 @@ const Donate = () => {
                 status: 'completed'
             };
             
-            await addDonation(donationData);
+            try {
+                await addDonation(donationData);
+                donationAdded = true;
+            } catch (donationError) {
+                console.error('Error adding donation:', donationError);
+                throw new Error('Failed to record donation. Please try again.');
+            }
             
             // Add donation to campaign (update campaign's currentAmount)
-            const updatedCampaign = await addDonationToCampaign(campaign.id, donationAmount);
-            setCampaign(updatedCampaign);
+            try {
+                const updatedCampaign = await addDonationToCampaign(campaign.id, donationAmount);
+                setCampaign(updatedCampaign);
+                campaignUpdated = true;
+            } catch (campaignError) {
+                console.error('Error updating campaign:', campaignError);
+                // If donation was added but campaign update failed, still show success
+                // but log the error
+                if (donationAdded) {
+                    console.warn('Donation was recorded but campaign update failed');
+                } else {
+                    throw new Error('Failed to update campaign. Please try again.');
+                }
+            }
             
-            // Show success message
-            alert(`Thank you for your donation of ৳${donationAmount.toLocaleString()}!\n\nYour contribution will make a real difference.`);
-            
-            // Redirect to campaign details
-            navigate(`/campaigns/${campaign.id}`);
+            // Show success message only if donation was successfully added
+            if (donationAdded) {
+                await showAlert(
+                    'success', 
+                    'Donation Successful!', 
+                    `Thank you for your donation of ৳${donationAmount.toLocaleString()}!\n\nYour contribution will make a real difference.`
+                );
+                
+                // Redirect to campaign details
+                navigate(`/campaigns/${campaign.id}`);
+            } else {
+                throw new Error('Donation processing failed');
+            }
         } catch (error) {
             console.error('Donation error:', error);
-            alert('Failed to process donation. Please try again.');
+            await showAlert(
+                'error', 
+                'Donation Failed', 
+                error.message || 'Failed to process donation. Please try again.'
+            );
             setProcessing(false);
         }
     };

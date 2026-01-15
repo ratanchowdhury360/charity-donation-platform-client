@@ -11,7 +11,9 @@ import {
     FaEye,
     FaChartLine,
     FaHandHoldingHeart,
-    FaCreditCard
+    FaCreditCard,
+    FaChevronDown,
+    FaChevronUp
 } from 'react-icons/fa';
 
 const MyDonations = () => {
@@ -20,6 +22,7 @@ const MyDonations = () => {
     const [campaigns, setCampaigns] = useState({});
     const [loading, setLoading] = useState(true);
     const [filterRange, setFilterRange] = useState('all');
+    const [expandedCampaigns, setExpandedCampaigns] = useState({});
     const [stats, setStats] = useState({
         totalDonated: 0,
         totalDonations: 0,
@@ -101,6 +104,61 @@ const MyDonations = () => {
         });
     }, [donations, filterRange, periodRanges]);
 
+    // Group donations by campaign
+    const groupedDonations = useMemo(() => {
+        const grouped = {};
+        
+        filteredDonations.forEach((donation) => {
+            const campaignId = donation.campaignId;
+            if (!campaignId) return;
+            
+            if (!grouped[campaignId]) {
+                grouped[campaignId] = {
+                    campaignId,
+                    campaignTitle: donation.campaignTitle || 'Unknown Campaign',
+                    charityName: donation.charityName || 'Unknown Charity',
+                    totalAmount: 0,
+                    donationCount: 0,
+                    donations: [],
+                    firstDonationDate: null,
+                    lastDonationDate: null
+                };
+            }
+            
+            grouped[campaignId].totalAmount += donation.amount || 0;
+            grouped[campaignId].donationCount += 1;
+            grouped[campaignId].donations.push(donation);
+            
+            const donationDate = new Date(donation.createdAt || donation.date);
+            if (!isNaN(donationDate.getTime())) {
+                if (!grouped[campaignId].firstDonationDate || donationDate < grouped[campaignId].firstDonationDate) {
+                    grouped[campaignId].firstDonationDate = donationDate;
+                }
+                if (!grouped[campaignId].lastDonationDate || donationDate > grouped[campaignId].lastDonationDate) {
+                    grouped[campaignId].lastDonationDate = donationDate;
+                }
+            }
+        });
+        
+        // Sort donations within each group by date (newest first)
+        Object.values(grouped).forEach(group => {
+            group.donations.sort((a, b) => {
+                const dateA = new Date(a.createdAt || a.date);
+                const dateB = new Date(b.createdAt || b.date);
+                return dateB - dateA;
+            });
+        });
+        
+        return grouped;
+    }, [filteredDonations]);
+
+    const toggleCampaignExpansion = (campaignId) => {
+        setExpandedCampaigns(prev => ({
+            ...prev,
+            [campaignId]: !prev[campaignId]
+        }));
+    };
+
     const handleDownloadSlip = () => {
         const list = filteredDonations;
         if (!list.length) {
@@ -131,6 +189,15 @@ const MyDonations = () => {
         link.download = `donations-${filterRange}.csv`;
         link.click();
         URL.revokeObjectURL(url);
+    };
+
+    const formatDate = (date) => {
+        if (!date) return 'N/A';
+        return new Date(date).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
     };
 
     if (loading) {
@@ -201,7 +268,7 @@ const MyDonations = () => {
                                 <div>
                                     <h2 className="card-title text-2xl mb-1">Donation History</h2>
                                     <p className="text-sm text-gray-600">
-                                        Showing {filteredDonations.length} of {donations.length} donations
+                                        Showing {Object.keys(groupedDonations).length} campaign{Object.keys(groupedDonations).length !== 1 ? 's' : ''} ({filteredDonations.length} donation{filteredDonations.length !== 1 ? 's' : ''})
                                     </p>
                                 </div>
                                 <div className="w-full md:w-auto">
@@ -230,7 +297,7 @@ const MyDonations = () => {
                             <div className="h-1 w-full bg-gradient-to-r from-primary/40 via-secondary/40 to-accent/40 rounded-full"></div>
                         </div>
                         
-                        {filteredDonations.length === 0 ? (
+                        {Object.keys(groupedDonations).length === 0 ? (
                             <div className="text-center py-12">
                                 <FaHandHoldingHeart className="text-6xl text-gray-300 mx-auto mb-4" />
                                 <h3 className="text-xl font-bold mb-2">No Donations Yet</h3>
@@ -248,10 +315,13 @@ const MyDonations = () => {
                             </div>
                         ) : (
                             <div className="space-y-4">
-                                {filteredDonations.map((donation) => {
-                                    const campaign = campaigns[donation.campaignId];
+                                {Object.values(groupedDonations).map((group) => {
+                                    const campaign = campaigns[group.campaignId];
+                                    const isExpanded = expandedCampaigns[group.campaignId];
+                                    const hasMultipleDonations = group.donationCount > 1;
+                                    
                                     return (
-                                        <div key={donation.id} className="card bg-gradient-to-br from-base-100 via-primary/10 to-secondary/5 shadow-lg border border-primary/20 hover:shadow-xl hover:border-primary/30 transition-all">
+                                        <div key={group.campaignId} className="card bg-gradient-to-br from-base-100 via-primary/10 to-secondary/5 shadow-lg border border-primary/20 hover:shadow-xl hover:border-primary/30 transition-all">
                                             <div className="card-body">
                                                 <div className="flex flex-col lg:flex-row gap-4">
                                                     {/* Campaign Image */}
@@ -271,18 +341,19 @@ const MyDonations = () => {
                                                     {/* Donation Details */}
                                                     <div className="flex-1">
                                                         <div className="flex justify-between items-start mb-3 p-3 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-lg border border-primary/20">
-                                                            <div>
-                                                            <h3 className="text-xl font-bold text-base-content">{donation.campaignTitle || 'Unknown Campaign'}</h3>
-                                                            <p className="text-sm text-black text-base-content/70 font-medium">By: {donation.charityName || 'Unknown Charity'}</p>
+                                                            <div className="flex-1">
+                                                                <h3 className="text-xl font-bold text-base-content">{group.campaignTitle}</h3>
+                                                                <p className="text-sm text-black text-base-content/70 font-medium">By: {group.charityName}</p>
+                                                                {hasMultipleDonations && (
+                                                                    <p className="text-xs text-base-content/60 mt-1">
+                                                                        {group.donationCount} donation{group.donationCount > 1 ? 's' : ''} made
+                                                                    </p>
+                                                                )}
                                                             </div>
                                                             <div className="text-right">
-                                                                <p className="text-2xl font-black text-primary">৳{(donation.amount || 0).toLocaleString()}</p>
-                                                                <span className={`badge badge-sm font-semibold ${
-                                                                    donation.status === 'completed' ? 'badge-success' : 
-                                                                    donation.status === 'pending' ? 'badge-warning' : 
-                                                                    'badge-error'
-                                                                }`}>
-                                                                    {donation.status || 'completed'}
+                                                                <p className="text-2xl font-black text-primary">৳{group.totalAmount.toLocaleString()}</p>
+                                                                <span className="badge badge-sm font-semibold badge-success">
+                                                                    Total Donated
                                                                 </span>
                                                             </div>
                                                         </div>
@@ -291,27 +362,32 @@ const MyDonations = () => {
                                                             <div className="flex items-center gap-2 p-2 bg-primary/10 rounded-lg border border-primary/20">
                                                                 <FaCalendarAlt className="text-primary text-lg" />
                                                                 <div>
-                                                                    <p className="text-xs text-base-content/60 font-medium">Date</p>
-                                                                <p className="text-sm font-bold text-base-content">
-                                                                    {new Date(donation.createdAt || donation.date).toLocaleDateString()}
-                                                                </p>
+                                                                    <p className="text-xs text-base-content/60 font-medium">Date Range</p>
+                                                                    <p className="text-sm font-bold text-base-content">
+                                                                        {formatDate(group.firstDonationDate)}
+                                                                    </p>
+                                                                    {hasMultipleDonations && group.firstDonationDate !== group.lastDonationDate && (
+                                                                        <p className="text-xs text-base-content/50">
+                                                                            to {formatDate(group.lastDonationDate)}
+                                                                        </p>
+                                                                    )}
                                                                 </div>
                                                             </div>
                                                             
                                                             <div className="flex items-center gap-2 p-2 bg-secondary/10 rounded-lg border border-secondary/20">
-                                                                <FaCreditCard className="text-secondary text-lg" />
+                                                                <FaMoneyBillWave className="text-secondary text-lg" />
                                                                 <div>
-                                                                    <p className="text-xs text-base-content/60 font-medium">Payment</p>
-                                                                    <p className="text-sm font-bold capitalize text-base-content">{donation.paymentMethod}</p>
+                                                                    <p className="text-xs text-base-content/60 font-medium">Donations</p>
+                                                                    <p className="text-sm font-bold text-base-content">{group.donationCount}</p>
                                                                 </div>
                                                             </div>
                                                             
                                                             <div className="flex items-center gap-2 p-2 bg-accent/10 rounded-lg border border-accent/20">
                                                                 <FaHeart className="text-accent text-lg" />
                                                                 <div>
-                                                                    <p className="text-xs text-base-content/60 font-medium">Visibility</p>
+                                                                    <p className="text-xs text-base-content/60 font-medium">Total Amount</p>
                                                                     <p className="text-sm font-bold text-base-content">
-                                                                        {donation.anonymous ? 'Anonymous' : 'Public'}
+                                                                        ৳{group.totalAmount.toLocaleString()}
                                                                     </p>
                                                                 </div>
                                                             </div>
@@ -326,6 +402,49 @@ const MyDonations = () => {
                                                                 </div>
                                                             )}
                                                         </div>
+                                                        
+                                                        {/* Date Dropdown for Multiple Donations */}
+                                                        {hasMultipleDonations && (
+                                                            <div className="mt-4">
+                                                                <button
+                                                                    onClick={() => toggleCampaignExpansion(group.campaignId)}
+                                                                    className="btn btn-outline btn-sm w-full justify-between"
+                                                                >
+                                                                    <span className="flex items-center gap-2">
+                                                                        <FaCalendarAlt />
+                                                                        View Individual Donation Dates ({group.donationCount})
+                                                                    </span>
+                                                                    {isExpanded ? <FaChevronUp /> : <FaChevronDown />}
+                                                                </button>
+                                                                
+                                                                {isExpanded && (
+                                                                    <div className="mt-3 p-4 bg-base-200 rounded-lg border border-primary/20">
+                                                                        <h4 className="font-bold text-base-content mb-3">Donation History</h4>
+                                                                        <div className="space-y-2">
+                                                                            {group.donations.map((donation, idx) => (
+                                                                                <div key={donation.id || idx} className="flex justify-between items-center p-3 bg-base-100 rounded-lg border border-base-300">
+                                                                                    <div className="flex items-center gap-3">
+                                                                                        <FaCalendarAlt className="text-primary" />
+                                                                                        <div>
+                                                                                            <p className="font-semibold text-base-content">
+                                                                                                {formatDate(donation.createdAt || donation.date)}
+                                                            </p>
+                                                                                            <p className="text-xs text-base-content/60">
+                                                                                                {new Date(donation.createdAt || donation.date).toLocaleTimeString()}
+                                                                                            </p>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div className="text-right">
+                                                                                        <p className="font-bold text-primary">৳{(donation.amount || 0).toLocaleString()}</p>
+                                                                                        <p className="text-xs text-base-content/60 capitalize">{donation.paymentMethod}</p>
+                                                                                    </div>
+                                                                                </div>
+                                                                            ))}
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        )}
                                                         
                                                         {/* Campaign Progress */}
                                                         {campaign && (
@@ -358,9 +477,9 @@ const MyDonations = () => {
                                                                     <FaEye className="mr-2" />
                                                                     View Campaign
                                                                 </Link>
-                                                            ) : donation.campaignId ? (
+                                                            ) : group.campaignId ? (
                                                                 <Link 
-                                                                    to={`/campaigns/${donation.campaignId}`} 
+                                                                    to={`/campaigns/${group.campaignId}`} 
                                                                     className="btn btn-primary btn-sm"
                                                                 >
                                                                     <FaEye className="mr-2" />

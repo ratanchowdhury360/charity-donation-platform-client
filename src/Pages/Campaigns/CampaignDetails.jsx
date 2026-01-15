@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { getCampaigns } from '../../utils/campaignStorage';
+import { getCampaigns, isCampaignActive } from '../../utils/campaignStorage';
 import { getUniqueDonorCount } from '../../utils/donationStorage';
-import { FaHeart, FaUsers, FaCalendarAlt, FaMapMarkerAlt, FaShare, FaFlag, FaCheckCircle, FaBuilding } from 'react-icons/fa';
+import { FaHeart, FaUsers, FaCalendarAlt, FaMapMarkerAlt, FaShare, FaFlag, FaCheckCircle, FaBuilding, FaLock } from 'react-icons/fa';
 
 const CampaignDetails = () => {
     const { id } = useParams();
@@ -162,16 +162,35 @@ const CampaignDetails = () => {
                                         </div>
                                     </div>
 
-                                    {campaign.status === 'approved' ? (
-                                        <Link to={`/campaigns/${campaign.id}/donate`} className="btn btn-primary w-full mb-4">
-                                            <FaHeart className="mr-2" />
-                                            Donate Now
-                                        </Link>
-                                    ) : (
-                                        <button className="btn btn-disabled w-full mb-4" disabled>
-                                            Campaign Pending Approval
-                                        </button>
-                                    )}
+                                    {(() => {
+                                        const active = isCampaignActive(campaign);
+                                        let message = '';
+                                        if (campaign.status !== 'approved') {
+                                            message = 'Campaign Pending Approval';
+                                        } else if ((campaign.currentAmount || 0) >= campaign.goalAmount) {
+                                            message = 'Campaign Goal Reached';
+                                        } else {
+                                            const now = new Date();
+                                            now.setHours(0, 0, 0, 0);
+                                            const endDate = new Date(campaign.endDate);
+                                            endDate.setHours(23, 59, 59, 999);
+                                            if (endDate < now) {
+                                                message = 'Campaign Ended';
+                                            }
+                                        }
+                                        
+                                        return active ? (
+                                            <Link to={`/campaigns/${campaign.id}/donate`} className="btn btn-primary w-full mb-4">
+                                                <FaHeart className="mr-2" />
+                                                Donate Now
+                                            </Link>
+                                        ) : (
+                                            <button className="btn btn-disabled w-full mb-4" disabled>
+                                                <FaLock className="mr-2" />
+                                                {message || 'Donation Not Available'}
+                                            </button>
+                                        );
+                                    })()}
 
                                     <div className="flex gap-2">
                                         <button className="btn btn-outline btn-sm flex-1">

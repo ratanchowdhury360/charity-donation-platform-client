@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { getCampaigns, addDonationToCampaign } from '../../utils/campaignStorage';
+import { getCampaigns, addDonationToCampaign, isCampaignActive } from '../../utils/campaignStorage';
 import { addDonation } from '../../utils/donationStorage';
 import { useAuth } from '../../provider/authProvider';
-import { FaHeart, FaCreditCard, FaMobile, FaPaypal, FaCheckCircle } from 'react-icons/fa';
+import { FaHeart, FaCreditCard, FaMobile, FaPaypal, FaCheckCircle, FaLock } from 'react-icons/fa';
 
 const showAlert = (icon, title, text) => {
     const swal = typeof window !== 'undefined' ? window.Swal : null;
@@ -69,8 +69,35 @@ const Donate = () => {
         );
     }
 
+    const campaignActive = isCampaignActive(campaign);
+    
+    // Get campaign status message
+    const getCampaignStatusMessage = () => {
+        if (campaign.status !== 'approved') {
+            return 'This campaign is pending approval and cannot accept donations yet.';
+        }
+        const isCompleted = (campaign.currentAmount || 0) >= campaign.goalAmount;
+        if (isCompleted) {
+            return 'This campaign has reached its goal and is no longer accepting donations.';
+        }
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+        const endDate = new Date(campaign.endDate);
+        endDate.setHours(23, 59, 59, 999);
+        if (endDate < now) {
+            return 'This campaign has ended and is no longer accepting donations.';
+        }
+        return '';
+    };
+
     const handleDonate = async (e) => {
         e.preventDefault();
+        
+        // Check if campaign is active
+        if (!campaignActive) {
+            await showAlert('error', 'Donation Not Available', getCampaignStatusMessage());
+            return;
+        }
         
         if (!currentUser) {
             await showAlert('warning', 'Login Required', 'Please login to make a donation');
@@ -115,7 +142,7 @@ const Donate = () => {
             };
             
             try {
-                await addDonation(donationData);
+            await addDonation(donationData);
                 donationAdded = true;
             } catch (donationError) {
                 console.error('Error adding donation:', donationError);
@@ -124,8 +151,8 @@ const Donate = () => {
             
             // Add donation to campaign (update campaign's currentAmount)
             try {
-                const updatedCampaign = await addDonationToCampaign(campaign.id, donationAmount);
-                setCampaign(updatedCampaign);
+            const updatedCampaign = await addDonationToCampaign(campaign.id, donationAmount);
+            setCampaign(updatedCampaign);
                 campaignUpdated = true;
             } catch (campaignError) {
                 console.error('Error updating campaign:', campaignError);
@@ -145,9 +172,9 @@ const Donate = () => {
                     'Donation Successful!', 
                     `Thank you for your donation of ৳${donationAmount.toLocaleString()}!\n\nYour contribution will make a real difference.`
                 );
-                
-                // Redirect to campaign details
-                navigate(`/campaigns/${campaign.id}`);
+            
+            // Redirect to campaign details
+            navigate(`/campaigns/${campaign.id}`);
             } else {
                 throw new Error('Donation processing failed');
             }
@@ -341,23 +368,42 @@ const Donate = () => {
                                     </div>
 
                                     {/* Submit Button */}
-                                    <button
-                                        type="submit"
-                                        className="btn btn-primary w-full btn-lg text-white font-bold text-lg py-3 hover:btn-primary-focus transition-all shadow-xl hover:shadow-2xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-                                        disabled={!amount || parseInt(amount) < 100 || processing}
-                                    >
-                                        {processing ? (
-                                            <>
-                                                <span className="loading loading-spinner loading-lg"></span>
-                                                Processing Your Donation...
-                                            </>
-                                        ) : (
-                                            <>
-                                                <FaHeart className="mr-2 text-xl" />
-                                                Donate {amount ? `৳${parseInt(amount).toLocaleString()}` : 'Now'}
-                                            </>
-                                        )}
-                                    </button>
+                                    {campaignActive ? (
+                                        <button
+                                            type="submit"
+                                            className="btn btn-primary w-full btn-lg text-white font-bold text-lg py-3 hover:btn-primary-focus transition-all shadow-xl hover:shadow-2xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                                            disabled={!amount || parseInt(amount) < 100 || processing}
+                                        >
+                                            {processing ? (
+                                                <>
+                                                    <span className="loading loading-spinner loading-lg"></span>
+                                                    Processing Your Donation...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <FaHeart className="mr-2 text-xl" />
+                                                    Donate {amount ? `৳${parseInt(amount).toLocaleString()}` : 'Now'}
+                                                </>
+                                            )}
+                                        </button>
+                                    ) : (
+                                        <button
+                                            type="button"
+                                            className="btn btn-disabled w-full btn-lg font-bold text-lg py-3 cursor-not-allowed"
+                                            disabled
+                                        >
+                                            <FaLock className="mr-2 text-xl" />
+                                            Donation Not Available
+                                        </button>
+                                    )}
+                                    
+                                    {!campaignActive && (
+                                        <div className="mt-4 p-4 bg-warning/20 border border-warning/40 rounded-lg">
+                                            <p className="text-sm text-base-content font-medium text-center">
+                                                {getCampaignStatusMessage()}
+                                            </p>
+                                        </div>
+                                    )}
                                 </form>
 
                                 <div className="mt-8 p-4 bg-gradient-to-r from-success/20 to-success/10 rounded-lg border border-success/30">

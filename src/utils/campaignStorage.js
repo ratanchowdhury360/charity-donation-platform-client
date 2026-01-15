@@ -107,3 +107,25 @@ export const clearAllCampaigns = async () => {
     return Promise.resolve();
 };
 
+// Check if a campaign is active (can accept donations)
+export const isCampaignActive = (campaign) => {
+    if (!campaign) return false;
+    
+    // Campaign must be approved
+    if (campaign.status !== 'approved') return false;
+    
+    // Check if campaign is completed (reached goal)
+    const isCompleted = (campaign.currentAmount || 0) >= campaign.goalAmount;
+    if (isCompleted) return false;
+    
+    // Check if campaign has ended (end date passed)
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    const endDate = new Date(campaign.endDate);
+    endDate.setHours(23, 59, 59, 999);
+    const isEnded = endDate < now;
+    if (isEnded) return false;
+    
+    return true;
+};
+

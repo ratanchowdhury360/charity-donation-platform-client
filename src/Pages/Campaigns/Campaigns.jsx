@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { getCampaignsByStatus } from '../../utils/campaignStorage';
+import { getCampaignsByStatus, isCampaignActive } from '../../utils/campaignStorage';
 import { getAllCampaignDonorCounts } from '../../utils/donationStorage';
-import { FaSearch, FaFilter, FaHeart, FaClock, FaUsers, FaCheckCircle } from 'react-icons/fa';
+import { FaSearch, FaFilter, FaHeart, FaClock, FaUsers, FaCheckCircle, FaLock } from 'react-icons/fa';
 
 const Campaigns = () => {
     const [campaigns, setCampaigns] = useState([]);
@@ -303,13 +303,28 @@ const Campaigns = () => {
                                         >
                                             View Details
                                         </Link>
-                                        <Link 
-                                            to={`/campaigns/${campaign.id}/donate`} 
-                                            className="btn btn-outline btn-sm flex-1"
-                                        >
-                                            <FaHeart className="mr-1" />
-                                            Donate
-                                        </Link>
+                                        {isCampaignActive(campaign) ? (
+                                            <Link 
+                                                to={`/campaigns/${campaign.id}/donate`} 
+                                                className="btn btn-outline btn-sm flex-1"
+                                            >
+                                                <FaHeart className="mr-1" />
+                                                Donate
+                                            </Link>
+                                        ) : (
+                                            <button 
+                                                className="btn btn-disabled btn-sm flex-1" 
+                                                disabled
+                                                title={
+                                                    campaign.status !== 'approved' ? 'Campaign Pending Approval' :
+                                                    (campaign.currentAmount || 0) >= campaign.goalAmount ? 'Campaign Goal Reached' :
+                                                    'Campaign Ended'
+                                                }
+                                            >
+                                                <FaLock className="mr-1" />
+                                                Donate
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             </div>

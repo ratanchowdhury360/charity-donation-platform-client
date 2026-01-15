@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import Banner from "../Banner/Banner";
-import { getCampaigns, getCampaignsByStatus } from '../../../utils/campaignStorage';
+import { getCampaigns, getCampaignsByStatus, isCampaignActive } from '../../../utils/campaignStorage';
 import { getAllCampaignDonorCounts, getAllDonations } from '../../../utils/donationStorage';
 import { getAllReviews } from '../../../utils/reviewStorage';
 import { db } from '../../../firebase/firebase.config';
@@ -17,7 +17,8 @@ import {
     FaBuilding,
     FaUser,
     FaCheckCircle,
-    FaHourglassEnd
+    FaHourglassEnd,
+    FaLock
 } from 'react-icons/fa';
 
 const fundViewOrder = ['thisMonth', 'lastMonth', 'lastThreeMonths', 'lastYear'];
@@ -359,9 +360,23 @@ const Home = () => {
                                             <Link to={`/campaigns/${campaign.id}`} className="btn btn-primary btn-sm">
                                                 View Details
                                             </Link>
-                                            <Link to={`/campaigns/${campaign.id}/donate`} className="btn btn-outline btn-sm">
-                                                Donate Now
-                                            </Link>
+                                            {isCampaignActive(campaign) ? (
+                                                <Link to={`/campaigns/${campaign.id}/donate`} className="btn btn-outline btn-sm">
+                                                    Donate Now
+                                                </Link>
+                                            ) : (
+                                                <button 
+                                                    className="btn btn-disabled btn-sm" 
+                                                    disabled
+                                                    title={
+                                                        campaign.status !== 'approved' ? 'Campaign Pending Approval' :
+                                                        (campaign.currentAmount || 0) >= campaign.goalAmount ? 'Campaign Goal Reached' :
+                                                        'Campaign Ended'
+                                                    }
+                                                >
+                                                    <FaLock className="mr-1" /> Donate
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
                                 </div>

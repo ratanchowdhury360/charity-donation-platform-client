@@ -363,13 +363,13 @@ const MyDonations = () => {
                                                                 <FaCalendarAlt className="text-primary text-lg" />
                                                                 <div>
                                                                     <p className="text-xs text-base-content/60 font-medium">Date Range</p>
-                                                                    <p className="text-sm font-bold text-base-content">
+                                                                <p className="text-sm font-bold text-base-content">
                                                                         {formatDate(group.firstDonationDate)}
                                                                     </p>
                                                                     {hasMultipleDonations && group.firstDonationDate !== group.lastDonationDate && (
                                                                         <p className="text-xs text-base-content/50">
                                                                             to {formatDate(group.lastDonationDate)}
-                                                                        </p>
+                                                                </p>
                                                                     )}
                                                                 </div>
                                                             </div>

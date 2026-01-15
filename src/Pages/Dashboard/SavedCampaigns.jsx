@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { FaHeart, FaRegHeart, FaDonate, FaUsers, FaCalendarAlt, FaEye, FaHandHoldingHeart } from 'react-icons/fa';
-import { getCampaignsByStatus } from '../../utils/campaignStorage';
+import { FaHeart, FaRegHeart, FaDonate, FaUsers, FaCalendarAlt, FaEye, FaHandHoldingHeart, FaLock } from 'react-icons/fa';
+import { getCampaignsByStatus, isCampaignActive } from '../../utils/campaignStorage';
 
 export default function SavedCampaigns() {
     const [campaigns, setCampaigns] = useState([]);
@@ -104,12 +104,26 @@ export default function SavedCampaigns() {
                                         >
                                             <FaEye className="mr-1" /> Details
                                         </Link>
-                                        <Link 
-                                            to={`/campaigns/${campaign.id}/donate`} 
-                                            className="btn bg-gradient-to-r from-pink-500 to-purple-600 text-white border-0 btn-sm hover:from-pink-600 hover:to-purple-700 shadow-lg"
-                                        >
-                                            <FaHeart className="mr-1" /> Donate
-                                        </Link>
+                                        {isCampaignActive(campaign) ? (
+                                            <Link 
+                                                to={`/campaigns/${campaign.id}/donate`} 
+                                                className="btn bg-gradient-to-r from-pink-500 to-purple-600 text-white border-0 btn-sm hover:from-pink-600 hover:to-purple-700 shadow-lg"
+                                            >
+                                                <FaHeart className="mr-1" /> Donate
+                                            </Link>
+                                        ) : (
+                                            <button 
+                                                className="btn btn-disabled btn-sm" 
+                                                disabled
+                                                title={
+                                                    campaign.status !== 'approved' ? 'Campaign Pending Approval' :
+                                                    (campaign.currentAmount || 0) >= campaign.goalAmount ? 'Campaign Goal Reached' :
+                                                    'Campaign Ended'
+                                                }
+                                            >
+                                                <FaLock className="mr-1" /> Donate
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             </div>

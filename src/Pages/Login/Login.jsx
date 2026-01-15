@@ -6,6 +6,20 @@ import { FaGoogle, FaEye, FaEyeSlash } from 'react-icons/fa';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://charity-donation-platform-server.vercel.app';
 
+const showSuccessAlert = async () => {
+    const swal = typeof window !== 'undefined' ? window.Swal : null;
+    if (swal) {
+        await swal.fire({
+            icon: 'success',
+            title: 'Login Successful!',
+            text: 'Welcome back!',
+            timer: 2000,
+            showConfirmButton: false,
+            confirmButtonColor: '#10b981'
+        });
+    }
+};
+
 const resolveRoleFromServer = async (email) => {
     if (!email) {
         console.log('[resolveRoleFromServer] No email provided');
@@ -65,6 +79,9 @@ const Login = () => {
             const role = (await resolveRoleFromServer(userEmail)) || 'donor';
             console.log(`[Login] Resolved role: ${role}`);
 
+            // Show success alert
+            await showSuccessAlert();
+
             // Navigate based on role from backend
             if (role === 'admin') {
                 console.log('[Login] Navigating to admin dashboard');
@@ -106,6 +123,9 @@ const Login = () => {
 
             const role = (await resolveRoleFromServer(userEmail)) || 'donor';
             console.log(`[Google Login] Resolved role: ${role}`);
+
+            // Show success alert
+            await showSuccessAlert();
 
             if (role === 'admin') {
                 console.log('[Google Login] Navigating to admin dashboard');

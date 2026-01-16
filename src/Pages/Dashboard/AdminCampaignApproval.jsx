@@ -1,18 +1,19 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { FaCheckCircle, FaTimesCircle, FaEye, FaSpinner, FaUser, FaEnvelope, FaTrash } from 'react-icons/fa';
-import { updateCampaignStatus, getCampaigns, deleteCampaign } from '../../utils/campaignStorage';
+import { FaCheckCircle, FaTimesCircle, FaEye, FaSpinner, FaUser, FaEnvelope, FaArchive } from 'react-icons/fa';
+import { updateCampaignStatus, getCampaigns } from '../../utils/campaignStorage';
 
 const AdminCampaignApproval = () => {
     const [campaigns, setCampaigns] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedCampaign, setSelectedCampaign] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [statusFilter, setStatusFilter] = useState('all'); // 'all', 'pending', 'approved', 'rejected'
+    const [statusFilter, setStatusFilter] = useState('all'); // 'all', 'pending', 'approved', 'rejected', 'archived'
     const [counts, setCounts] = useState({
         all: 0,
         pending: 0,
         approved: 0,
         rejected: 0,
+        archived: 0,
     });
 
     const fetchCampaigns = useCallback(async () => {
@@ -23,12 +24,14 @@ const AdminCampaignApproval = () => {
             const pendingCount = allCampaigns.filter(c => c.status === 'pending').length;
             const approvedCount = allCampaigns.filter(c => c.status === 'approved').length;
             const rejectedCount = allCampaigns.filter(c => c.status === 'rejected').length;
+            const archivedCount = allCampaigns.filter(c => c.status === 'archived').length;
 
             setCounts({
                 all: allCampaigns.length,
                 pending: pendingCount,
                 approved: approvedCount,
                 rejected: rejectedCount,
+                archived: archivedCount,
             });
 
             const filteredList =
@@ -120,40 +123,40 @@ const AdminCampaignApproval = () => {
         }
     };
 
-    const handleDelete = async (campaignId) => {
-        if (!window.confirm('Are you sure you want to permanently delete this campaign? This action cannot be undone.')) {
+    const handleArchive = async (campaignId) => {
+        if (!window.confirm('Are you sure you want to archive this campaign? It will be moved to archived campaigns.')) {
             return;
         }
 
         try {
             // Optimistically update the UI immediately
-            const campaignToDelete = campaigns.find(c => c.id === campaignId);
+            const campaignToArchive = campaigns.find(c => c.id === campaignId);
             setCampaigns(prevCampaigns => 
                 prevCampaigns.filter(c => c.id !== campaignId)
             );
             
             // Update counts immediately
-            if (campaignToDelete) {
+            if (campaignToArchive) {
                 setCounts(prevCounts => ({
                     ...prevCounts,
-                    all: Math.max(0, prevCounts.all - 1),
-                    [campaignToDelete.status]: Math.max(0, prevCounts[campaignToDelete.status] - 1),
+                    [campaignToArchive.status]: Math.max(0, prevCounts[campaignToArchive.status] - 1),
+                    archived: prevCounts.archived + 1,
                 }));
             }
 
-            // Delete from storage
-            await deleteCampaign(campaignId);
+            // Update status to archived
+            await updateCampaignStatus(campaignId, 'archived');
             
             // Refetch to ensure consistency
             await fetchCampaigns();
             
-            // Close modal if it was the deleted campaign
+            // Close modal if it was the archived campaign
             if (isModalOpen && selectedCampaign?.id === campaignId) {
                 closeModal();
             }
         } catch (error) {
-            console.error('Error deleting campaign:', error);
-            alert('Failed to delete campaign. Please try again.');
+            console.error('Error archiving campaign:', error);
+            alert('Failed to archive campaign. Please try again.');
             // Revert on error by refetching
             await fetchCampaigns();
         }
@@ -250,6 +253,17 @@ const AdminCampaignApproval = () => {
       Rejected ({counts.rejected})
     </button>
 
+    <button
+      className={`tab transition-all duration-200 !text-white
+        ${statusFilter === 'archived'
+          ? 'tab-active bg-base-content !text-white'
+          : 'bg-base-300/50 hover:bg-base-300/70 !text-white'
+        }`}
+      onClick={() => setStatusFilter('archived')}
+    >
+      Archived ({counts.archived})
+    </button>
+
   </div>
 </div>
 
@@ -329,10 +343,10 @@ const AdminCampaignApproval = () => {
                                         </div>
                                     )}
                                     <button 
-                                        onClick={() => handleDelete(campaign.id)}
-                                        className="btn btn-outline btn-error btn-sm w-full"
+                                        onClick={() => handleArchive(campaign.id)}
+                                        className="btn btn-outline btn-warning btn-sm w-full"
                                     >
-                                        <FaTrash className="mr-1" /> Delete Campaign
+                                        <FaArchive className="mr-1" /> Archive Campaign
                                     </button>
                                 </div>
                             </div>
@@ -412,10 +426,10 @@ const AdminCampaignApproval = () => {
                                 )}
                                 <div className="border-t pt-3">
                                     <button 
-                                        onClick={() => handleDelete(selectedCampaign.id)}
-                                        className="btn btn-outline btn-error w-full"
+                                        onClick={() => handleArchive(selectedCampaign.id)}
+                                        className="btn btn-outline btn-warning w-full"
                                     >
-                                        <FaTrash className="mr-2" /> Delete Campaign Permanently
+                                        <FaArchive className="mr-2" /> Archive Campaign
                                     </button>
                                 </div>
                             </div>

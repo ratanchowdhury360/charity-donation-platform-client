@@ -342,12 +342,25 @@ const AdminCampaignApproval = () => {
                                             </button>
                                         </div>
                                     )}
-                                    <button 
-                                        onClick={() => handleArchive(campaign.id)}
-                                        className="btn btn-outline btn-warning btn-sm w-full"
-                                    >
-                                        <FaArchive className="mr-1" /> Archive Campaign
-                                    </button>
+                                    {(() => {
+                                        const isCompleted = (campaign.currentAmount || 0) >= campaign.goalAmount;
+                                        return isCompleted ? (
+                                            <button 
+                                                className="btn btn-disabled btn-sm w-full"
+                                                disabled
+                                                title="Cannot archive completed campaigns"
+                                            >
+                                                <FaArchive className="mr-1" /> Archive Campaign
+                                            </button>
+                                        ) : (
+                                            <button 
+                                                onClick={() => handleArchive(campaign.id)}
+                                                className="btn btn-outline btn-warning btn-sm w-full"
+                                            >
+                                                <FaArchive className="mr-1" /> Archive Campaign
+                                            </button>
+                                        );
+                                    })()}
                                 </div>
                             </div>
                         </div>
@@ -390,8 +403,20 @@ const AdminCampaignApproval = () => {
                                     <p>৳{selectedCampaign.goalAmount.toLocaleString()}</p>
                                 </div>
                                 <div>
+                                    <p className="text-sm text-gray-500">Amount Raised</p>
+                                    <p>৳{(selectedCampaign.currentAmount || 0).toLocaleString()}</p>
+                                </div>
+                                <div>
                                     <p className="text-sm text-gray-500">End Date</p>
                                     <p>{new Date(selectedCampaign.endDate).toLocaleDateString()}</p>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-gray-500">Funding Status</p>
+                                    <p className="capitalize">
+                                        {(selectedCampaign.currentAmount || 0) >= selectedCampaign.goalAmount 
+                                            ? 'Completed' 
+                                            : 'In Progress'}
+                                    </p>
                                 </div>
                             </div>
                             
@@ -425,12 +450,25 @@ const AdminCampaignApproval = () => {
                                     </div>
                                 )}
                                 <div className="border-t pt-3">
-                                    <button 
-                                        onClick={() => handleArchive(selectedCampaign.id)}
-                                        className="btn btn-outline btn-warning w-full"
-                                    >
-                                        <FaArchive className="mr-2" /> Archive Campaign
-                                    </button>
+                                    {(() => {
+                                        const isCompleted = (selectedCampaign.currentAmount || 0) >= selectedCampaign.goalAmount;
+                                        return isCompleted ? (
+                                            <button 
+                                                className="btn btn-disabled w-full"
+                                                disabled
+                                                title="Cannot archive completed campaigns"
+                                            >
+                                                <FaArchive className="mr-2" /> Archive Campaign
+                                            </button>
+                                        ) : (
+                                            <button 
+                                                onClick={() => handleArchive(selectedCampaign.id)}
+                                                className="btn btn-outline btn-warning w-full"
+                                            >
+                                                <FaArchive className="mr-2" /> Archive Campaign
+                                            </button>
+                                        );
+                                    })()}
                                 </div>
                             </div>
                         </div>

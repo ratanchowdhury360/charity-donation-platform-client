@@ -2,10 +2,16 @@ const API_BASE_URL = (import.meta.env && import.meta.env.VITE_API_URL) || 'https
 
 const normalizeMessage = (message) => {
     if (!message) return message;
-    return {
+    // Preserve both id and _id for compatibility
+    const normalized = {
         ...message,
         id: message.id || (message._id ? message._id.toString() : undefined),
     };
+    // Keep _id if it exists (for MongoDB compatibility)
+    if (message._id && !normalized._id) {
+        normalized._id = message._id.toString();
+    }
+    return normalized;
 };
 
 const handleResponse = async (response) => {
@@ -57,15 +63,44 @@ export const getMessageById = async (messageId) => {
 };
 
 export const replyToMessage = async (messageId, replyPayload) => {
-    const response = await fetch(`${API_BASE_URL}/messages/${messageId}/reply`, {
+    // Ensure we have a valid messageId
+    if (!messageId) {
+        throw new Error('Message ID is required');
+    }
+    
+    // Try the messageId as-is first, then try _id if it exists
+    let url = `${API_BASE_URL}/messages/${messageId}/reply`;
+    
+    const response = await fetch(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(replyPayload),
     });
-    const data = await handleResponse(response);
-    return normalizeMessage(data);
+    
+    // Check if response is ok (status 200-299)
+    if (response.ok) {
+        try {
+            const data = await response.json();
+            return normalizeMessage(data);
+        } catch (parseError) {
+            // If JSON parsing fails but status is OK, still consider it success
+            console.warn('Response parsing warning:', parseError);
+            // Return a success indicator even if we can't parse the response
+            return { success: true, messageId };
+        }
+    } else {
+        // Only throw error if response is not OK
+        let errorText;
+        try {
+            const errorData = await response.json();
+            errorText = errorData.message || JSON.stringify(errorData);
+        } catch {
+            errorText = await response.text();
+        }
+        throw new Error(errorText || `Server returned status ${response.status}`);
+    }
 };
 
 export const updateMessageStatus = async (messageId, status) => {

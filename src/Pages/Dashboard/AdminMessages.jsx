@@ -69,20 +69,49 @@ const AdminMessages = () => {
         if (!selectedMessage || !replyText.trim()) return;
         try {
             setProcessing(true);
-            await replyToMessage(selectedMessage.id, {
+            setFeedback({ type: '', text: '' }); // Clear previous feedback
+            
+            // Use _id if available, otherwise use id (for MongoDB compatibility)
+            const messageId = selectedMessage._id || selectedMessage.id;
+            
+            if (!messageId) {
+                throw new Error('Message ID is missing. Please refresh and try again.');
+            }
+            
+            console.log('Sending reply to message ID:', messageId);
+            
+            const result = await replyToMessage(messageId, {
                 reply: replyText.trim(),
                 adminName: 'Platform Admin',
                 adminId: 'admin',
                 actorType: 'admin',
             });
-            setFeedback({ type: 'success', text: 'Reply sent successfully.' });
-            showAlert('success', 'Reply sent!', 'The user will see it instantly.');
+            
+            // If we get here, the reply was successful
+            setFeedback({ type: 'success', text: 'Reply sent successfully!' });
+            await showAlert('success', 'Reply Sent!', 'Your reply has been sent successfully. The user will see it instantly.');
             closeModal();
-            fetchMessages();
+            // Refresh messages to show the new reply
+            await fetchMessages();
         } catch (error) {
             console.error('Failed to send reply', error);
-            setFeedback({ type: 'error', text: 'Failed to send reply. Please try again.' });
-            showAlert('error', 'Reply failed', 'Please try sending again.');
+            // Parse error message if it's JSON
+            let errorMessage = 'Failed to send reply. Please try again.';
+            try {
+                if (error?.message) {
+                    // Try to parse if it's a JSON string
+                    const parsed = JSON.parse(error.message);
+                    errorMessage = parsed.message || error.message;
+                } else {
+                    errorMessage = error.message || errorMessage;
+                }
+            } catch (parseErr) {
+                // If parsing fails, use the original message
+                errorMessage = error?.message || errorMessage;
+            }
+            
+            setFeedback({ type: 'error', text: errorMessage });
+            await showAlert('error', 'Reply Failed', errorMessage);
             setProcessing(false);
         }
     };

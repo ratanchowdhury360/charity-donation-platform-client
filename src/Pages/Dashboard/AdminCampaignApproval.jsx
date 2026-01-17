@@ -103,6 +103,7 @@ const AdminCampaignApproval = () => {
     }, [fetchCampaigns]);
 
     const handleApprove = async (campaignId) => {
+        
         try {
             // Optimistically update the UI immediately
             setCampaigns(prevCampaigns => 

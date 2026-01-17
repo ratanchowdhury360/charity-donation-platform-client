@@ -103,7 +103,7 @@ const AdminCampaignApproval = () => {
     }, [fetchCampaigns]);
 
     const handleApprove = async (campaignId) => {
-        
+
         try {
             // Optimistically update the UI immediately
             setCampaigns(prevCampaigns => 
@@ -133,6 +133,7 @@ const AdminCampaignApproval = () => {
                 closeModal();
             }
         } catch (error) {
+            
             console.error('Error approving campaign:', error);
             // Revert on error by refetching
             await fetchCampaigns();

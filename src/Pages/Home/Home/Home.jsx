@@ -361,9 +361,9 @@ const Home = () => {
                                                 View Details
                                             </Link>
                                             {isCampaignActive(campaign) ? (
-                                                <Link to={`/campaigns/${campaign.id}/donate`} className="btn btn-outline btn-sm">
-                                                    Donate Now
-                                                </Link>
+                                            <Link to={`/campaigns/${campaign.id}/donate`} className="btn btn-outline btn-sm">
+                                                Donate Now
+                                            </Link>
                                             ) : (
                                                 <button 
                                                     className="btn btn-disabled btn-sm" 

@@ -304,13 +304,13 @@ const Campaigns = () => {
                                             View Details
                                         </Link>
                                         {isCampaignActive(campaign) ? (
-                                            <Link 
-                                                to={`/campaigns/${campaign.id}/donate`} 
-                                                className="btn btn-outline btn-sm flex-1"
-                                            >
-                                                <FaHeart className="mr-1" />
-                                                Donate
-                                            </Link>
+                                        <Link 
+                                            to={`/campaigns/${campaign.id}/donate`} 
+                                            className="btn btn-outline btn-sm flex-1"
+                                        >
+                                            <FaHeart className="mr-1" />
+                                            Donate
+                                        </Link>
                                         ) : (
                                             <button 
                                                 className="btn btn-disabled btn-sm flex-1" 

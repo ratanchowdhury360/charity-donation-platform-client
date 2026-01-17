@@ -263,9 +263,9 @@ const DonorDashboard = () => {
                                                     <FaEye className="mr-1" /> Details
                                                 </Link>
                                                 {isCampaignActive(campaign) ? (
-                                                    <Link to={`/campaigns/${campaign.id}/donate`} className="btn btn-primary btn-sm">
-                                                        <FaHeart className="mr-1" /> Donate
-                                                    </Link>
+                                                <Link to={`/campaigns/${campaign.id}/donate`} className="btn btn-primary btn-sm">
+                                                    <FaHeart className="mr-1" /> Donate
+                                                </Link>
                                                 ) : (
                                                     <button 
                                                         className="btn btn-disabled btn-sm" 

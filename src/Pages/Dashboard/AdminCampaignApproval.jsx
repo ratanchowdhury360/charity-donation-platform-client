@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { FaCheckCircle, FaTimesCircle, FaEye, FaSpinner, FaUser, FaEnvelope, FaArchive } from 'react-icons/fa';
-import { updateCampaignStatus, getCampaigns } from '../../utils/campaignStorage';
+import { updateCampaignStatus, getCampaigns, isCampaignActive } from '../../utils/campaignStorage';
 
 const AdminCampaignApproval = () => {
     const [campaigns, setCampaigns] = useState([]);
@@ -20,6 +20,57 @@ const AdminCampaignApproval = () => {
         try {
             setLoading(true);
             const allCampaigns = await getCampaigns();
+
+            // Automatically archive campaigns that have ended (end date passed) and are approved
+            const now = new Date();
+            now.setHours(0, 0, 0, 0);
+            
+            const campaignsToArchive = [];
+            for (const campaign of allCampaigns) {
+                // Only auto-archive approved campaigns that haven't been archived yet
+                if (campaign.status === 'approved' && campaign.status !== 'archived') {
+                    const endDate = new Date(campaign.endDate);
+                    endDate.setHours(23, 59, 59, 999);
+                    if (endDate < now) {
+                        campaignsToArchive.push(campaign.id);
+                    }
+                }
+            }
+
+            // Archive campaigns that have ended
+            if (campaignsToArchive.length > 0) {
+                try {
+                    await Promise.all(
+                        campaignsToArchive.map(campaignId => 
+                            updateCampaignStatus(campaignId, 'archived')
+                        )
+                    );
+                    // Refetch campaigns after archiving
+                    const updatedCampaigns = await getCampaigns();
+                    const pendingCount = updatedCampaigns.filter(c => c.status === 'pending').length;
+                    const approvedCount = updatedCampaigns.filter(c => c.status === 'approved').length;
+                    const rejectedCount = updatedCampaigns.filter(c => c.status === 'rejected').length;
+                    const archivedCount = updatedCampaigns.filter(c => c.status === 'archived').length;
+
+                    setCounts({
+                        all: updatedCampaigns.length,
+                        pending: pendingCount,
+                        approved: approvedCount,
+                        rejected: rejectedCount,
+                        archived: archivedCount,
+                    });
+
+                    const filteredList =
+                        statusFilter === 'all'
+                            ? updatedCampaigns
+                            : updatedCampaigns.filter(campaign => campaign.status === statusFilter);
+
+                    setCampaigns(filteredList);
+                    return;
+                } catch (archiveError) {
+                    console.error('Error auto-archiving campaigns:', archiveError);
+                }
+            }
 
             const pendingCount = allCampaigns.filter(c => c.status === 'pending').length;
             const approvedCount = allCampaigns.filter(c => c.status === 'approved').length;
@@ -343,19 +394,24 @@ const AdminCampaignApproval = () => {
                                         </div>
                                     )}
                                     {(() => {
-                                        const isCompleted = (campaign.currentAmount || 0) >= campaign.goalAmount;
-                                        return isCompleted ? (
+                                        const isActive = isCampaignActive(campaign);
+                                        return isActive ? (
                                             <button 
-                                                className="btn btn-disabled btn-sm w-full"
-                                                disabled
-                                                title="Cannot archive completed campaigns"
+                                                onClick={() => handleArchive(campaign.id)}
+                                                className="btn btn-outline btn-warning btn-sm w-full"
                                             >
                                                 <FaArchive className="mr-1" /> Archive Campaign
                                             </button>
                                         ) : (
                                             <button 
-                                                onClick={() => handleArchive(campaign.id)}
-                                                className="btn btn-outline btn-warning btn-sm w-full"
+                                                className="btn btn-disabled btn-sm w-full"
+                                                disabled
+                                                title={
+                                                    campaign.status === 'archived' ? 'Campaign is already archived' :
+                                                    campaign.status !== 'approved' ? 'Only approved campaigns can be archived' :
+                                                    (campaign.currentAmount || 0) >= campaign.goalAmount ? 'Cannot archive completed campaigns' :
+                                                    'Campaign has ended and will be auto-archived'
+                                                }
                                             >
                                                 <FaArchive className="mr-1" /> Archive Campaign
                                             </button>
@@ -451,19 +507,24 @@ const AdminCampaignApproval = () => {
                                 )}
                                 <div className="border-t pt-3">
                                     {(() => {
-                                        const isCompleted = (selectedCampaign.currentAmount || 0) >= selectedCampaign.goalAmount;
-                                        return isCompleted ? (
+                                        const isActive = isCampaignActive(selectedCampaign);
+                                        return isActive ? (
                                             <button 
-                                                className="btn btn-disabled w-full"
-                                                disabled
-                                                title="Cannot archive completed campaigns"
+                                                onClick={() => handleArchive(selectedCampaign.id)}
+                                                className="btn btn-outline btn-warning w-full"
                                             >
                                                 <FaArchive className="mr-2" /> Archive Campaign
                                             </button>
                                         ) : (
                                             <button 
-                                                onClick={() => handleArchive(selectedCampaign.id)}
-                                                className="btn btn-outline btn-warning w-full"
+                                                className="btn btn-disabled w-full"
+                                                disabled
+                                                title={
+                                                    selectedCampaign.status === 'archived' ? 'Campaign is already archived' :
+                                                    selectedCampaign.status !== 'approved' ? 'Only approved campaigns can be archived' :
+                                                    (selectedCampaign.currentAmount || 0) >= selectedCampaign.goalAmount ? 'Cannot archive completed campaigns' :
+                                                    'Campaign has ended and will be auto-archived'
+                                                }
                                             >
                                                 <FaArchive className="mr-2" /> Archive Campaign
                                             </button>

@@ -180,15 +180,15 @@ const CampaignDetails = () => {
                                         }
                                         
                                         return active ? (
-                                            <Link to={`/campaigns/${campaign.id}/donate`} className="btn btn-primary w-full mb-4">
-                                                <FaHeart className="mr-2" />
-                                                Donate Now
-                                            </Link>
-                                        ) : (
-                                            <button className="btn btn-disabled w-full mb-4" disabled>
+                                        <Link to={`/campaigns/${campaign.id}/donate`} className="btn btn-primary w-full mb-4">
+                                            <FaHeart className="mr-2" />
+                                            Donate Now
+                                        </Link>
+                                    ) : (
+                                        <button className="btn btn-disabled w-full mb-4" disabled>
                                                 <FaLock className="mr-2" />
                                                 {message || 'Donation Not Available'}
-                                            </button>
+                                        </button>
                                         );
                                     })()}
 

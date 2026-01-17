@@ -369,23 +369,23 @@ const Donate = () => {
 
                                     {/* Submit Button */}
                                     {campaignActive ? (
-                                        <button
-                                            type="submit"
-                                            className="btn btn-primary w-full btn-lg text-white font-bold text-lg py-3 hover:btn-primary-focus transition-all shadow-xl hover:shadow-2xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-                                            disabled={!amount || parseInt(amount) < 100 || processing}
-                                        >
-                                            {processing ? (
-                                                <>
-                                                    <span className="loading loading-spinner loading-lg"></span>
-                                                    Processing Your Donation...
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <FaHeart className="mr-2 text-xl" />
-                                                    Donate {amount ? `৳${parseInt(amount).toLocaleString()}` : 'Now'}
-                                                </>
-                                            )}
-                                        </button>
+                                    <button
+                                        type="submit"
+                                        className="btn btn-primary w-full btn-lg text-white font-bold text-lg py-3 hover:btn-primary-focus transition-all shadow-xl hover:shadow-2xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                                        disabled={!amount || parseInt(amount) < 100 || processing}
+                                    >
+                                        {processing ? (
+                                            <>
+                                                <span className="loading loading-spinner loading-lg"></span>
+                                                Processing Your Donation...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <FaHeart className="mr-2 text-xl" />
+                                                Donate {amount ? `৳${parseInt(amount).toLocaleString()}` : 'Now'}
+                                            </>
+                                        )}
+                                    </button>
                                     ) : (
                                         <button
                                             type="button"

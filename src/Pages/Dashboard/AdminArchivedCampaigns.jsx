@@ -104,12 +104,12 @@ const AdminArchivedCampaigns = () => {
                                 <div className="card-body">
                                     <div className="flex items-center justify-between">
                                         <span className="badge badge-warning badge-outline">Ended</span>
-                                        <span className="text-xs text-gray-500">
+                                        <span className="text-xs text-black">
                                             Created {new Date(campaign.createdAt).toLocaleDateString()}
                                         </span>
                                     </div>
-                                    <h3 className="card-title text-lg mt-2">{campaign.title}</h3>
-                                    <p className="text-sm text-gray-500 mb-4">By {campaign.charityName}</p>
+                                    <h3 className="card-title text-black text-lg mt-2">{campaign.title}</h3>
+                                    <p className="text-sm text-black mb-4">By {campaign.charityName}</p>
                                     <div className="space-y-2 text-sm">
                                         <div className="flex justify-between">
                                             <span>Goal</span>

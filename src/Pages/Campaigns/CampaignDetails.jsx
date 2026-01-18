@@ -135,9 +135,9 @@ const CampaignDetails = () => {
                                     
                                     <div className="mb-6">
                                         <div className="text-center mb-4 p-4 bg-primary/10 rounded-lg">
-                                            <p className="text-sm text-gray-600 mb-1">Total Raised</p>
+                                            <p className="text-sm text-white mb-1">Total Raised</p>
                                             <p className="text-3xl font-bold text-primary">৳{(campaign.currentAmount || 0).toLocaleString()}</p>
-                                            <p className="text-sm text-gray-600 mt-1">of ৳{campaign.goalAmount.toLocaleString()} goal</p>
+                                            <p className="text-sm text-white mt-1">of ৳{campaign.goalAmount.toLocaleString()} goal</p>
                                         </div>
                                         
                                         <progress 
@@ -150,7 +150,7 @@ const CampaignDetails = () => {
                                             <span className="font-semibold text-primary">
                                                 {Math.round(((campaign.currentAmount || 0) / campaign.goalAmount) * 100)}% funded
                                             </span>
-                                            <span className="text-gray-600">
+                                            <span className="text-white font-semibold">
                                                 ৳{(campaign.goalAmount - (campaign.currentAmount || 0)).toLocaleString()} to go
                                             </span>
                                         </div>

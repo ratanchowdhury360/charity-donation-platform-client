@@ -94,13 +94,13 @@ const CampaignDetails = () => {
                                         <FaBuilding className="text-2xl text-primary" />
                                         <div>
                                             <p className="text-sm text-gray-600">Organized by</p>
-                                            <p className="font-bold text-lg">{campaign.charityName}</p>
+                                            <p className="font-bold text-lg text-base-content">{campaign.charityName}</p>
                                             <p className="text-xs text-gray-500">Charity ID: {campaign.charityId}</p>
                                         </div>
                                     </div>
 
                                     <div className="divider">Campaign Description</div>
-                                    <p className="text-lg text-gray-700 whitespace-pre-line leading-relaxed mb-6">{campaign.description}</p>
+                                    <p className="text-lg  whitespace-pre-line leading-relaxed mb-6">{campaign.description}</p>
 
                                     {/* Campaign Details Grid */}
                                     <div className="divider">Additional Information</div>
@@ -115,11 +115,11 @@ const CampaignDetails = () => {
                                         </div>
                                         <div className="p-4 bg-base-200 rounded-lg">
                                             <p className="text-sm text-gray-600 mb-1">Start Date</p>
-                                            <p className="font-semibold">{new Date(campaign.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                                            <p className="font-semibold text-base-content">{new Date(campaign.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                                         </div>
                                         <div className="p-4 bg-base-200 rounded-lg">
                                             <p className="text-sm text-gray-600 mb-1">End Date</p>
-                                            <p className="font-semibold">{new Date(campaign.endDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                                            <p className="font-semibold text-base-content">{new Date(campaign.endDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                                         </div>
                                     </div>
                                 </div>

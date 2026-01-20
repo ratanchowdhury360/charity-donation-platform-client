@@ -94,13 +94,13 @@ const CampaignDetails = () => {
                                         <FaBuilding className="text-2xl text-primary" />
                                         <div>
                                             <p className="text-sm text-gray-600">Organized by</p>
-                                            <p className="font-bold text-lg text-base-content">{campaign.charityName}</p>
+                                            <p className="font-bold text-lg">{campaign.charityName}</p>
                                             <p className="text-xs text-gray-500">Charity ID: {campaign.charityId}</p>
                                         </div>
                                     </div>
 
                                     <div className="divider">Campaign Description</div>
-                                    <p className="text-lg  whitespace-pre-line leading-relaxed mb-6">{campaign.description}</p>
+                                    <p className="text-lg text-gray-700 whitespace-pre-line leading-relaxed mb-6">{campaign.description}</p>
 
                                     {/* Campaign Details Grid */}
                                     <div className="divider">Additional Information</div>
@@ -115,11 +115,11 @@ const CampaignDetails = () => {
                                         </div>
                                         <div className="p-4 bg-base-200 rounded-lg">
                                             <p className="text-sm text-gray-600 mb-1">Start Date</p>
-                                            <p className="font-semibold text-base-content">{new Date(campaign.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                                            <p className="font-semibold">{new Date(campaign.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                                         </div>
                                         <div className="p-4 bg-base-200 rounded-lg">
                                             <p className="text-sm text-gray-600 mb-1">End Date</p>
-                                            <p className="font-semibold text-base-content">{new Date(campaign.endDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                                            <p className="font-semibold">{new Date(campaign.endDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -135,9 +135,9 @@ const CampaignDetails = () => {
                                     
                                     <div className="mb-6">
                                         <div className="text-center mb-4 p-4 bg-primary/10 rounded-lg">
-                                            <p className="text-sm text-white mb-1">Total Raised</p>
+                                            <p className="text-sm text-gray-600 mb-1">Total Raised</p>
                                             <p className="text-3xl font-bold text-primary">৳{(campaign.currentAmount || 0).toLocaleString()}</p>
-                                            <p className="text-sm text-white mt-1">of ৳{campaign.goalAmount.toLocaleString()} goal</p>
+                                            <p className="text-sm text-gray-600 mt-1">of ৳{campaign.goalAmount.toLocaleString()} goal</p>
                                         </div>
                                         
                                         <progress 
@@ -150,7 +150,7 @@ const CampaignDetails = () => {
                                             <span className="font-semibold text-primary">
                                                 {Math.round(((campaign.currentAmount || 0) / campaign.goalAmount) * 100)}% funded
                                             </span>
-                                            <span className="text-white font-semibold">
+                                            <span className="text-gray-600">
                                                 ৳{(campaign.goalAmount - (campaign.currentAmount || 0)).toLocaleString()} to go
                                             </span>
                                         </div>

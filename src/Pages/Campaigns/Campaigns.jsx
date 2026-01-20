@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { getCampaignsByStatus, isCampaignActive } from '../../utils/campaignStorage';
+import { getCampaigns, isCampaignActive } from '../../utils/campaignStorage';
 import { getAllCampaignDonorCounts } from '../../utils/donationStorage';
 import { FaSearch, FaFilter, FaHeart, FaClock, FaUsers, FaCheckCircle, FaLock } from 'react-icons/fa';
 
@@ -22,9 +22,10 @@ const Campaigns = () => {
     useEffect(() => {
         const fetchCampaigns = async () => {
             try {
-                const approvedCampaigns = await getCampaignsByStatus('approved');
-                setCampaigns(approvedCampaigns);
-                setFilteredCampaigns(approvedCampaigns);
+                // Load all campaigns so we can show active/completed/archived
+                const allCampaigns = await getCampaigns();
+                setCampaigns(allCampaigns);
+                setFilteredCampaigns(allCampaigns);
 
                 const counts = await getAllCampaignDonorCounts();
                 setDonorCounts(counts);
@@ -57,8 +58,9 @@ const Campaigns = () => {
     const matchesView = (campaign, view) => {
         const now = new Date();
         const endDate = new Date(campaign.endDate);
-        const isArchived = endDate < now;
+        const isEnded = endDate < now;
         const isCompleted = (campaign.currentAmount || 0) >= campaign.goalAmount;
+        const isArchived = campaign.status === 'archived' || isEnded;
 
         switch (view) {
             case 'completed':
@@ -66,10 +68,11 @@ const Campaigns = () => {
             case 'archived':
                 return isArchived;
             case 'all':
-                return true;
+                // Show everything except pending/rejected
+                return campaign.status !== 'pending' && campaign.status !== 'rejected';
             case 'active':
             default:
-                return !isArchived;
+                return isCampaignActive(campaign);
         }
     };
 
@@ -355,9 +358,9 @@ const Campaigns = () => {
 
                     {/* Results Count */}
                     {filteredCampaigns.length > 0 && (
-                        <div className="text-center mt-8">
+                    <div className="text-center mt-8">
                             <p className="text-white">
-                                Showing {filteredCampaigns.length} of {campaigns.length} approved campaigns
+                                Showing {filteredCampaigns.length} of {campaigns.filter(c => c.status !== 'pending' && c.status !== 'rejected').length} campaigns
                             </p>
                         </div>
                     )}

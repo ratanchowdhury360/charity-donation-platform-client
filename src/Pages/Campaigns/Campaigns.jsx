@@ -62,16 +62,21 @@ const Campaigns = () => {
         const isCompleted = (campaign.currentAmount || 0) >= campaign.goalAmount;
         const isArchived = campaign.status === 'archived' || isEnded;
 
+        const isVisibleStatus = campaign.status !== 'pending' && campaign.status !== 'rejected';
+
         switch (view) {
             case 'completed':
-                return isCompleted;
+                // Only show completed campaigns that are not pending/rejected
+                return isCompleted && isVisibleStatus;
             case 'archived':
-                return isArchived;
+                // Only show archived/ended campaigns that are not pending/rejected
+                return isArchived && isVisibleStatus;
             case 'all':
                 // Show everything except pending/rejected
-                return campaign.status !== 'pending' && campaign.status !== 'rejected';
+                return isVisibleStatus;
             case 'active':
             default:
+                // Active campaigns are approved, not completed, not ended
                 return isCampaignActive(campaign);
         }
     };

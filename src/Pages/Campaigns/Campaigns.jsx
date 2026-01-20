@@ -169,7 +169,7 @@ const Campaigns = () => {
                     {/* Header */}
                     <div className="text-center mb-12">
                         <h1 className="text-4xl font-bold mb-4">Charity Campaigns</h1>
-                        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                        <p className="text-xl text-white max-w-2xl mx-auto">
                             Discover and support verified charity campaigns making a real difference in communities across Bangladesh
                         </p>
                     </div>

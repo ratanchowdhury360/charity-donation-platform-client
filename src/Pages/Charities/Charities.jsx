@@ -65,7 +65,7 @@ const Charities = () => {
                 <div className="container mx-auto px-4 py-8">
                     <div className="text-center mb-12">
                         <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent">Verified Charities</h1>
-                        <p className="text-xl text-gray-800 max-w-2xl mx-auto font-medium">
+                        <p className="text-xl text-white max-w-2xl mx-auto font-medium">
                             Discover trusted charity organizations making a real difference in communities across Bangladesh
                         </p>
                     </div>

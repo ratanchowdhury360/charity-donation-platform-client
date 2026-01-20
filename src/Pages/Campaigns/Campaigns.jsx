@@ -15,6 +15,7 @@ const Campaigns = () => {
     const [loading, setLoading] = useState(true);
     const [searchParams, setSearchParams] = useSearchParams();
     const [viewFilter, setViewFilter] = useState(searchParams.get('view') || 'active');
+    const [charityFilter, setCharityFilter] = useState(searchParams.get('charity') || '');
 
     // Get unique categories from campaigns
     const categories = [...new Set(campaigns.map(c => c.category))];
@@ -42,17 +43,17 @@ const Campaigns = () => {
     const handleSearch = (e) => {
         const term = e.target.value.toLowerCase();
         setSearchTerm(term);
-        filterCampaigns(term, selectedCategory, sortBy, viewFilter);
+        filterCampaigns(term, selectedCategory, sortBy, viewFilter, charityFilter);
     };
 
     const handleCategoryChange = (category) => {
         setSelectedCategory(category);
-        filterCampaigns(searchTerm, category, sortBy, viewFilter);
+        filterCampaigns(searchTerm, category, sortBy, viewFilter, charityFilter);
     };
 
     const handleSortChange = (sort) => {
         setSortBy(sort);
-        filterCampaigns(searchTerm, selectedCategory, sort, viewFilter);
+        filterCampaigns(searchTerm, selectedCategory, sort, viewFilter, charityFilter);
     };
 
     const matchesView = (campaign, view) => {
@@ -81,14 +82,15 @@ const Campaigns = () => {
         }
     };
 
-    const filterCampaigns = useCallback((search, category, sort, view = viewFilter) => {
+    const filterCampaigns = useCallback((search, category, sort, view = viewFilter, charityId = charityFilter) => {
         let filtered = campaigns.filter(campaign => {
             const matchesSearch = campaign.title.toLowerCase().includes(search) ||
                                 campaign.description.toLowerCase().includes(search) ||
                                 campaign.category.toLowerCase().includes(search);
             const matchesCategory = !category || campaign.category === category;
             const matchesLifecycle = matchesView(campaign, view);
-            return matchesSearch && matchesCategory && matchesLifecycle;
+            const matchesCharity = !charityId || campaign.charityId === charityId;
+            return matchesSearch && matchesCategory && matchesLifecycle && matchesCharity;
         });
 
         // Sort campaigns
@@ -114,7 +116,7 @@ const Campaigns = () => {
         }
 
         setFilteredCampaigns(filtered);
-    }, [campaigns, viewFilter]);
+    }, [campaigns, viewFilter, charityFilter]);
 
     const handleViewChange = (view) => {
         setViewFilter(view);
@@ -124,14 +126,19 @@ const Campaigns = () => {
         } else {
             params.set('view', view);
         }
+        if (charityFilter) {
+            params.set('charity', charityFilter);
+        }
         setSearchParams(params);
-        filterCampaigns(searchTerm, selectedCategory, sortBy, view);
+        filterCampaigns(searchTerm, selectedCategory, sortBy, view, charityFilter);
     };
 
     useEffect(() => {
         const paramView = searchParams.get('view') || 'active';
+        const charityParam = searchParams.get('charity') || '';
         setViewFilter(paramView);
-        filterCampaigns(searchTerm, selectedCategory, sortBy, paramView);
+        setCharityFilter(charityParam);
+        filterCampaigns(searchTerm, selectedCategory, sortBy, paramView, charityParam);
     }, [searchParams, campaigns, searchTerm, selectedCategory, sortBy, filterCampaigns]);
 
     const getDaysLeft = (endDate) => {
@@ -365,7 +372,7 @@ const Campaigns = () => {
                     {filteredCampaigns.length > 0 && (
                     <div className="text-center mt-8">
                             <p className="text-white">
-                                Showing {filteredCampaigns.length} of {campaigns.filter(c => c.status !== 'pending' && c.status !== 'rejected').length} campaigns
+                                Showing {filteredCampaigns.length} of {campaigns.filter(c => c.status !== 'pending' && c.status !== 'rejected' && (!charityFilter || c.charityId === charityFilter)).length} campaigns
                             </p>
                         </div>
                     )}

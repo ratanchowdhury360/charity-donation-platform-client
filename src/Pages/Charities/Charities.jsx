@@ -128,7 +128,7 @@ const Charities = () => {
 
                                         <div className="card-actions justify-center mt-4">
                                             <Link 
-                                                to={`/campaigns?charity=${charity.id}`} 
+                                                to={`/campaigns?view=all&charity=${charity.id}`} 
                                                 className="btn btn-primary btn-block"
                                             >
                                                 <FaHeart className="mr-2" />

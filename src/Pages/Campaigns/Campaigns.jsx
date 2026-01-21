@@ -145,8 +145,8 @@ const Campaigns = () => {
         const end = new Date(endDate);
         const now = new Date();
         const diffTime = end - now;
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        return diffDays > 0 ? diffDays : 0;
+        // Can be positive (left), zero (today), or negative (passed)
+        return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     };
 
     if (loading) {
@@ -265,11 +265,29 @@ const Campaigns = () => {
                                     />
                                     <div className="absolute top-4 left-4 flex gap-2">
                                         <span className="badge badge-primary capitalize">{campaign.category}</span>
-                                        {getDaysLeft(campaign.endDate) <= 7 && getDaysLeft(campaign.endDate) > 0 && (
-                                            <span className="badge badge-error">
-                                                <FaClock className="mr-1" /> {getDaysLeft(campaign.endDate)} days left
-                                            </span>
-                                        )}
+                                        {(() => {
+                                            const days = getDaysLeft(campaign.endDate);
+                                            const plural = Math.abs(days) === 1 ? '' : 's';
+                                            if (days > 0) {
+                                                return (
+                                                    <span className="badge badge-error gap-1">
+                                                        <FaClock className="mr-1" /> {days} day{plural} left
+                                                    </span>
+                                                );
+                                            }
+                                            if (days === 0) {
+                                                return (
+                                                    <span className="badge badge-warning gap-1">
+                                                        <FaClock className="mr-1" /> Ends today
+                                                    </span>
+                                                );
+                                            }
+                                            return (
+                                                <span className="badge badge-ghost gap-1 text-xs">
+                                                    <FaClock className="mr-1" /> {Math.abs(days)} day{plural} passed
+                                                </span>
+                                            );
+                                        })()}
                                     </div>
                                     <div className="absolute top-4 right-4">
                                         <span className="badge badge-success gap-1">

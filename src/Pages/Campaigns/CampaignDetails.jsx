@@ -129,15 +129,15 @@ const CampaignDetails = () => {
                         {/* Sidebar */}
                         <div className="space-y-6">
                             {/* Donation Card */}
-                            <div className="card bg-gradient-to-br from-success/20 via-primary/10 to-success/20 shadow-xl border-2 border-success/30 sticky top-24">
+                            <div className="card bg-gradient-to-br from-success/20 via-primary/10 to-success/20 shadow-xl border-2 border-success/30 mt-10 mb-20 top-24">
                                 <div className="card-body">
                                     <h2 className="card-title mb-4">Support This Campaign</h2>
                                     
                                     <div className="mb-6">
                                         <div className="text-center mb-4 p-4 bg-primary/10 rounded-lg">
-                                            <p className="text-sm text-gray-600 mb-1">Total Raised</p>
+                                            <p className="text-sm text-white mb-1">Total Raised</p>
                                             <p className="text-3xl font-bold text-primary">৳{(campaign.currentAmount || 0).toLocaleString()}</p>
-                                            <p className="text-sm text-gray-600 mt-1">of ৳{campaign.goalAmount.toLocaleString()} goal</p>
+                                            <p className="text-sm text-white mt-1">of ৳{campaign.goalAmount.toLocaleString()} goal</p>
                                         </div>
                                         
                                         <progress 
@@ -147,10 +147,10 @@ const CampaignDetails = () => {
                                         ></progress>
                                         
                                         <div className="flex justify-between text-sm mt-3">
-                                            <span className="font-semibold text-primary">
+                                            <span className="font-semibold text-white text-primary">
                                                 {Math.round(((campaign.currentAmount || 0) / campaign.goalAmount) * 100)}% funded
                                             </span>
-                                            <span className="text-gray-600">
+                                            <span className="text-white">
                                                 ৳{(campaign.goalAmount - (campaign.currentAmount || 0)).toLocaleString()} to go
                                             </span>
                                         </div>
@@ -214,15 +214,15 @@ const CampaignDetails = () => {
                                             <FaCalendarAlt className="text-primary mt-1" />
                                             <div>
                                                 <p className="font-semibold">Created</p>
-                                                <p className="text-sm text-gray-600">{new Date(campaign.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                                                <p className="text-sm text-white ">{new Date(campaign.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                                             </div>
                                         </div>
                                         <div className="flex items-start gap-3">
                                             <FaCalendarAlt className="text-success mt-1" />
                                             <div>
                                                 <p className="font-semibold">End Date</p>
-                                                <p className="text-sm text-gray-600">{new Date(campaign.endDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-                                                <p className="text-xs text-gray-500 mt-1">
+                                                <p className="text-sm text-white ">{new Date(campaign.endDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                                                <p className="text-xs text-white mt-1">
                                                     {new Date(campaign.endDate) > new Date() 
                                                         ? `${Math.ceil((new Date(campaign.endDate) - new Date()) / (1000 * 60 * 60 * 24))} days remaining`
                                                         : 'Campaign ended'}
@@ -233,7 +233,7 @@ const CampaignDetails = () => {
                                             <FaMapMarkerAlt className="text-info mt-1" />
                                             <div>
                                                 <p className="font-semibold">Location</p>
-                                                <p className="text-sm text-gray-600">Bangladesh</p>
+                                                <p className="text-sm text-white ">Bangladesh</p>
                                             </div>
                                         </div>
                                     </div>
@@ -252,7 +252,7 @@ const CampaignDetails = () => {
                                         </div>
                                         <div>
                                             <p className="font-bold text-lg">{campaign.charityName}</p>
-                                            <p className="text-sm text-gray-600 flex items-center gap-1">
+                                            <p className="text-sm text-white flex items-center gap-1">
                                                 <FaCheckCircle className="text-success" />
                                                 Registered Charity
                                             </p>

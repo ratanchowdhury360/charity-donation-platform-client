@@ -199,8 +199,8 @@ export default function Profile() {
             {/* User Login Info Card */}
             <div className="card bg-gradient-to-r from-primary/10 to-secondary/10 shadow-lg border-2 border-primary/20">
                 <div className="card-body">
-                    <h2 className="card-title text-xl mb-4 flex items-center gap-2 text-base-content">
-                        <FaShieldAlt className="text-primary" />
+                    <h2 className="card-title text-xl mb-4 flex items-center gap-2 ">
+                        <FaShieldAlt className="text-primary " />
                         Account Information
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

@@ -1,10 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../provider/authProvider';
-import { FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaCalendarAlt, FaEdit, FaSave, FaTimes, FaUserTag, FaIdCard, FaClock, FaShieldAlt } from 'react-icons/fa';
+import { db } from '../../firebase/firebase.config';
+import { doc, getDoc } from 'firebase/firestore';
+import { FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaCalendarAlt, FaEdit, FaSave, FaTimes, FaUserTag, FaIdCard, FaClock, FaShieldAlt, FaSpinner } from 'react-icons/fa';
 
 export default function Profile() {
     const { currentUser, updateUserProfile, userRole } = useAuth();
     const [isEditing, setIsEditing] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [photoFile, setPhotoFile] = useState(null);
+    const [photoPreview, setPhotoPreview] = useState(null);
     const [formData, setFormData] = useState({
         displayName: '',
         email: '',
@@ -15,15 +21,41 @@ export default function Profile() {
 
     // Initialize form data when currentUser changes
     useEffect(() => {
-        if (currentUser) {
-            setFormData({
-                displayName: currentUser.displayName || '',
-                email: currentUser.email || '',
-                phone: currentUser.phoneNumber || '',
-                location: currentUser.location || 'Not specified',
-                bio: currentUser.bio || 'No bio added yet.'
-            });
-        }
+        const loadUserProfile = async () => {
+            if (currentUser) {
+                setIsLoading(true);
+                try {
+                    // Load additional profile data from Firestore
+                    const userRef = doc(db, 'users', currentUser.uid);
+                    const userSnap = await getDoc(userRef);
+                    const userData = userSnap.exists() ? userSnap.data() : {};
+
+                    setFormData({
+                        displayName: currentUser.displayName || userData.displayName || '',
+                        email: currentUser.email || '',
+                        phone: userData.phoneNumber || '',
+                        location: userData.location || '',
+                        bio: userData.bio || ''
+                    });
+                    setPhotoPreview(null);
+                    setPhotoFile(null);
+                } catch (error) {
+                    console.error('Error loading user profile:', error);
+                    // Fallback to basic data
+                    setFormData({
+                        displayName: currentUser.displayName || '',
+                        email: currentUser.email || '',
+                        phone: '',
+                        location: '',
+                        bio: ''
+                    });
+                } finally {
+                    setIsLoading(false);
+                }
+            }
+        };
+
+        loadUserProfile();
     }, [currentUser]);
 
     const handleChange = (e) => {
@@ -34,21 +66,94 @@ export default function Profile() {
         }));
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        try {
-            await updateUserProfile(formData);
-            setIsEditing(false);
-            // Show success message
-            alert('Profile updated successfully!');
-        } catch (error) {
-            console.error('Failed to update profile:', error);
-            alert('Failed to update profile. Please try again.');
+    const handlePhotoChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                const swal = typeof window !== 'undefined' ? window.Swal : null;
+                if (swal) {
+                    swal.fire({
+                        icon: 'error',
+                        title: 'Invalid File',
+                        text: 'Please select an image file (jpg, png, etc.)'
+                    });
+                } else {
+                    alert('Please select an image file');
+                }
+                return;
+            }
+
+            // Validate file size (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                const swal = typeof window !== 'undefined' ? window.Swal : null;
+                if (swal) {
+                    swal.fire({
+                        icon: 'error',
+                        title: 'File Too Large',
+                        text: 'Please select an image smaller than 5MB'
+                    });
+                } else {
+                    alert('Please select an image smaller than 5MB');
+                }
+                return;
+            }
+
+            setPhotoFile(file);
+            // Create preview
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setPhotoPreview(reader.result);
+            };
+            reader.readAsDataURL(file);
         }
     };
 
-    if (!currentUser) {
-        return <div>Loading...</div>;
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setIsUploading(true);
+        try {
+            await updateUserProfile(formData, photoFile);
+            setIsEditing(false);
+            setPhotoFile(null);
+            setPhotoPreview(null);
+            
+            // Show success message with SweetAlert2
+            const swal = typeof window !== 'undefined' ? window.Swal : null;
+            if (swal) {
+                swal.fire({
+                    icon: 'success',
+                    title: 'Profile Updated!',
+                    text: 'Your profile has been updated successfully.',
+                    timer: 3000,
+                    showConfirmButton: false
+                });
+            } else {
+                alert('Profile updated successfully!');
+            }
+        } catch (error) {
+            console.error('Failed to update profile:', error);
+            const swal = typeof window !== 'undefined' ? window.Swal : null;
+            if (swal) {
+                swal.fire({
+                    icon: 'error',
+                    title: 'Update Failed',
+                    text: error.message || 'Failed to update profile. Please try again.'
+                });
+            } else {
+                alert('Failed to update profile. Please try again.');
+            }
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
+    if (!currentUser || isLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-[400px]">
+                <FaSpinner className="animate-spin text-4xl text-primary" />
+            </div>
+        );
     }
 
     return (
@@ -74,8 +179,18 @@ export default function Profile() {
                             type="submit" 
                             form="profileForm"
                             className="btn btn-primary btn-sm"
+                            disabled={isUploading}
                         >
-                            <FaSave className="mr-1" /> Save Changes
+                            {isUploading ? (
+                                <>
+                                    <FaSpinner className="mr-1 animate-spin" />
+                                    Saving...
+                                </>
+                            ) : (
+                                <>
+                                    <FaSave className="mr-1" /> Save Changes
+                                </>
+                            )}
                         </button>
                     </div>
                 )}
@@ -162,7 +277,7 @@ export default function Profile() {
                                 <div className="avatar">
                                     <div className="w-32 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
                                         <img 
-                                            src={currentUser.photoURL || '/api/placeholder/150/150'} 
+                                            src={photoPreview || currentUser.photoURL || '/api/placeholder/150/150'} 
                                             alt="Profile"
                                             onError={(e) => {
                                                 e.target.src = 'https://via.placeholder.com/150';
@@ -172,10 +287,28 @@ export default function Profile() {
                                 </div>
                                 {isEditing && (
                                     <div className="mt-4">
-                                        <label className="btn btn-sm btn-primary btn-outline w-full hover:btn-primary">
-                                            Change Photo
-                                            <input type="file" className="hidden" />
+                                        <label className="btn btn-sm btn-primary btn-outline w-full hover:btn-primary cursor-pointer">
+                                            {isUploading ? (
+                                                <>
+                                                    <FaSpinner className="mr-2 animate-spin" />
+                                                    Uploading...
+                                                </>
+                                            ) : (
+                                                'Change Photo'
+                                            )}
+                                            <input 
+                                                type="file" 
+                                                className="hidden" 
+                                                accept="image/*"
+                                                onChange={handlePhotoChange}
+                                                disabled={isUploading}
+                                            />
                                         </label>
+                                        {photoFile && (
+                                            <p className="text-xs text-white/80 mt-2 text-center">
+                                                {photoFile.name}
+                                            </p>
+                                        )}
                                     </div>
                                 )}
                             </div>

@@ -118,7 +118,8 @@ const MyCampaigns = () => {
             </div>
 
             {/* Filter Tabs */}
-            <div className="tabs tabs-boxed bg-gradient-to-r from-teal-200 via-cyan-200 to-teal-200 shadow-lg border-2 border-teal-300 w-fit">
+           <div className="tabs tabs-boxed bg-gradient-to-r from-teal-500 via-cyan-500 to-teal-500 text-white shadow-lg border-2 border-teal-600 w-fit">
+
                 <button 
                     className={`tab ${filter === 'all' ? 'tab-active' : ''}`}
                     onClick={() => setFilter('all')}

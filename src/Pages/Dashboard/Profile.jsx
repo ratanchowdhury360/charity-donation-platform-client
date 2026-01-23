@@ -252,7 +252,7 @@ export default function Profile() {
                         </div>
                         <p className="text-base font-black text-white">{currentUser.email}</p>
                         <div className="mt-2">
-                            {currentUser.emailVerified ? (
+                            {/* {currentUser.emailVerified ? (
                                 <span className="badge badge-success gap-1">
                                     <FaShieldAlt /> Verified
                                 </span>
@@ -260,7 +260,7 @@ export default function Profile() {
                                 <span className="badge badge-warning gap-1">
                                     <FaClock /> Not Verified
                                 </span>
-                            )}
+                            )} */}
                         </div>
                     </div>
                 </div>

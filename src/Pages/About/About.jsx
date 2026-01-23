@@ -299,7 +299,7 @@ const About = () => {
                                 <div className="card-body text-center">
                                     <div className="avatar mb-4">
                                         <div className="w-24 rounded-full mx-auto">
-                                            <img src="/api/placeholder/96/96" alt="Team Member" />
+                                         {/*    <img src="/api/placeholder/96/96" alt="Team Member" /> */}
                                         </div>
                                     </div>
                                     <h3 className="card-title text-black justify-center">Md. Ratan Chowdhury</h3>
@@ -314,7 +314,7 @@ const About = () => {
                                 <div className="card-body text-center">
                                     <div className="avatar mb-4">
                                         <div className="w-24 rounded-full mx-auto">
-                                            <img src="/api/placeholder/96/96" alt="Team Member" />
+                                            {/* <img src="/api/placeholder/96/96" alt="Team Member" /> */}
                                         </div>
                                     </div>
                                     <h3 className="card-title text-black justify-center">Nayeem Khan</h3>
@@ -329,7 +329,7 @@ const About = () => {
                                 <div className="card-body text-center">
                                     <div className="avatar mb-4">
                                         <div className="w-24 rounded-full mx-auto">
-                                            <img src="/api/placeholder/96/96" alt="Team Member" />
+                                            {/* <img src="/api/placeholder/96/96" alt="Team Member" /> */}
                                         </div>
                                     </div>
                                     <h3 className="card-title text-black justify-center">Golam Rabbi</h3>

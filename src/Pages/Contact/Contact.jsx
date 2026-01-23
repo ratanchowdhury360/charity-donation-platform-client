@@ -176,19 +176,26 @@ const Contact = () => {
                         : entry.actorName || 'Guest';
             const isAdmin = entry.actorType === 'admin';
             return (
-                <div
-                    key={`${thread.id}-reply-${idx}`}
-                    className={`rounded-2xl p-4 text-sm leading-relaxed shadow-sm border-2 ${
-                        isAdmin
-                            ? 'bg-gradient-to-r from-primary/90 to-secondary/90 text-white border-transparent'
-                            : 'bg-gradient-to-br from-white via-primary/5 to-base-100 text-gray-900 border-primary/20'
+                 <div
+                key={`${thread.id}-reply-${idx}`}
+                className={`rounded-2xl p-4 text-sm leading-relaxed shadow-sm ${
+                    isAdmin
+                        ? 'bg-primary text-primary-content'
+                        : 'bg-base-200 text-base-content border border-base-300'
+                }`}
+            >
+                <p
+                    className={`font-semibold text-xs mb-2 ${
+                        isAdmin ? 'text-primary-content/80' : 'text-gray-600'
                     }`}
                 >
-                    <p className={`font-semibold text-xs mb-2 ${isAdmin ? 'text-white/90' : 'text-gray-700'}`}>
-                        {label} • {new Date(entry.createdAt).toLocaleString()}
-                    </p>
-                    <p className={`whitespace-pre-line text-base ${isAdmin ? 'text-white' : 'text-gray-900'}`}>{entry.message}</p>
-                </div>
+                    {label} • {new Date(entry.createdAt).toLocaleString()}
+                </p>
+
+                <p className="whitespace-pre-line text-base">
+                    {entry.message}
+                </p>
+            </div>
             );
         });
     };

@@ -6,12 +6,10 @@ import {
     signInWithPopup,
     GoogleAuthProvider,
     signOut,
-    onAuthStateChanged,
-    updateProfile
+    onAuthStateChanged
 } from 'firebase/auth';
-import { auth, db, storage } from '../firebase/firebase.config';
+import { auth, db } from '../firebase/firebase.config';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { syncUserWithServer } from './authSync';
 import { AuthContext } from './authContext';
 import { getStoredRole, persistRole } from './authRoleHelpers';
@@ -172,77 +170,6 @@ export const AuthProvider = ({ children }) => {
         setRole(null);
     };
 
-    // Update user profile
-    const updateUserProfile = async (profileData, photoFile = null) => {
-        const user = auth.currentUser;
-        if (!user) {
-            throw new Error('No user is currently signed in');
-        }
-
-        try {
-            let photoURL = user.photoURL || '';
-
-            // Upload photo if provided
-            if (photoFile) {
-                const photoRef = ref(storage, `profile-photos/${user.uid}/${Date.now()}_${photoFile.name}`);
-                await uploadBytes(photoRef, photoFile);
-                photoURL = await getDownloadURL(photoRef);
-            }
-
-            // Update Firebase Auth profile
-            const updateData = {};
-            if (profileData.displayName) {
-                updateData.displayName = profileData.displayName;
-            }
-            if (photoURL) {
-                updateData.photoURL = photoURL;
-            }
-            
-            if (Object.keys(updateData).length > 0) {
-                await updateProfile(user, updateData);
-            }
-
-            // Update Firestore user document
-            const userRef = doc(db, 'users', user.uid);
-            const userSnap = await getDoc(userRef);
-            const existingData = userSnap.exists() ? userSnap.data() : {};
-
-            const updatedData = {
-                ...existingData,
-                displayName: profileData.displayName || existingData.displayName || user.displayName || '',
-                phoneNumber: profileData.phone || existingData.phoneNumber || '',
-                location: profileData.location || existingData.location || '',
-                bio: profileData.bio || existingData.bio || '',
-                photoURL: photoURL || existingData.photoURL || user.photoURL || '',
-                updatedAt: serverTimestamp()
-            };
-
-            await setDoc(userRef, updatedData, { merge: true });
-
-            // Sync with backend server
-            const userPayload = {
-                uid: user.uid,
-                email: user.email,
-                displayName: updatedData.displayName,
-                photoURL: updatedData.photoURL,
-                phoneNumber: updatedData.phoneNumber,
-                location: updatedData.location,
-                bio: updatedData.bio,
-                role: existingData.role || userRole || 'donor',
-                providerId: existingData.providerId || user.providerData?.[0]?.providerId || 'password'
-            };
-
-            await syncUserWithServer(userPayload);
-
-            // Update currentUser state by reloading
-            // The onAuthStateChanged will handle the state update
-            return { success: true };
-        } catch (error) {
-            console.error('Error updating user profile:', error);
-            throw error;
-        }
-    };
-
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             setCurrentUser(user);
@@ -292,7 +219,6 @@ export const AuthProvider = ({ children }) => {
         login,
         loginWithGoogle,
         logout,
-        updateUserProfile,
         setRole,
         hasRole,
         isAdmin,

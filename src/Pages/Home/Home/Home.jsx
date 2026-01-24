@@ -199,9 +199,8 @@ const Home = () => {
                                     <button
                                         key={key}
                                         onClick={() => setFundView(key)}
-                                        className={`btn btn-sm border-0 ${
-                                            fundView === key ? 'btn-secondary text-white' : 'btn-ghost text-white/80 bg-white/10'
-                                        }`}
+                                        className={`btn btn-sm border-0 ${fundView === key ? 'btn-secondary text-white' : 'btn-ghost text-white/80 bg-white/10'
+                                            }`}
                                     >
                                         {donationTrends[key]?.label}
                                     </button>
@@ -216,37 +215,55 @@ const Home = () => {
             </section>
 
             {/* Stats Section */}
-            <section className="py-10 ">
-                <div className="container mx-auto px-4">
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
-                        <div className="text-center p-6 bg-red-300 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
-                            <FaHeart className="text-4xl text-primary mx-auto mb-3" />
-                            <div className="text-3xl font-bold text-primary mb-2">৳{stats.totalRaised.toLocaleString()}</div>
-                            <div className="text-sm text-gray-600">Total Raised</div>
-                        </div>
-                        <div className="text-center p-6 bg-green-300 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
-                            <FaChartLine className="text-4xl text-secondary mx-auto mb-3" />
-                            <div className="text-3xl font-bold text-secondary mb-2">{stats.activeCampaigns}</div>
-                            <div className="text-sm text-gray-600">Active Campaigns</div>
-                        </div>
-                        <div className="text-center p-6 bg-yellow-300 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
-                            <FaUsers className="text-4xl text-accent mx-auto mb-3" />
-                            <div className="text-3xl font-bold text-accent mb-2">{stats.totalDonors}</div>
-                            <div className="text-sm text-gray-600">Donors</div>
-                        </div>
-                        <div className="text-center p-6 bg-blue-300 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
-                            <FaBuilding className="text-4xl text-info mx-auto mb-3" />
-                            <div className="text-3xl font-bold text-info mb-2">{stats.totalCharities}</div>
-                            <div className="text-sm text-gray-600">Charities</div>
-                        </div>
-                        <div className="text-center p-6 bg-green-300 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
-                            <FaStar className="text-4xl text-warning mx-auto mb-3" />
-                            <div className="text-3xl font-bold text-warning mb-2">{stats.successRate}%</div>
-                            <div className="text-sm text-gray-600">Success Rate</div>
-                        </div>
-                    </div>
-                </div>
-            </section>
+            <section className="py-12 ">
+  <div className="container mx-auto px-4">
+    <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
+
+      <div className="text-center p-6 rounded-xl shadow-md bg-gradient-to-br from-primary to-primary-focus text-white hover:scale-105 transition-transform">
+        <FaHeart className="text-4xl mx-auto mb-3 text-white" />
+        <div className="text-3xl font-bold mb-1">
+          ৳{stats.totalRaised.toLocaleString()}
+        </div>
+        <div className="text-sm text-white/80">Total Raised</div>
+      </div>
+
+      <div className="text-center p-6 rounded-xl shadow-md bg-gradient-to-br from-secondary to-secondary-focus text-white hover:scale-105 transition-transform">
+        <FaChartLine className="text-4xl mx-auto mb-3 text-white" />
+        <div className="text-3xl font-bold mb-1">
+          {stats.activeCampaigns}
+        </div>
+        <div className="text-sm text-white/80">Active Campaigns</div>
+      </div>
+
+      <div className="text-center p-6 rounded-xl shadow-md bg-gradient-to-br from-accent to-accent-focus text-white hover:scale-105 transition-transform">
+        <FaUsers className="text-4xl mx-auto mb-3 text-white" />
+        <div className="text-3xl font-bold mb-1">
+          {stats.totalDonors}
+        </div>
+        <div className="text-sm text-white/80">Donors</div>
+      </div>
+
+      <div className="text-center p-6 rounded-xl shadow-md bg-gradient-to-br from-info to-info-focus text-white hover:scale-105 transition-transform">
+        <FaBuilding className="text-4xl mx-auto mb-3 text-white" />
+        <div className="text-3xl font-bold mb-1">
+          {stats.totalCharities}
+        </div>
+        <div className="text-sm text-white/80">Charities</div>
+      </div>
+
+      <div className="text-center p-6 rounded-xl shadow-md bg-gradient-to-br from-success to-success-focus text-white hover:scale-105 transition-transform">
+        <FaStar className="text-4xl mx-auto mb-3 text-white" />
+        <div className="text-3xl font-bold mb-1">
+          {stats.successRate}%
+        </div>
+        <div className="text-sm text-white/80">Success Rate</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
 
             {/* Campaign highlights */}
             <section className="py-12 ">
@@ -361,17 +378,17 @@ const Home = () => {
                                                 View Details
                                             </Link>
                                             {isCampaignActive(campaign) ? (
-                                            <Link to={`/campaigns/${campaign.id}/donate`} className="btn btn-outline btn-sm">
-                                                Donate Now
-                                            </Link>
+                                                <Link to={`/campaigns/${campaign.id}/donate`} className="btn btn-outline btn-sm">
+                                                    Donate Now
+                                                </Link>
                                             ) : (
-                                                <button 
-                                                    className="btn btn-disabled btn-sm" 
+                                                <button
+                                                    className="btn btn-disabled btn-sm"
                                                     disabled
                                                     title={
                                                         campaign.status !== 'approved' ? 'Campaign Pending Approval' :
-                                                        (campaign.currentAmount || 0) >= campaign.goalAmount ? 'Campaign Goal Reached' :
-                                                        'Campaign Ended'
+                                                            (campaign.currentAmount || 0) >= campaign.goalAmount ? 'Campaign Goal Reached' :
+                                                                'Campaign Ended'
                                                     }
                                                 >
                                                     <FaLock className="mr-1" /> Donate

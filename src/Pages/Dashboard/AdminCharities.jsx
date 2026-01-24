@@ -64,134 +64,189 @@ const AdminCharities = () => {
   });
 
   return (
-    <>
-      <Helmet>
-        <title>Admin Charities - Charity Platform</title>
-      </Helmet>
+ <>
+  <Helmet>
+    <title>Admin Charities - Charity Platform</title>
+  </Helmet>
 
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <FaBuilding className="text-2xl text-primary" />
-            <h1 className="text-2xl font-bold">Charities</h1>
-          </div>
-          <div className="join">
-            <input
-              type="text"
-              placeholder="Search charities..."
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-              className="input input-bordered join-item w-72"
-            />
-            <button className="btn btn-primary join-item">
-              <FaSearch />
-            </button>
-          </div>
+  {/* Page Background */}
+  <div className="space-y-6 p-4 rounded-3xl bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50">
+
+    {/* Header */}
+    <div className="flex items-center justify-between p-5 rounded-2xl 
+      bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600 
+      text-white shadow-lg">
+
+      <div className="flex items-center gap-3">
+        <FaBuilding className="text-2xl opacity-90" />
+        <h1 className="text-2xl font-semibold tracking-wide">
+          Charities Management
+        </h1>
+      </div>
+
+      <div className="join">
+        <input
+          type="text"
+          placeholder="Search charities..."
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+          className="input join-item w-72 bg-white/90 text-gray-800 placeholder:text-gray-400"
+        />
+        <button className="btn join-item bg-white/20 hover:bg-white/30 text-white border-none">
+          <FaSearch />
+        </button>
+      </div>
+    </div>
+
+    {/* Stats Overview */}
+    <div className="stats shadow-lg rounded-2xl 
+      bg-white/80 backdrop-blur border border-indigo-100">
+
+      <div className="stat">
+        <div className="stat-title text-gray-500">Total Charities</div>
+        <div className="stat-value text-indigo-600">
+          {charities.length}
         </div>
-
-        {/* Stats Overview */}
-        <div className="stats shadow-lg bg-gradient-to-br from-white via-primary/5 to-secondary/5 border-2 border-primary/20 w-full">
-          <div className="stat bg-gradient-to-br from-primary/10 to-primary/5 border-r-2 border-primary/20">
-            <div className="stat-title text-gray-700 font-semibold">Total Charities</div>
-            <div className="stat-value text-primary">{charities.length}</div>
-            <div className="stat-desc text-gray-600">Registered organizations</div>
-          </div>
-          <div className="stat bg-gradient-to-br from-secondary/10 to-secondary/5 border-r-2 border-secondary/20">
-            <div className="stat-title text-gray-700 font-semibold">Total Campaigns</div>
-            <div className="stat-value text-secondary">
-              {charities.reduce((sum, c) => sum + c.totalCampaigns, 0)}
-            </div>
-            <div className="stat-desc text-gray-600">All campaigns combined</div>
-          </div>
-          <div className="stat bg-gradient-to-br from-accent/10 to-accent/5">
-            <div className="stat-title text-gray-700 font-semibold">Total Raised</div>
-            <div className="stat-value text-accent">
-              ৳{charities.reduce((sum, c) => sum + c.totalRaised, 0).toLocaleString()}
-            </div>
-            <div className="stat-desc text-gray-600">Across all charities</div>
-          </div>
-        </div>
-
-        {/* Charities List */}
-        <div className="card bg-gradient-to-br from-white via-primary/10 to-secondary/10 shadow-xl border-2 border-primary/20">
-          <div className="card-body p-0">
-            {loading ? (
-              <div className="p-6 text-center">
-                <span className="loading loading-spinner loading-lg"></span>
-              </div>
-            ) : filteredCharities.length === 0 ? (
-              <div className="p-12 text-center">
-                <FaBuilding className="text-6xl text-base-300 mx-auto mb-4" />
-                <h3 className="text-xl font-bold mb-2">No Charities Found</h3>
-                <p className="text-base-content/70">
-                  {searchText ? 'Try a different search term' : 'No charities have registered yet'}
-                </p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="table">
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>Charity Name</th>
-                      <th>Total Campaigns</th>
-                      <th>Approved</th>
-                      <th>Pending</th>
-                      <th>Total Raised</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredCharities.map((charity, idx) => (
-                      <tr key={charity.id} className="hover">
-                        <td>{idx + 1}</td>
-                        <td>
-                          <div className="flex items-center gap-3">
-                            <div className="avatar placeholder">
-                              <div className="bg-primary text-primary-content rounded-full w-10">
-                                <span className="text-lg">{charity.name.charAt(0).toUpperCase()}</span>
-                              </div>
-                            </div>
-                            <div>
-                              <div className="font-bold">{charity.name}</div>
-                              <div className="text-xs flex items-center gap-1 text-success">
-                                <FaCheckCircle />
-                                <span>Registered</span>
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-                        <td>
-                          <span className="badge badge-lg">{charity.totalCampaigns}</span>
-                        </td>
-                        <td>
-                          <span className="badge badge-success badge-lg">{charity.approvedCampaigns}</span>
-                        </td>
-                        <td>
-                          <span className="badge badge-warning badge-lg">{charity.pendingCampaigns}</span>
-                        </td>
-                        <td>
-                          <span className="font-bold text-secondary">৳{charity.totalRaised.toLocaleString()}</span>
-                        </td>
-                        <td>
-                          <Link
-                            to={`/campaigns?charity=${charity.id}`}
-                            className="btn btn-sm btn-ghost"
-                            title="View campaigns"
-                          >
-                            <FaEye />
-                          </Link>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
+        <div className="stat-desc text-gray-400">
+          Registered organizations
         </div>
       </div>
-    </>
+
+      <div className="stat">
+        <div className="stat-title text-gray-500">Total Campaigns</div>
+        <div className="stat-value text-blue-600">
+          {charities.reduce((sum, c) => sum + c.totalCampaigns, 0)}
+        </div>
+        <div className="stat-desc text-gray-400">
+          All campaigns combined
+        </div>
+      </div>
+
+      <div className="stat">
+        <div className="stat-title text-gray-500">Total Raised</div>
+        <div className="stat-value text-purple-600">
+          ৳{charities.reduce((sum, c) => sum + c.totalRaised, 0).toLocaleString()}
+        </div>
+        <div className="stat-desc text-gray-400">
+          Across all charities
+        </div>
+      </div>
+
+    </div>
+
+    {/* Charities Table */}
+    <div className="card rounded-2xl shadow-lg 
+      bg-white/90 backdrop-blur border border-indigo-100">
+      <div className="card-body p-0">
+
+        {loading ? (
+          <div className="p-10 text-center">
+            <span className="loading loading-spinner loading-lg text-indigo-600"></span>
+          </div>
+        ) : filteredCharities.length === 0 ? (
+          <div className="p-12 text-center">
+            <FaBuilding className="text-6xl text-gray-300 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold mb-2">
+              No Charities Found
+            </h3>
+            <p className="text-gray-500">
+              {searchText
+                ? "Try a different search term"
+                : "No charities have registered yet"}
+            </p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="table">
+
+              <thead>
+                <tr className="bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-700">
+                  <th>#</th>
+                  <th>Charity</th>
+                  <th>Campaigns</th>
+                  <th>Approved</th>
+                  <th>Pending</th>
+                  <th>Total Raised</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {filteredCharities.map((charity, idx) => (
+                  <tr
+                    key={charity.id}
+                    className="hover:bg-indigo-50 transition-colors"
+                  >
+                    <td className="font-medium text-indigo-600">
+                      {idx + 1}
+                    </td>
+
+                    <td>
+                      <div className="flex items-center gap-3">
+                        <div className="avatar placeholder">
+                          <div className="bg-indigo-100 text-indigo-700 rounded-full w-10">
+                            <span className="font-semibold">
+                              {charity.name.charAt(0).toUpperCase()}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div>
+                          <div className="font-semibold text-gray-800">
+                            {charity.name}
+                          </div>
+                          <div className="text-xs flex items-center gap-1 text-green-600">
+                            <FaCheckCircle />
+                            <span>Registered</span>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+
+                    <td>
+                      <span className="badge bg-blue-100 text-blue-700">
+                        {charity.totalCampaigns}
+                      </span>
+                    </td>
+
+                    <td>
+                      <span className="badge bg-green-100 text-green-700">
+                        {charity.approvedCampaigns}
+                      </span>
+                    </td>
+
+                    <td>
+                      <span className="badge bg-yellow-100 text-yellow-700">
+                        {charity.pendingCampaigns}
+                      </span>
+                    </td>
+
+                    <td className="font-semibold text-purple-600">
+                      ৳{charity.totalRaised.toLocaleString()}
+                    </td>
+
+                    <td>
+                      <Link
+                        to={`/campaigns?charity=${charity.id}`}
+                        className="btn btn-sm btn-ghost text-indigo-600 hover:bg-indigo-100"
+                      >
+                        <FaEye />
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+
+  </div>
+</>
+
+
   );
 };
 

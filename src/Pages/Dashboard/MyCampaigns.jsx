@@ -11,24 +11,24 @@ const MyCampaigns = () => {
     const [filter, setFilter] = useState('all'); // all, pending, approved, rejected
 
     useEffect(() => {
+        const fetchMyCampaigns = async () => {
+            try {
+                setLoading(true);
+                if (currentUser?.uid) {
+                    const myCampaigns = await getCampaignsByCharity(currentUser.uid);
+                    setCampaigns(myCampaigns);
+                } else {
+                    setCampaigns([]);
+                }
+            } catch (error) {
+                console.error('Error fetching campaigns:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
         fetchMyCampaigns();
     }, [currentUser]);
-
-    const fetchMyCampaigns = async () => {
-        try {
-            setLoading(true);
-            if (currentUser?.uid) {
-                const myCampaigns = await getCampaignsByCharity(currentUser.uid);
-                setCampaigns(myCampaigns);
-            } else {
-                setCampaigns([]);
-            }
-        } catch (error) {
-            console.error('Error fetching campaigns:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const getFilteredCampaigns = () => {
         if (filter === 'all') return campaigns;

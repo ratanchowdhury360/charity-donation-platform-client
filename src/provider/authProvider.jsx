@@ -16,6 +16,7 @@ import { getStoredRole, persistRole } from './authRoleHelpers';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://charity-donation-platform-server.vercel.app';
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => {
     return useContext(AuthContext);
 };

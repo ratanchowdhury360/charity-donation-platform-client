@@ -75,12 +75,12 @@ const SignUp = () => {
         <div className="min-h-screen flex items-center justify-center bg-base-200 py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-md w-full space-y-8">
                 <div className="text-center">
-                    <h2 className="mt-6 text-3xl font-extrabold text-primary">
+                    <h2 className="mt-6 text-3xl font-extrabold ">
                         Create your account
                     </h2>
                     <p className="mt-2 text-sm text-base-content/80">
                         Or{' '}
-                        <Link to="/login" className="font-medium text-primary hover:text-primary-focus underline">
+                        <Link to="/login" className="font-medium text-blue-600 hover:text-primary-focus underline">
                             sign in to your existing account
                         </Link>
                     </p>
@@ -278,7 +278,7 @@ const SignUp = () => {
                         <button
                             onClick={handleGoogleLogin}
                             disabled={loading}
-                            className="btn btn-outline btn-primary w-full flex items-center justify-center gap-2 hover:btn-primary hover:text-white transition-all"
+                            className="btn btn-outline btn-primary text-white w-full flex items-center justify-center gap-2 hover:btn-primary hover:text-white transition-all"
                         >
                             <FaGoogle className="h-5 w-5" />
                             Continue with Google

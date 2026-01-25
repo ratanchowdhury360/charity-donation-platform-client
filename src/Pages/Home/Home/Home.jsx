@@ -180,7 +180,7 @@ const Home = () => {
 
 
             {/* Fund Pulse */}
-            <section className="pt-6 pb-10 mt-6 ">
+            <section className="pt-10 pb-10 mt-10 ">
                 <div className="container mt-10 mx-auto px-4">
                     <div className="card mt-5 shadow-2xl bg-gradient-to-r from-primary to-secondary text-white">
                         <div className="card-body mt-5 flex flex-col lg:flex-row gap-8 items-start lg:items-center">

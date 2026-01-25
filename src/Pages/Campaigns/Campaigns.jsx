@@ -17,13 +17,11 @@ const Campaigns = () => {
     const [viewFilter, setViewFilter] = useState(searchParams.get('view') || 'active');
     const [charityFilter, setCharityFilter] = useState(searchParams.get('charity') || '');
 
-    // Get unique categories from campaigns
     const categories = [...new Set(campaigns.map(c => c.category))];
 
     useEffect(() => {
         const fetchCampaigns = async () => {
             try {
-                // Load all campaigns so we can show active/completed/archived
                 const allCampaigns = await getCampaigns();
                 setCampaigns(allCampaigns);
                 setFilteredCampaigns(allCampaigns);
@@ -62,22 +60,17 @@ const Campaigns = () => {
         const isEnded = endDate < now;
         const isCompleted = (campaign.currentAmount || 0) >= campaign.goalAmount;
         const isArchived = campaign.status === 'archived' || isEnded;
-
         const isVisibleStatus = campaign.status !== 'pending' && campaign.status !== 'rejected';
 
         switch (view) {
             case 'completed':
-                // Only show completed campaigns that are not pending/rejected
                 return isCompleted && isVisibleStatus;
             case 'archived':
-                // Only show archived/ended campaigns that are not pending/rejected
                 return isArchived && isVisibleStatus;
             case 'all':
-                // Show everything except pending/rejected
                 return isVisibleStatus;
             case 'active':
             default:
-                // Active campaigns are approved, not completed, not ended
                 return isCampaignActive(campaign);
         }
     };
@@ -85,15 +78,14 @@ const Campaigns = () => {
     const filterCampaigns = useCallback((search, category, sort, view = viewFilter, charityId = charityFilter) => {
         let filtered = campaigns.filter(campaign => {
             const matchesSearch = campaign.title.toLowerCase().includes(search) ||
-                                campaign.description.toLowerCase().includes(search) ||
-                                campaign.category.toLowerCase().includes(search);
+                                  campaign.description.toLowerCase().includes(search) ||
+                                  campaign.category.toLowerCase().includes(search);
             const matchesCategory = !category || campaign.category === category;
             const matchesLifecycle = matchesView(campaign, view);
             const matchesCharity = !charityId || campaign.charityId === charityId;
             return matchesSearch && matchesCategory && matchesLifecycle && matchesCharity;
         });
 
-        // Sort campaigns
         switch (sort) {
             case 'newest':
                 filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -121,14 +113,9 @@ const Campaigns = () => {
     const handleViewChange = (view) => {
         setViewFilter(view);
         const params = new URLSearchParams(searchParams);
-        if (view === 'active') {
-            params.delete('view');
-        } else {
-            params.set('view', view);
-        }
-        if (charityFilter) {
-            params.set('charity', charityFilter);
-        }
+        if (view === 'active') params.delete('view');
+        else params.set('view', view);
+        if (charityFilter) params.set('charity', charityFilter);
         setSearchParams(params);
         filterCampaigns(searchTerm, selectedCategory, sortBy, view, charityFilter);
     };
@@ -145,13 +132,12 @@ const Campaigns = () => {
         const end = new Date(endDate);
         const now = new Date();
         const diffTime = end - now;
-        // Can be positive (left), zero (today), or negative (passed)
         return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     };
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-base-200 pt-20 flex items-center justify-center">
+            <div className="min-h-screen bg-gray-900 pt-20 flex items-center justify-center">
                 <span className="loading loading-spinner loading-lg text-primary"></span>
             </div>
         );
@@ -164,53 +150,48 @@ const Campaigns = () => {
                 <meta name="description" content="Browse all verified charity campaigns. Support education, healthcare, emergency relief, and more causes across Bangladesh." />
             </Helmet>
 
-            <div className="min-h-screen  pt-20">
+            <div className="min-h-screen pt-20 bg-gray-900 text-white">
                 <div className="container mx-auto px-4 py-8">
                     {/* Header */}
                     <div className="text-center mb-12">
                         <h1 className="text-4xl font-bold mb-4">Charity Campaigns</h1>
-                        <p className="text-xl text-white max-w-2xl mx-auto">
+                        <p className="text-xl max-w-2xl mx-auto">
                             Discover and support verified charity campaigns making a real difference in communities across Bangladesh
                         </p>
                     </div>
 
                     {/* Search and Filters */}
-                    <div className="bg-gradient-to-r from-primary/20 via-secondary/15 to-primary/20 rounded-lg shadow-lg p-6 mb-8 border border-primary/30">
+                    <div className="bg-gray-800/50 backdrop-blur-md rounded-lg shadow-lg p-6 mb-8 border border-gray-700">
                         <div className="flex flex-col lg:flex-row gap-4">
-                            {/* Search */}
-                            <div className="flex-1 ">
+                            <div className="flex-1">
                                 <div className="relative">
                                     <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                                     <input
                                         type="text"
                                         placeholder="Search campaigns..."
-                                        className="input bg-black input-bordered w-full pl-10"
+                                        className="input bg-gray-900/50 backdrop-blur-sm input-bordered w-full pl-10 text-white placeholder-gray-300"
                                         value={searchTerm}
                                         onChange={handleSearch}
                                     />
                                 </div>
                             </div>
 
-                            {/* Category Filter */}
                             <div className="lg:w-64">
                                 <select
-                                    className="select bg-black select-bordered w-full"
+                                    className="select bg-gray-900/50 backdrop-blur-sm select-bordered w-full text-white"
                                     value={selectedCategory}
                                     onChange={(e) => handleCategoryChange(e.target.value)}
                                 >
                                     <option value="">All Categories</option>
                                     {categories.map(category => (
-                                        <option key={category} value={category}>
-                                            {category.charAt(0).toUpperCase() + category.slice(1)}
-                                        </option>
+                                        <option key={category} value={category}>{category.charAt(0).toUpperCase() + category.slice(1)}</option>
                                     ))}
                                 </select>
                             </div>
 
-                            {/* Sort */}
                             <div className="lg:w-48">
                                 <select
-                                    className="select bg-black select-bordered w-full"
+                                    className="select bg-gray-900/50 backdrop-blur-sm select-bordered w-full text-white"
                                     value={sortBy}
                                     onChange={(e) => handleSortChange(e.target.value)}
                                 >
@@ -225,23 +206,16 @@ const Campaigns = () => {
                         </div>
 
                         <div className="mt-6">
-                            <p className="text-sm font-semibold text-white mb-2 flex items-center gap-2">
+                            <p className="text-sm font-semibold mb-2 flex items-center gap-2">
                                 <FaFilter />
                                 View campaigns by status
                             </p>
                             <div className="flex flex-wrap gap-2">
-                                {[
-                                    { key: 'active', label: 'Active' },
-                                    { key: 'completed', label: 'Completed' },
-                                    { key: 'archived', label: 'Ended' },
-                                    { key: 'all', label: 'All' },
-                                ].map((option) => (
+                                {[{ key: 'active', label: 'Active' }, { key: 'completed', label: 'Completed' }, { key: 'archived', label: 'Ended' }, { key: 'all', label: 'All' }].map((option) => (
                                     <button
                                         key={option.key}
                                         onClick={() => handleViewChange(option.key)}
-                                        className={`btn btn-sm ${
-                                            viewFilter === option.key ? 'btn-primary' : 'btn-outline'
-                                        }`}
+                                        className={`btn btn-sm ${viewFilter === option.key ? 'btn-primary' : 'btn-outline'}`}
                                     >
                                         {option.label}
                                     </button>
@@ -253,110 +227,55 @@ const Campaigns = () => {
                     {/* Campaigns Grid */}
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {filteredCampaigns.map((campaign) => (
-                            <div key={campaign.id} className="card bg-gradient-to-br from-white via-primary/10 to-secondary/10 border-2 border-primary/20 shadow-xl hover:shadow-2xl hover:border-primary/40 hover:scale-[1.02] transition-all duration-300">
+                            <div
+                                key={campaign.id}
+                                className="card bg-black/30 backdrop-blur-md border border-gray-700 shadow-xl hover:shadow-2xl hover:scale-[1.02] transition-all duration-300"
+                            >
                                 <figure className="relative">
-                                    <img 
-                                        src={campaign.image} 
-                                        alt={campaign.title} 
+                                    <img
+                                        src={campaign.image}
+                                        alt={campaign.title}
                                         className="h-48 w-full object-cover"
-                                        onError={(e) => {
-                                            e.target.src = 'https://via.placeholder.com/400x200';
-                                        }}
+                                        onError={(e) => { e.target.src = 'https://via.placeholder.com/400x200'; }}
                                     />
                                     <div className="absolute top-4 left-4 flex gap-2">
                                         <span className="badge badge-primary capitalize">{campaign.category}</span>
                                         {(() => {
                                             const days = getDaysLeft(campaign.endDate);
                                             const plural = Math.abs(days) === 1 ? '' : 's';
-                                            if (days > 0) {
-                                                return (
-                                                    <span className="badge badge-error gap-1">
-                                                        <FaClock className="mr-1" /> {days} day{plural} left
-                                                    </span>
-                                                );
-                                            }
-                                            if (days === 0) {
-                                                return (
-                                                    <span className="badge badge-warning gap-1">
-                                                        <FaClock className="mr-1" /> Ends today
-                                                    </span>
-                                                );
-                                            }
-                                            return (
-                                                <span className="badge badge-ghost gap-1 text-xs">
-                                                    <FaClock className="mr-1" /> {Math.abs(days)} day{plural} passed
-                                                </span>
-                                            );
+                                            if (days > 0) return <span className="badge badge-error gap-1"><FaClock className="mr-1" /> {days} day{plural} left</span>;
+                                            if (days === 0) return <span className="badge badge-warning gap-1"><FaClock className="mr-1" /> Ends today</span>;
+                                            return <span className="badge badge-ghost gap-1 text-xs"><FaClock className="mr-1" /> {Math.abs(days)} day{plural} passed</span>;
                                         })()}
                                     </div>
                                     <div className="absolute top-4 right-4">
-                                        <span className="badge badge-success gap-1">
-                                            <FaCheckCircle /> Approved
-                                        </span>
+                                        <span className="badge badge-success gap-1"><FaCheckCircle /> Approved</span>
                                     </div>
                                 </figure>
 
                                 <div className="card-body">
-                                    <h3 className="card-title text-lg line-clamp-2 text-base-content">{campaign.title}</h3>
-                                    <p className="text-base-content/70 line-clamp-2">{campaign.description}</p>
-                                    
-                                    <div className="text-sm text-base-content/80 mb-2">
-                                        <p>By: <span className="font-semibold text-primary">{campaign.charityName}</span></p>
+                                    <h3 className="card-title text-lg line-clamp-2">{campaign.title}</h3>
+                                    <p className="line-clamp-2">{campaign.description}</p>
+                                    <div className="text-sm mb-2">
+                                        <p>By: <span className="font-semibold text-green-400">{campaign.charityName}</span></p>
                                     </div>
-
-                                    <div className="mt-4 p-3 bg-gradient-to-r from-primary/10 via-secondary/5 to-primary/10 rounded-lg border border-primary/20">
+                                    <div className="mt-4 p-3 bg-black/20 backdrop-blur-sm rounded-lg border border-gray-700">
                                         <div className="flex justify-between text-sm mb-2">
-                                            <span className="font-bold text-success text-lg">
-                                                ৳{campaign.currentAmount.toLocaleString()}
-                                            </span>
-                                            <span className="text-base-content/70 font-medium">
-                                                of ৳{campaign.goalAmount.toLocaleString()}
-                                            </span>
+                                            <span className="font-bold text-success text-lg">৳{campaign.currentAmount.toLocaleString()}</span>
+                                            <span className="text-gray-300 font-medium">of ৳{campaign.goalAmount.toLocaleString()}</span>
                                         </div>
-                                        <progress 
-                                            className="progress progress-success w-full h-2" 
-                                            value={campaign.currentAmount} 
-                                            max={campaign.goalAmount}
-                                        ></progress>
+                                        <progress className="progress progress-success w-full h-2" value={campaign.currentAmount} max={campaign.goalAmount}></progress>
                                         <div className="flex justify-between text-sm mt-2">
-                                            <span className="font-bold text-primary">
-                                                {Math.round((campaign.currentAmount / campaign.goalAmount) * 100)}% funded
-                                            </span>
-                                            <span className="text-base-content/70 flex items-center gap-1 font-medium">
-                                                <FaUsers className="text-primary" />
-                                                {donorCounts[campaign.id] || 0} {(donorCounts[campaign.id] || 0) === 1 ? 'donor' : 'donors'}
-                                            </span>
+                                            <span className="font-bold text-2xl  text-white">{Math.round((campaign.currentAmount / campaign.goalAmount) * 100)}% funded</span>
+                                            <span className="flex items-center gap-1 font-medium"><FaUsers className="text-primary" />{donorCounts[campaign.id] || 0} {(donorCounts[campaign.id] || 0) === 1 ? 'donor' : 'donors'}</span>
                                         </div>
                                     </div>
-
                                     <div className="card-actions justify-between mt-4">
-                                        <Link 
-                                            to={`/campaigns/${campaign.id}`} 
-                                            className="btn btn-primary btn-sm flex-1"
-                                        >
-                                            View Details
-                                        </Link>
+                                        <Link to={`/campaigns/${campaign.id}`} className="btn btn-primary btn-sm flex-1">View Details</Link>
                                         {isCampaignActive(campaign) ? (
-                                        <Link 
-                                            to={`/campaigns/${campaign.id}/donate`} 
-                                            className="btn btn-outline btn-sm flex-1"
-                                        >
-                                            <FaHeart className="mr-1" />
-                                            Donate
-                                        </Link>
+                                            <Link to={`/campaigns/${campaign.id}/donate`} className="btn btn-outline btn-sm flex-1"><FaHeart className="mr-1" />Donate</Link>
                                         ) : (
-                                            <button 
-                                                className="btn btn-disabled btn-sm flex-1" 
-                                                disabled
-                                                title={
-                                                    campaign.status !== 'approved' ? 'Campaign Pending Approval' :
-                                                    (campaign.currentAmount || 0) >= campaign.goalAmount ? 'Campaign Goal Reached' :
-                                                    'Campaign Ended'
-                                                }
-                                            >
-                                                <FaLock className="mr-1" />
-                                                Donate
-                                            </button>
+                                            <button className="btn btn-disabled btn-sm flex-1" disabled title={campaign.status !== 'approved' ? 'Campaign Pending Approval' : (campaign.currentAmount || 0) >= campaign.goalAmount ? 'Campaign Goal Reached' : 'Campaign Ended'}><FaLock className="mr-1" />Donate</button>
                                         )}
                                     </div>
                                 </div>
@@ -369,29 +288,15 @@ const Campaigns = () => {
                         <div className="text-center py-12">
                             <div className="text-6xl mb-4">🔍</div>
                             <h3 className="text-2xl font-bold mb-2">No campaigns found</h3>
-                            <p className="text-gray-600 mb-4">
-                                Try adjusting your search terms or filters
-                            </p>
-                            <button 
-                                onClick={() => {
-                                    setSearchTerm('');
-                                    setSelectedCategory('');
-                                    setSortBy('newest');
-                                    setFilteredCampaigns(campaigns);
-                                }}
-                                className="btn btn-primary"
-                            >
-                                Clear Filters
-                            </button>
+                            <p className="text-gray-400 mb-4">Try adjusting your search terms or filters</p>
+                            <button onClick={() => { setSearchTerm(''); setSelectedCategory(''); setSortBy('newest'); setFilteredCampaigns(campaigns); }} className="btn btn-primary">Clear Filters</button>
                         </div>
                     )}
 
                     {/* Results Count */}
                     {filteredCampaigns.length > 0 && (
-                    <div className="text-center mt-8">
-                            <p className="text-white">
-                                Showing {filteredCampaigns.length} of {campaigns.filter(c => c.status !== 'pending' && c.status !== 'rejected' && (!charityFilter || c.charityId === charityFilter)).length} campaigns
-                            </p>
+                        <div className="text-center mt-8">
+                            <p className="text-gray-300">Showing {filteredCampaigns.length} of {campaigns.filter(c => c.status !== 'pending' && c.status !== 'rejected' && (!charityFilter || c.charityId === charityFilter)).length} campaigns</p>
                         </div>
                     )}
                 </div>

@@ -21,11 +21,11 @@ const Navber = () => {
 
     const navOptions = (
         <>
-            <li><Link to="/" className="hover:text-primary-focus text-white transition-colors">Home</Link></li>
-            <li><Link to="/campaigns" className="hover:text-primary-focus text-white transition-colors">Campaigns</Link></li>
-            <li><Link to="/charities" className="hover:text-primary-focus text-white transition-colors">Charities</Link></li>
-            <li><Link to="/about" className="hover:text-primary-focus text-white transition-colors">About</Link></li>
-            <li><Link to="/contact" className="hover:text-primary-focus text-white font-semibold transition-colors">Contact</Link></li>
+            <li><Link to="/" className="hover:text-primary text-white transition-colors">Home</Link></li>
+            <li><Link to="/campaigns" className="hover:text-primary text-white transition-colors">Campaigns</Link></li>
+            <li><Link to="/charities" className="hover:text-primary text-white transition-colors">Charities</Link></li>
+            <li><Link to="/about" className="hover:text-primary text-white transition-colors">About</Link></li>
+            <li><Link to="/contact" className="hover:text-primary font-semibold text-white transition-colors">Contact</Link></li>
         </>
     );
 
@@ -48,7 +48,7 @@ const Navber = () => {
             </div>
             <ul
                 tabIndex={0}
-                className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow-lg bg-gradient-to-br from-primary/95 to-secondary/95 backdrop-blur-md rounded-box w-52 border border-primary/30"
+                className="menu menu-sm dropdown-content mt-3 p-2 shadow-lg bg-white/10 backdrop-blur-md rounded-box border border-white/20 text-white"
             >
                 <li className="menu-title">
                     <div className="truncate px-1 text-white">
@@ -56,7 +56,7 @@ const Navber = () => {
                     </div>
                 </li>
                 <li>
-                    <button onClick={handleLogout} className="flex items-center gap-2 text-error hover:bg-error/20">
+                    <button onClick={handleLogout} className="flex items-center gap-2 text-red-500 hover:bg-red-500/20">
                         <FaSignOutAlt /> Logout
                     </button>
                 </li>
@@ -74,63 +74,69 @@ const Navber = () => {
     );
 
     return (
-        <div className="navbar fixed z-50 bg-gradient-to-r from-primary/95 via-secondary/90 to-primary/95 backdrop-blur-md shadow-xl border-b border-primary/20">
-            <div className="navbar-start">
-                <div className="dropdown">
-                    <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h8m-8 6h16" />
-                        </svg>
+        <nav className="w-full sticky top-0 z-50 backdrop-blur-xl shadow-none px-4 py-3">
+            <div className="flex justify-between items-center w-full max-w-full mx-auto">
+                {/* Start */}
+                <div className="flex items-center gap-2">
+                    {/* Mobile menu */}
+                    <div className="dropdown lg:hidden">
+                        <div tabIndex={0} role="button" className="btn btn-ghost">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                        </div>
+                        <ul
+                            tabIndex={0}
+                            className="menu menu-sm dropdown-content mt-3 p-2 shadow-lg bg-white/10 backdrop-blur-md rounded-box border border-white/20 text-white w-52"
+                        >
+                            {navOptions}
+                        </ul>
                     </div>
-                    <ul
-                        tabIndex={0}
-                        className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow-lg bg-gradient-to-br from-primary/95 to-secondary/95 backdrop-blur-md rounded-box w-52 border border-primary/30"
+
+                    {/* Brand */}
+                    <Link
+                        to="/"
+                        className="btn btn-ghost flex items-center gap-2 hover:bg-white/10"
                     >
+                        <FaHeart className="text-white text-xl" />
+                        <span className="font-bold text-white text-xl sm:text-2xl lg:text-3xl">
+                            Charity Platform
+                        </span>
+                    </Link>
+                </div>
+
+                {/* Center */}
+                <div className="hidden bg-transparent lg:flex">
+                    <ul className="menu menu-horizontal  px-1 text-white gap-2">
                         {navOptions}
                     </ul>
                 </div>
 
-                {/* Brand */}
-                <Link
-                    to="/"
-                    className="btn btn-ghost flex items-center gap-1 sm:gap-2 hover:bg-primary/20"
-                >
-                    <FaHeart className="text-white text-lg sm:text-xl" />
-                    <span className="font-bold text-white text-xl sm:text-2xl lg:text-3xl">
-                        Charity Platform
-                    </span>
-                </Link>
+                {/* End */}
+                <div className="flex items-center gap-2">
+                    {currentUser && (
+                        <div className="hidden md:block">
+                            <Link
+                                to={
+                                    userRole === 'donor'
+                                        ? '/dashboard/donor'
+                                        : userRole === 'charity'
+                                        ? '/dashboard/charity'
+                                        : userRole === 'admin'
+                                        ? '/dashboard/admin'
+                                        : '/dashboard'
+                                }
+                                className="btn btn-outline border-white text-white hover:bg-white hover:text-primary flex items-center gap-2"
+                            >
+                                <FaTachometerAlt />
+                                Dashboard
+                            </Link>
+                        </div>
+                    )}
+                    {userMenu}
+                </div>
             </div>
-
-            <div className="navbar-center hidden lg:flex">
-                <ul className="menu menu-horizontal px-1 text-white">
-                    {navOptions}
-                </ul>
-            </div>
-
-            <div className="navbar-end">
-                {currentUser && (
-                    <div className="hidden md:block mr-2">
-                        <Link
-                            to={
-                                userRole === 'donor'
-                                    ? '/dashboard/donor'
-                                    : userRole === 'charity'
-                                    ? '/dashboard/charity'
-                                    : userRole === 'admin'
-                                    ? '/dashboard/admin'
-                                    : '/dashboard'
-                            }
-                            className="btn btn-outline btn-primary border-white text-white hover:bg-white hover:text-primary flex items-center gap-2"
-                        >
-                            <FaTachometerAlt />
-                            Dashboard
-                        </Link>
-                    </div>
-                )}
-                {userMenu}
-            </div>
-        </div>
+        </nav>
     );
 };
 

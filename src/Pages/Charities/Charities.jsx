@@ -85,58 +85,59 @@ const Charities = () => {
                     ) : (
                         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                             {charities.map((charity) => (
-                                <div key={charity.id} className="card bg-gradient-to-br from-white via-primary/10 to-secondary/10 border-2 border-primary/20 shadow-xl hover:shadow-2xl hover:scale-[1.02] transition-all">
-                                    <div className="card-body">
-                                        <div className="flex items-center gap-3 mb-4">
-                                            <div className="avatar placeholder">
-                                                <div className="bg-gradient-to-br from-primary to-secondary text-white rounded-full w-16">
-                                                    <span className="text-2xl font-bold">{charity.name.charAt(0).toUpperCase()}</span>
-                                                </div>
-                                            </div>
-                                            <div className="flex-1">
-                                                <h3 className="card-title text-lg text-gray-900">{charity.name}</h3>
-                                                <div className="flex items-center gap-1">
-                                                    <FaCheckCircle className="text-success text-sm" />
-                                                    <span className="text-xs text-gray-700 font-medium">Registered Charity</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                        <div className="divider my-2"></div>
-                                        
-                                        <div className="grid grid-cols-3 gap-4 mb-4">
-                                            <div className="text-center bg-gradient-to-br from-primary/10 to-primary/5 p-3 rounded-lg border border-primary/20">
-                                                <div className="text-2xl font-bold text-primary">{charity.totalCampaigns}</div>
-                                                <div className="text-xs text-gray-700 font-medium">Total Campaigns</div>
-                                            </div>
-                                            <div className="text-center bg-gradient-to-br from-success/10 to-success/5 p-3 rounded-lg border border-success/20">
-                                                <div className="text-2xl font-bold text-success">{charity.approvedCampaigns}</div>
-                                                <div className="text-xs text-gray-700 font-medium">Approved</div>
-                                            </div>
-                                            <div className="text-center bg-gradient-to-br from-warning/10 to-warning/5 p-3 rounded-lg border border-warning/20">
-                                                <div className="text-2xl font-bold text-warning">{charity.totalCampaigns - charity.approvedCampaigns}</div>
-                                                <div className="text-xs text-gray-700 font-medium">Pending</div>
-                                            </div>
-                                        </div>
+                               <div key={charity.id} className="card bg-black/30 backdrop-blur-md border border-gray-700 shadow-xl hover:shadow-2xl hover:scale-[1.02] transition-all">
+    <div className="card-body">
+        <div className="flex items-center gap-3 mb-4">
+            <div className="avatar placeholder">
+                <div className="bg-gradient-to-br from-primary/70 via-secondary/70 to-primary/70 text-white rounded-full w-16">
+                    <span className="text-2xl font-bold">{charity.name.charAt(0).toUpperCase()}</span>
+                </div>
+            </div>
+            <div className="flex-1">
+                <h3 className="card-title text-lg text-white">{charity.name}</h3>
+                <div className="flex items-center gap-1">
+                    <FaCheckCircle className="text-success text-sm" />
+                    <span className="text-xs text-gray-300 font-medium">Registered Charity</span>
+                </div>
+            </div>
+        </div>
+        
+        <div className="divider my-2 border-gray-700"></div>
+        
+        <div className="grid grid-cols-3 gap-4 mb-4">
+            <div className="text-center bg-black/20 backdrop-blur-sm p-3 rounded-lg border border-gray-600">
+                <div className="text-2xl font-bold text-primary">{charity.totalCampaigns}</div>
+                <div className="text-xs text-gray-300 font-medium">Total Campaigns</div>
+            </div>
+            <div className="text-center bg-black/20 backdrop-blur-sm p-3 rounded-lg border border-gray-600">
+                <div className="text-2xl font-bold text-success">{charity.approvedCampaigns}</div>
+                <div className="text-xs text-gray-300 font-medium">Approved</div>
+            </div>
+            <div className="text-center bg-black/20 backdrop-blur-sm p-3 rounded-lg border border-gray-600">
+                <div className="text-2xl font-bold text-warning">{charity.totalCampaigns - charity.approvedCampaigns}</div>
+                <div className="text-xs text-gray-300 font-medium">Pending</div>
+            </div>
+        </div>
 
-                                        <div className="bg-gradient-to-r from-secondary/30 via-accent/20 to-secondary/30 p-4 rounded-lg border-2 border-secondary/30">
-                                            <div className="text-center">
-                                                <div className="text-sm text-gray-800 mb-1 font-semibold">Total Amount Raised</div>
-                                                <div className="text-3xl font-bold text-secondary">৳{charity.totalRaised.toLocaleString()}</div>
-                                            </div>
-                                        </div>
+        <div className="bg-black/20 backdrop-blur-sm p-4 rounded-lg border border-gray-600">
+            <div className="text-center">
+                <div className="text-sm text-gray-300 mb-1 font-semibold">Total Amount Raised</div>
+                <div className="text-3xl font-bold text-secondary">৳{charity.totalRaised.toLocaleString()}</div>
+            </div>
+        </div>
 
-                                        <div className="card-actions justify-center mt-4">
-                                            <Link 
-                                                to={`/campaigns?view=all&charity=${charity.id}`} 
-                                                className="btn btn-primary btn-block"
-                                            >
-                                                <FaHeart className="mr-2" />
-                                                View Campaigns
-                                            </Link>
-                                        </div>
-                                    </div>
-                                </div>
+        <div className="card-actions justify-center mt-4">
+            <Link 
+                to={`/campaigns?view=all&charity=${charity.id}`} 
+                className="btn btn-primary btn-block"
+            >
+                <FaHeart className="mr-2" />
+                View Campaigns
+            </Link>
+        </div>
+    </div>
+</div>
+
                             ))}
                         </div>
                     )}

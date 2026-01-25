@@ -64,66 +64,67 @@ const CampaignDetails = () => {
                     <div className="grid lg:grid-cols-3 gap-8">
                         {/* Main Content */}
                         <div className="lg:col-span-2 space-y-8">
-                            {/* Campaign Image */}
-                            <div className="card bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/5 shadow-xl border border-primary/20">
+                            {/* Campaign Image Card */}
+                            <div className="card bg-black/30 backdrop-blur-md shadow-xl border border-gray-700">
                                 <figure>
-                                    <img 
-                                        src={campaign.image} 
-                                        alt={campaign.title} 
-                                        className="w-full h-96 object-cover"
-                                        onError={(e) => {
-                                            e.target.src = 'https://via.placeholder.com/800x400';
-                                        }}
+                                    <img
+                                        src={campaign.image}
+                                        alt={campaign.title}
+                                        className="w-full h-96 object-cover rounded-lg"
+                                        onError={(e) => { e.target.src = 'https://via.placeholder.com/800x400'; }}
                                     />
                                 </figure>
                             </div>
 
-                            {/* Campaign Info */}
-                            <div className="card bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/5 shadow-xl border border-primary/20">
+                            {/* Campaign Info Card */}
+                            <div className="card bg-black/30 backdrop-blur-md shadow-xl border border-gray-700">
                                 <div className="card-body">
                                     <div className="flex items-center gap-2 mb-4">
-                                        <span className="badge badge-primary capitalize">{campaign.category}</span>
-                                        {campaign.status === 'approved' && <span className="badge badge-success"><FaCheckCircle className="mr-1" /> Approved</span>}
-                                        {campaign.status === 'pending' && <span className="badge badge-warning">Pending Review</span>}
+                                        <span className="badge badge-primary/80 capitalize">{campaign.category}</span>
+                                        {campaign.status === 'approved' && <span className="badge badge-success/80"><FaCheckCircle className="mr-1" /> Approved</span>}
+                                        {campaign.status === 'pending' && <span className="badge badge-warning/80">Pending Review</span>}
                                     </div>
-                                    
-                                    <h1 className="text-3xl font-bold mb-4">{campaign.title}</h1>
-                                    
+
+                                    <h1 className="text-3xl font-bold mb-4 text-white">{campaign.title}</h1>
+
                                     {/* Charity Info */}
-                                    <div className="flex items-center gap-3 mb-6 p-4 bg-base-200 rounded-lg">
-                                        <FaBuilding className="text-2xl text-primary" />
+                                    <div className="flex items-center gap-3 mb-6 p-4 bg-black/20 backdrop-blur-sm rounded-lg">
+                                        <FaBuilding className="text-primary" />
                                         <div>
-                                            <p className="text-sm text-gray-600">Organized by</p>
-                                            <p className="font-bold text-gray-400 text-lg">{campaign.charityName}</p>
-                                            <p className="text-xs text-gray-500">Charity ID: {campaign.charityId}</p>
+                                            <p className="text-sm text-gray-300">Organized by</p>
+                                            <p className="font-bold text-white text-lg">{campaign.charityName}</p>
+                                            <p className="text-xs text-gray-400">Charity ID: {campaign.charityId}</p>
                                         </div>
                                     </div>
 
-                                    <div className="divider">Campaign Description</div>
-                                    <p className="text-lg text-orange-200 whitespace-pre-line leading-relaxed mb-6">{campaign.description}</p>
+                                    <div className="divider border-gray-700">Campaign Description</div>
+                                    <p className="text-lg text-gray-300 whitespace-pre-line leading-relaxed mb-6">{campaign.description}</p>
 
-                                    {/* Campaign Details Grid */}
-                                    <div className="divider">Additional Information</div>
+                                    {/* Additional Info */}
+                                    <div className="divider border-gray-700">Additional Information</div>
                                     <div className="grid md:grid-cols-2 gap-4 mb-6">
-                                        <div className="p-4 bg-base-200 rounded-lg">
-                                            <p className="text-sm text-gray-600 mb-1">Goal Amount</p>
-                                            <p className="text-2xl font-bold text-primary">৳{campaign.goalAmount.toLocaleString()}</p>
+                                        <div className="p-4 bg-black/20 backdrop-blur-sm rounded-lg border border-gray-600">
+                                            <p className="text-sm text-gray-400 mb-1">Goal Amount</p>
+                                            <p className="text-2xl font-bold text-white">৳{campaign.goalAmount.toLocaleString()}</p>
                                         </div>
-                                        <div className="p-4 bg-base-200 rounded-lg">
-                                            <p className="text-sm text-gray-600 mb-1">Amount Raised</p>
+                                        <div className="p-4 bg-black/20 backdrop-blur-sm rounded-lg border border-gray-600">
+                                            <p className="text-sm text-gray-400 mb-1">Amount Raised</p>
                                             <p className="text-2xl font-bold text-success">৳{(campaign.currentAmount || 0).toLocaleString()}</p>
                                         </div>
-                                        <div className="p-4 bg-base-200 rounded-lg">
-                                            <p className="text-sm text-gray-600 mb-1">Start Date</p>
-                                            <p className="font-semibold text-base-content">{new Date(campaign.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                                        <div className="p-4 bg-black/20 backdrop-blur-sm rounded-lg border border-gray-600">
+                                            <p className="text-sm text-gray-400 mb-1">Start Date</p>
+                                            <p className="font-semibold text-gray-300">{new Date(campaign.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                                         </div>
-                                        <div className="p-4 bg-base-200 rounded-lg">
-                                            <p className="text-sm text-gray-600 mb-1">End Date</p>
-                                            <p className="font-semibold text-base-content">{new Date(campaign.endDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                                        <div className="p-4 bg-black/20 backdrop-blur-sm rounded-lg border border-gray-600">
+                                            <p className="text-sm text-gray-400 mb-1">End Date</p>
+                                            <p className="font-semibold text-gray-300">{new Date(campaign.endDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+
+                         
+
                         </div>
 
                         {/* Sidebar */}
@@ -132,20 +133,20 @@ const CampaignDetails = () => {
                             <div className="card bg-gradient-to-br from-success/20 via-primary/10 to-success/20 shadow-xl border-2 border-success/30 mt-10 mb-20 top-24">
                                 <div className="card-body">
                                     <h2 className="card-title mb-4">Support This Campaign</h2>
-                                    
+
                                     <div className="mb-6">
                                         <div className="text-center mb-4 p-4 bg-primary/10 rounded-lg">
                                             <p className="text-sm text-white mb-1">Total Raised</p>
-                                            <p className="text-3xl font-bold text-primary">৳{(campaign.currentAmount || 0).toLocaleString()}</p>
+                                            <p className="text-3xl font-bold text-green-500">৳{(campaign.currentAmount || 0).toLocaleString()}</p>
                                             <p className="text-sm text-white mt-1">of ৳{campaign.goalAmount.toLocaleString()} goal</p>
                                         </div>
-                                        
-                                        <progress 
-                                            className="progress progress-primary w-full h-3" 
-                                            value={campaign.currentAmount || 0} 
+
+                                        <progress
+                                            className="progress progress-primary w-full h-3"
+                                            value={campaign.currentAmount || 0}
                                             max={campaign.goalAmount}
                                         ></progress>
-                                        
+
                                         <div className="flex justify-between text-sm mt-3">
                                             <span className="font-semibold text-white text-primary">
                                                 {Math.round(((campaign.currentAmount || 0) / campaign.goalAmount) * 100)}% funded
@@ -154,7 +155,7 @@ const CampaignDetails = () => {
                                                 ৳{(campaign.goalAmount - (campaign.currentAmount || 0)).toLocaleString()} to go
                                             </span>
                                         </div>
-                                        
+
                                         <div className="flex items-center justify-center gap-2 mt-3 p-2 bg-base-200 rounded-lg">
                                             <FaUsers className="text-primary" />
                                             <span className="font-semibold">{donorCount}</span>
@@ -178,17 +179,17 @@ const CampaignDetails = () => {
                                                 message = 'Campaign Ended';
                                             }
                                         }
-                                        
+
                                         return active ? (
-                                        <Link to={`/campaigns/${campaign.id}/donate`} className="btn btn-primary w-full mb-4">
-                                            <FaHeart className="mr-2" />
-                                            Donate Now
-                                        </Link>
-                                    ) : (
-                                        <button className="btn btn-disabled w-full mb-4" disabled>
+                                            <Link to={`/campaigns/${campaign.id}/donate`} className="btn btn-primary w-full mb-4">
+                                                <FaHeart className="mr-2" />
+                                                Donate Now
+                                            </Link>
+                                        ) : (
+                                            <button className="btn btn-disabled w-full mb-4" disabled>
                                                 <FaLock className="mr-2" />
                                                 {message || 'Donation Not Available'}
-                                        </button>
+                                            </button>
                                         );
                                     })()}
 
@@ -223,7 +224,7 @@ const CampaignDetails = () => {
                                                 <p className="font-semibold">End Date</p>
                                                 <p className="text-sm text-white ">{new Date(campaign.endDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                                                 <p className="text-xs text-white mt-1">
-                                                    {new Date(campaign.endDate) > new Date() 
+                                                    {new Date(campaign.endDate) > new Date()
                                                         ? `${Math.ceil((new Date(campaign.endDate) - new Date()) / (1000 * 60 * 60 * 24))} days remaining`
                                                         : 'Campaign ended'}
                                                 </p>

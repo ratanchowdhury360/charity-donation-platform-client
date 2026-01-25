@@ -42,15 +42,26 @@ const About = () => {
                             </div>
 
                             <div className="rounded-lg p-8 bg-gradient-to-br from-pink-500/20 via-purple-500/20 to-indigo-500/20 border border-purple-400/30">
-                                <div className="text-center">
-                                    <FaHeart className="text-6xl text-pink-400 mx-auto mb-4" />
-                                    <h3 className="text-2xl font-bold mb-2">Making Impact</h3>
-                                    <p className="text-white/80">
-                                        Every donation, no matter how small, creates ripples of positive change. We make it easy to
-                                        discover causes, track progress, and contribute meaningfully.
-                                    </p>
-                                </div>
-                            </div>
+    <div className="text-center">
+        <FaHeart className="text-6xl text-pink-400 mx-auto mb-4" />
+        <h3 className="text-2xl font-bold mb-3">Making Impact</h3>
+
+        <p className="text-white/80 mb-3">
+            Every donation, no matter how small, creates ripples of positive change. We make it easy to
+            discover causes, track progress, and contribute meaningfully.
+        </p>
+
+        <p className="text-white/80 mb-3">
+            By connecting compassionate donors with verified charities, we ensure that help reaches
+            the right people at the right time.
+        </p>
+
+        <p className="text-white/70 text-sm">
+            Together, we turn kindness into action and transform generosity into lasting social impact.
+        </p>
+    </div>
+</div>
+
                         </div>
                     </div>
                 </section>

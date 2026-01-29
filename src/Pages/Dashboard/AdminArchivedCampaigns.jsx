@@ -26,7 +26,7 @@ const AdminArchivedCampaigns = () => {
             setCampaigns(archived);
             setFeedback({ type: '', text: '' });
         } catch (error) {
-            console.error('Failed to fetch archived campaigns', error);
+            console.error(error);
             setFeedback({ type: 'error', text: 'Unable to load archived campaigns.' });
         } finally {
             setLoading(false);
@@ -55,7 +55,7 @@ const AdminArchivedCampaigns = () => {
             closeModal();
             fetchArchivedCampaigns();
         } catch (error) {
-            console.error('Failed to extend campaign', error);
+            console.error(error);
             setFeedback({ type: 'error', text: 'Failed to extend campaign. Please try again.' });
             setProcessing(false);
         }
@@ -67,57 +67,77 @@ const AdminArchivedCampaigns = () => {
                 <title>Archived Campaigns - Admin</title>
             </Helmet>
 
-            <div className="space-y-6">
-                <div className="bg-gradient-to-r from-warning to-secondary text-white rounded-lg p-6 shadow-xl flex flex-col gap-2">
+            <div className="space-y-6 p-4 bg-black/70 backdrop-blur rounded-3xl text-white">
+
+                {/* Header */}
+                <div className="bg-black/80 backdrop-blur rounded-2xl p-6 shadow-xl border border-white/10 flex flex-col gap-2">
                     <h1 className="text-3xl font-bold flex items-center gap-3">
                         <FaHourglassEnd />
                         Ended Campaigns
                     </h1>
-                    <p className="text-white/80">
-                        Campaigns that passed their end time appear here automatically. Extend a deadline to bring them back to the live
-                        campaign list instantly.
+                    <p className="text-gray-400">
+                        Campaigns that passed their end time appear here automatically. Extend a deadline to bring them back live.
                     </p>
                 </div>
 
                 {feedback.text && (
-                    <div className={`alert ${feedback.type === 'success' ? 'alert-success' : 'alert-error'}`}>
+                    <div
+                        className={`alert ${
+                            feedback.type === 'success'
+                                ? 'bg-green-500/10 border border-green-500/30 text-green-300'
+                                : 'bg-red-500/10 border border-red-500/30 text-red-300'
+                        }`}
+                    >
                         {feedback.text}
                     </div>
                 )}
 
                 {loading ? (
                     <div className="flex justify-center py-20">
-                        <span className="loading loading-spinner loading-lg text-warning"></span>
+                        <span className="loading loading-spinner loading-lg text-white"></span>
                     </div>
                 ) : campaigns.length === 0 ? (
-                    <div className="card bg-gradient-to-br from-white via-warning/10 to-warning/5 shadow-xl border-2 border-warning/20">
+                    <div className="card bg-black/60 backdrop-blur border border-white/10 shadow-xl">
                         <div className="card-body text-center py-16">
-                            <FaHourglassEnd className="text-5xl text-warning mx-auto mb-4" />
-                            <h3 className="text-2xl font-semibold mb-2 text-gray-900">No ended campaigns 🎉</h3>
-                            <p className="text-gray-700 font-medium">All approved campaigns are currently within their timeline.</p>
+                            <FaHourglassEnd className="text-5xl text-yellow-400 mx-auto mb-4" />
+                            <h3 className="text-2xl font-semibold mb-2">No ended campaigns 🎉</h3>
+                            <p className="text-gray-400">
+                                All approved campaigns are currently within their timeline.
+                            </p>
                         </div>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                         {campaigns.map((campaign) => (
-                            <div key={campaign.id} className="card bg-gradient-to-br from-white via-warning/10 to-warning/5 shadow-xl border-2 border-warning/30 hover:border-warning/50 hover:shadow-2xl hover:scale-[1.02] transition-all">
+                            <div
+                                key={campaign.id}
+                                className="card bg-black/70 backdrop-blur border border-white/10 hover:border-white/20 hover:shadow-2xl hover:scale-[1.02] transition-all"
+                            >
                                 <div className="card-body">
                                     <div className="flex items-center justify-between">
-                                        <span className="badge badge-warning badge-outline">Ended</span>
-                                        <span className="text-xs text-black">
+                                        <span className="badge bg-yellow-500/20 text-yellow-300 border border-yellow-500/30">
+                                            Ended
+                                        </span>
+                                        <span className="text-xs text-gray-400">
                                             Created {new Date(campaign.createdAt).toLocaleDateString()}
                                         </span>
                                     </div>
-                                    <h3 className="card-title text-black text-lg mt-2">{campaign.title}</h3>
-                                    <p className="text-sm text-black mb-4">By {campaign.charityName}</p>
-                                    <div className="space-y-2 text-sm">
+
+                                    <h3 className="card-title text-lg mt-2">{campaign.title}</h3>
+                                    <p className="text-sm text-gray-400 mb-4">By {campaign.charityName}</p>
+
+                                    <div className="space-y-2 text-sm text-gray-300">
                                         <div className="flex justify-between">
                                             <span>Goal</span>
-                                            <span className="font-semibold">৳{campaign.goalAmount.toLocaleString()}</span>
+                                            <span className="font-semibold">
+                                                ৳{campaign.goalAmount.toLocaleString()}
+                                            </span>
                                         </div>
                                         <div className="flex justify-between">
                                             <span>Raised</span>
-                                            <span className="font-semibold text-success">৳{(campaign.currentAmount || 0).toLocaleString()}</span>
+                                            <span className="font-semibold text-green-400">
+                                                ৳{(campaign.currentAmount || 0).toLocaleString()}
+                                            </span>
                                         </div>
                                         <div className="flex justify-between items-center">
                                             <span className="flex items-center gap-1">
@@ -126,8 +146,12 @@ const AdminArchivedCampaigns = () => {
                                             <span>{new Date(campaign.endDate).toLocaleDateString()}</span>
                                         </div>
                                     </div>
+
                                     <div className="card-actions mt-4">
-                                        <button className="btn btn-outline btn-warning w-full" onClick={() => openExtendModal(campaign)}>
+                                        <button
+                                            className="btn btn-outline btn-warning w-full"
+                                            onClick={() => openExtendModal(campaign)}
+                                        >
                                             <FaRedoAlt />
                                             Extend timeline
                                         </button>
@@ -138,31 +162,37 @@ const AdminArchivedCampaigns = () => {
                     </div>
                 )}
 
+                {/* Extend Modal */}
                 {selectedCampaign && (
-                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                        <div className="bg-gradient-to-br from-white via-warning/10 to-warning/5 rounded-lg w-full max-w-md shadow-2xl border-2 border-warning/30">
+                    <div className="fixed inset-0 bg-black/70 backdrop-blur flex items-center justify-center z-50 p-4">
+                        <div className="bg-black/80 text-white rounded-2xl w-full max-w-md shadow-2xl border border-white/10">
                             <div className="p-6 space-y-4">
                                 <div className="flex justify-between items-center">
                                     <h3 className="text-xl font-bold">Extend Campaign</h3>
-                                    <button className="btn btn-sm btn-ghost" onClick={closeModal}>
+                                    <button className="btn btn-sm btn-ghost text-white" onClick={closeModal}>
                                         ✕
                                     </button>
                                 </div>
-                                <p className="text-sm text-gray-500">{selectedCampaign.title}</p>
+
+                                <p className="text-sm text-gray-400">{selectedCampaign.title}</p>
+
                                 <form className="space-y-4" onSubmit={handleExtend}>
                                     <div className="form-control">
                                         <label className="label">
-                                            <span className="label-text font-semibold">New end date</span>
+                                            <span className="label-text text-gray-300 font-semibold">
+                                                New end date
+                                            </span>
                                         </label>
                                         <input
                                             type="date"
                                             min={new Date().toISOString().split('T')[0]}
-                                            className="input input-bordered"
+                                            className="input bg-black/60 border border-white/20 text-white"
                                             value={newEndDate}
                                             onChange={(e) => setNewEndDate(e.target.value)}
                                             required
                                         />
                                     </div>
+
                                     <button className="btn btn-warning w-full" disabled={processing}>
                                         {processing ? (
                                             <>
@@ -187,4 +217,3 @@ const AdminArchivedCampaigns = () => {
 };
 
 export default AdminArchivedCampaigns;
-

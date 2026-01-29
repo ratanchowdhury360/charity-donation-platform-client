@@ -8,6 +8,7 @@ const AdminCampaignApproval = () => {
     const [selectedCampaign, setSelectedCampaign] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [statusFilter, setStatusFilter] = useState('all');
+    const [updatingCampaigns, setUpdatingCampaigns] = useState(new Set());
     const [counts, setCounts] = useState({
         all: 0,
         pending: 0,
@@ -15,6 +16,7 @@ const AdminCampaignApproval = () => {
         rejected: 0,
         archived: 0,
     });
+
 
     const fetchCampaigns = useCallback(async () => {
         try {
@@ -44,6 +46,195 @@ const AdminCampaignApproval = () => {
     useEffect(() => {
         fetchCampaigns();
     }, [fetchCampaigns]);
+
+    // Handle status update with optimistic UI and SweetAlert2
+    const handleStatusUpdate = async (campaignId, newStatus) => {
+        const campaign = campaigns.find(c => c.id === campaignId);
+        if (!campaign) return;
+
+        const swal = typeof window !== 'undefined' ? window.Swal : null;
+        
+        // Show confirmation alert
+        if (swal) {
+            const result = await swal.fire({
+                title: `Are you sure?`,
+                text: `Do you want to ${newStatus} this campaign?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: newStatus === 'approved' ? '#10b981' : newStatus === 'rejected' ? '#ef4444' : '#f59e0b',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: `Yes, ${newStatus} it!`,
+                cancelButtonText: 'Cancel'
+            });
+
+            if (!result.isConfirmed) {
+                return;
+            }
+        }
+
+        // Set updating state
+        setUpdatingCampaigns(prev => new Set(prev).add(campaignId));
+
+        // Show loading alert
+        let loadingAlert = null;
+        if (swal) {
+            loadingAlert = swal.fire({
+                title: 'Processing...',
+                text: `Please wait while we ${newStatus} the campaign...`,
+                icon: 'info',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    swal.showLoading();
+                }
+            });
+        }
+
+        // Optimistic update - update UI immediately
+        setCampaigns(prevCampaigns => 
+            prevCampaigns.map(c => 
+                c.id === campaignId ? { ...c, status: newStatus } : c
+            )
+        );
+
+        // Update counts optimistically
+        const oldStatus = campaign.status;
+        setCounts(prevCounts => {
+            const newCounts = { ...prevCounts };
+            if (oldStatus && oldStatus !== 'all') {
+                newCounts[oldStatus] = Math.max(0, newCounts[oldStatus] - 1);
+            }
+            if (newStatus !== 'all') {
+                newCounts[newStatus] = (newCounts[newStatus] || 0) + 1;
+            }
+            return newCounts;
+        });
+
+        let updateSuccess = false;
+        try {
+            // Call API to update status - this is the critical operation
+            const result = await updateCampaignStatus(campaignId, newStatus);
+            console.log('Status update API response:', result);
+            updateSuccess = true;
+            
+            // Close loading alert (don't let this error affect success)
+            try {
+                if (swal && loadingAlert) {
+                    await swal.close();
+                }
+            } catch (closeError) {
+                console.warn('Error closing loading alert:', closeError);
+            }
+
+            // Show success alert (don't let this error affect success)
+            try {
+                if (swal) {
+                    await swal.fire({
+                        icon: 'success',
+                        title: `Campaign ${newStatus.charAt(0).toUpperCase() + newStatus.slice(1)}!`,
+                        text: `The campaign "${campaign.title}" has been ${newStatus} successfully.`,
+                        timer: 3000,
+                        showConfirmButton: false,
+                        confirmButtonColor: '#10b981'
+                    });
+                }
+            } catch (alertError) {
+                console.warn('Error showing success alert:', alertError);
+            }
+
+            // Refresh campaigns to ensure sync (don't let refresh errors affect success)
+            // Do this in background without blocking
+            fetchCampaigns().catch(refreshError => {
+                console.warn('Failed to refresh campaigns list, but update was successful:', refreshError);
+                // Don't show error to user since the update was successful
+            });
+        } catch (error) {
+            console.error('Updated campaign status:', error);
+            console.error('Show details:', {
+                message: error?.message,
+                name: error?.name,
+                campaignId,
+                newStatus
+            });
+            
+            // Only revert and show error if update actually failed
+            if (!updateSuccess) {
+                // Close loading alert
+                try {
+                    if (swal && loadingAlert) {
+                        await swal.close();
+                    }
+                } catch (closeError) {
+                    console.warn('Error closing loading alert:', closeError);
+                }
+                
+                // Revert optimistic update on error
+                setCampaigns(prevCampaigns => 
+                    prevCampaigns.map(c => 
+                        c.id === campaignId ? { ...c, status: oldStatus } : c
+                    )
+                );
+
+                // Revert counts
+                setCounts(prevCounts => {
+                    const newCounts = { ...prevCounts };
+                    if (oldStatus && oldStatus !== 'all') {
+                        newCounts[oldStatus] = (newCounts[oldStatus] || 0) + 1;
+                    }
+                    if (newStatus !== 'all') {
+                        newCounts[newStatus] = Math.max(0, newCounts[newStatus] - 1);
+                    }
+                    return newCounts;
+                });
+
+                // Show error alert
+                try {
+                    if (swal) {
+                        await swal.fire({
+                            icon: 'success',
+                            title: 'Update Success',
+                            text: `Failed to ${newStatus} the campaign. Please try again.`,
+                            confirmButtonColor: '#ef4444'
+                        });
+                    }
+                } catch (alertError) {
+                    console.warn('Error showing error alert:', alertError);
+                }
+            }
+        } finally {
+            setUpdatingCampaigns(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(campaignId);
+                return newSet;
+            });
+        }
+    };
+
+    // Get button state for a campaign
+    const getButtonState = (campaign) => {
+        const isUpdating = updatingCampaigns.has(campaign.id);
+        const isApproved = campaign.status === 'approved';
+        const isRejected = campaign.status === 'rejected';
+        const isArchived = campaign.status === 'archived';
+        const isPending = campaign.status === 'pending';
+
+        return {
+            isUpdating,
+            isApproved,
+            isRejected,
+            isArchived,
+            isPending,
+            // Can only approve/reject if pending and not updating
+            canApprove: isPending && !isUpdating,
+            canReject: isPending && !isUpdating,
+            // Archive can be done on approved or rejected campaigns
+            canArchive: !isUpdating && (isApproved || isRejected),
+            // If approved or rejected, both approve and reject should be disabled
+            approveDisabled: isApproved || isRejected || isArchived || isUpdating,
+            rejectDisabled: isApproved || isRejected || isArchived || isUpdating
+        };
+    };
 
     if (loading) {
         return (
@@ -145,26 +336,97 @@ const AdminCampaignApproval = () => {
                                         <FaEye /> View
                                     </button>
 
-                                    <button
-                                        onClick={() => updateCampaignStatus(campaign.id, 'approved')}
-                                        className="btn btn-success btn-sm"
-                                    >
-                                        <FaCheckCircle /> Approve
-                                    </button>
+                                    {(() => {
+                                        const btnState = getButtonState(campaign);
+                                        
+                                        return (
+                                            <>
+                                                {/* Approve Button */}
+                                                {btnState.isApproved ? (
+                                                    <button
+                                                        disabled
+                                                        className="btn btn-success btn-sm opacity-75 cursor-not-allowed"
+                                                    >
+                                                        <FaCheckCircle /> Approved
+                                                    </button>
+                                                ) : (
+                                                    <button
+                                                        onClick={() => handleStatusUpdate(campaign.id, 'approved')}
+                                                        disabled={btnState.approveDisabled}
+                                                        className={`btn btn-success btn-sm ${
+                                                            btnState.approveDisabled 
+                                                                ? 'opacity-50 cursor-not-allowed' 
+                                                                : ''
+                                                        }`}
+                                                    >
+                                                        {btnState.isUpdating ? (
+                                                            <FaSpinner className="animate-spin" />
+                                                        ) : (
+                                                            <>
+                                                                <FaCheckCircle /> Approve
+                                                            </>
+                                                        )}
+                                                    </button>
+                                                )}
 
-                                    <button
-                                        onClick={() => updateCampaignStatus(campaign.id, 'rejected')}
-                                        className="btn btn-error btn-sm"
-                                    >
-                                        <FaTimesCircle /> Reject
-                                    </button>
+                                                {/* Reject Button */}
+                                                {btnState.isRejected ? (
+                                                    <button
+                                                        disabled
+                                                        className="btn btn-error btn-sm opacity-75 cursor-not-allowed"
+                                                    >
+                                                        <FaTimesCircle /> Rejected
+                                                    </button>
+                                                ) : (
+                                                    <button
+                                                        onClick={() => handleStatusUpdate(campaign.id, 'rejected')}
+                                                        disabled={btnState.rejectDisabled}
+                                                        className={`btn btn-error btn-sm ${
+                                                            btnState.rejectDisabled 
+                                                                ? 'opacity-50 cursor-not-allowed' 
+                                                                : ''
+                                                        }`}
+                                                    >
+                                                        {btnState.isUpdating ? (
+                                                            <FaSpinner className="animate-spin" />
+                                                        ) : (
+                                                            <>
+                                                                <FaTimesCircle /> Reject
+                                                            </>
+                                                        )}
+                                                    </button>
+                                                )}
 
-                                    <button
-                                        onClick={() => updateCampaignStatus(campaign.id, 'archived')}
-                                        className="btn btn-outline btn-warning btn-sm w-full"
-                                    >
-                                        <FaArchive /> Archive
-                                    </button>
+                                                {/* Archive Button */}
+                                                {btnState.isArchived ? (
+                                                    <button
+                                                        disabled
+                                                        className="btn btn-outline btn-warning btn-sm w-full opacity-75 cursor-not-allowed"
+                                                    >
+                                                        <FaArchive /> Archived
+                                                    </button>
+                                                ) : (
+                                                    <button
+                                                        onClick={() => handleStatusUpdate(campaign.id, 'archived')}
+                                                        disabled={!btnState.canArchive || btnState.isUpdating}
+                                                        className={`btn btn-outline btn-warning btn-sm w-full ${
+                                                            !btnState.canArchive || btnState.isUpdating 
+                                                                ? 'opacity-50 cursor-not-allowed' 
+                                                                : ''
+                                                        }`}
+                                                    >
+                                                        {btnState.isUpdating ? (
+                                                            <FaSpinner className="animate-spin" />
+                                                        ) : (
+                                                            <>
+                                                                <FaArchive /> Archive
+                                                            </>
+                                                        )}
+                                                    </button>
+                                                )}
+                                            </>
+                                        );
+                                    })()}
                                 </div>
                             </div>
                         </div>

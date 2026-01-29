@@ -198,7 +198,7 @@ const DonorDashboard = () => {
                         <div className="flex justify-between items-center mb-6">
                             <div>
                                 <h2 className="text-2xl font-bold">Active Campaigns</h2>
-                                <p className="text-sm text-gray-600">Support these ongoing campaigns</p>
+                                <p className="text-sm text-white ">Support these ongoing campaigns</p>
                             </div>
                             <Link to="/campaigns" className="btn btn-primary btn-sm">
                                 View All <FaArrowRight className="ml-2" />
@@ -221,7 +221,7 @@ const DonorDashboard = () => {
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {activeCampaigns.map(campaign => (
-                                    <div key={campaign.id} className="card bg-gradient-to-br from-white via-primary/10 to-secondary/10 shadow-lg border-2 border-primary/20 hover:shadow-xl hover:border-primary/40 hover:scale-[1.02] transition-all">
+                                    <div key={campaign.id} className="card bg-black via-primary/10 to-secondary/10 shadow-lg border-2 border-primary/20 hover:shadow-xl hover:border-primary/40 hover:scale-[1.02] transition-all">
                                         <figure>
                                             <img 
                                                 src={campaign.image} 
@@ -237,7 +237,7 @@ const DonorDashboard = () => {
                                                 <span className="badge badge-primary capitalize">{campaign.category}</span>
                                                 <span className="badge badge-success">Active</span>
                                             </div>
-                                            <h3 className="card-title text-base text-base-content">{campaign.title}</h3>
+                                            <h3 className="card-title text-base text-white">{campaign.title}</h3>
                                             <p className="text-xs text-base-content/70 mb-1 font-medium">By: <span className="text-primary font-semibold">{campaign.charityName}</span></p>
                                             <p className="text-sm text-base-content/70 line-clamp-2">{campaign.description}</p>
                                             <div className="mt-4 p-3 bg-gradient-to-r from-primary/10 via-secondary/5 to-primary/10 rounded-lg border border-primary/20">

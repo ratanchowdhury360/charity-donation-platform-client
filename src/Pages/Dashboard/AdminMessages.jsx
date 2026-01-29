@@ -1,306 +1,151 @@
+/* eslint-disable no-unused-vars */
 import React, { useCallback, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { FaEnvelopeOpenText, FaInbox, FaFilter, FaReply, FaPaperPlane } from 'react-icons/fa';
+import { FaEnvelopeOpenText, FaPaperPlane } from 'react-icons/fa';
 import { getMessages, replyToMessage, updateMessageStatus } from '../../utils/messageStorage';
-
-const statusTabs = [
-    { key: 'all', label: 'All' },
-    { key: 'open', label: 'Open' },
-    { key: 'responded', label: 'Responded' },
-    { key: 'closed', label: 'Closed' },
-];
 
 const AdminMessages = () => {
     const [messages, setMessages] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [statusFilter, setStatusFilter] = useState('open');
     const [selectedMessage, setSelectedMessage] = useState(null);
     const [replyText, setReplyText] = useState('');
-    const [feedback, setFeedback] = useState({ type: '', text: '' });
     const [processing, setProcessing] = useState(false);
 
-    const showAlert = useCallback((icon, title, text) => {
-        const swal = typeof window !== 'undefined' ? window.Swal : null;
-        if (swal) {
-            swal.fire({
-                icon,
-                title,
-                text,
-                timer: icon === 'success' ? 1800 : undefined,
-                showConfirmButton: icon !== 'success'
-            });
-        } else if (typeof window !== 'undefined' && window.alert) {
-            window.alert(`${title}${text ? `\n${text}` : ''}`);
-        }
-    }, []);
-
     const fetchMessages = useCallback(async () => {
-        try {
-            setLoading(true);
-            const params = statusFilter === 'all' ? {} : { status: statusFilter };
-            const response = await getMessages(params);
-            setMessages(response);
-            setFeedback({ type: '', text: '' });
-        } catch (error) {
-            console.error('Failed to load messages', error);
-            setFeedback({ type: 'error', text: 'Unable to load messages. Please try again.' });
-        } finally {
-            setLoading(false);
-        }
-    }, [statusFilter]);
+        setLoading(true);
+        const response = await getMessages({});
+        setMessages(response);
+        setLoading(false);
+    }, []);
 
     useEffect(() => {
         fetchMessages();
     }, [fetchMessages]);
 
-    const openReplyModal = (message) => {
-        setSelectedMessage(message);
-        setReplyText('');
-    };
+    const handleReplySubmit = async (e) => {
+        e.preventDefault();
+        if (!replyText.trim() || !selectedMessage) return;
 
-    const closeModal = () => {
-        setSelectedMessage(null);
+        setProcessing(true);
+        const messageId = selectedMessage._id || selectedMessage.id;
+
+        await replyToMessage(messageId, {
+            reply: replyText,
+            adminName: 'Platform Admin',
+            adminId: 'admin',
+            actorType: 'admin',
+        });
+
         setReplyText('');
         setProcessing(false);
-    };
-
-    const handleReplySubmit = async (event) => {
-        event.preventDefault();
-        if (!selectedMessage || !replyText.trim()) return;
-        try {
-            setProcessing(true);
-            setFeedback({ type: '', text: '' }); // Clear previous feedback
-            
-            // Use _id if available, otherwise use id (for MongoDB compatibility)
-            const messageId = selectedMessage._id || selectedMessage.id;
-            
-            if (!messageId) {
-                throw new Error('Message ID is missing. Please refresh and try again.');
-            }
-            
-            console.log('Sending reply to message ID:', messageId);
-            
-            const result = await replyToMessage(messageId, {
-                reply: replyText.trim(),
-                adminName: 'Platform Admin',
-                adminId: 'admin',
-                actorType: 'admin',
-            });
-            
-            // If we get here, the reply was successful
-            setFeedback({ type: 'success', text: 'Reply sent successfully!' });
-            await showAlert('success', 'Reply Sent!', 'Your reply has been sent successfully. The user will see it instantly.');
-            closeModal();
-            // Refresh messages to show the new reply
-            await fetchMessages();
-        } catch (error) {
-            console.error('Failed to send reply', error);
-            // Parse error message if it's JSON
-            let errorMessage = 'Failed to send reply. Please try again.';
-            try {
-                if (error?.message) {
-                    // Try to parse if it's a JSON string
-                    const parsed = JSON.parse(error.message);
-                    errorMessage = parsed.message || error.message;
-                } else {
-                    errorMessage = error.message || errorMessage;
-                }
-            } catch (parseErr) {
-                // If parsing fails, use the original message
-                errorMessage = error?.message || errorMessage;
-            }
-            
-            setFeedback({ type: 'error', text: errorMessage });
-            await showAlert('error', 'Reply Failed', errorMessage);
-            setProcessing(false);
-        }
-    };
-
-    const handleStatusChange = async (messageId, status) => {
-        try {
-            await updateMessageStatus(messageId, status);
-            showAlert('success', 'Status updated', `Conversation marked as ${status}.`);
-            fetchMessages();
-        } catch (error) {
-            console.error('Failed to update message status', error);
-            setFeedback({ type: 'error', text: 'Could not update message status.' });
-            showAlert('error', 'Update failed', 'Unable to change status right now.');
-        }
+        fetchMessages();
     };
 
     return (
         <>
             <Helmet>
-                <title>Message Center - Admin</title>
+                <title>Admin Messages</title>
             </Helmet>
 
-            <div className="space-y-6">
-                <div className="bg-gradient-to-r from-primary to-secondary text-white rounded-lg p-6 shadow-xl flex flex-col gap-2">
-                    <h1 className="text-3xl font-bold flex items-center gap-3">
+            <div className="h-[calc(100vh-120px)] bg-black/70 backdrop-blur rounded-3xl overflow-hidden flex">
+
+                {/* LEFT: Conversation List */}
+                <div className="w-full max-w-sm border-r border-white/10 overflow-y-auto">
+                    <div className="p-4 border-b border-white/10 flex items-center gap-2 text-white">
                         <FaEnvelopeOpenText />
-                        Message Center
-                    </h1>
-                    <p className="text-white/80">
-                        All contact form submissions are logged here. Reply to donors and charities directly—responses appear inside their
-                        dashboards instantly.
-                    </p>
+                        <h2 className="font-bold">Messages</h2>
+                    </div>
+
+                    {messages.map(msg => (
+                        <button
+                            key={msg.id}
+                            onClick={() => setSelectedMessage(msg)}
+                            className={`w-full text-left p-4 border-b border-white/5 hover:bg-white/10 transition ${
+                                selectedMessage?.id === msg.id ? 'bg-white/10' : ''
+                            }`}
+                        >
+                            <p className="font-semibold text-white">{msg.senderName}</p>
+                            <p className="text-xs text-gray-400 truncate">{msg.message}</p>
+                        </button>
+                    ))}
                 </div>
 
-                <div className="card bg-gradient-to-br from-white via-primary/10 to-secondary/10 shadow-xl border-2 border-primary/20">
-                    <div className="card-body">
-                        <div className="flex items-center gap-3 mb-4">
-                            <FaFilter className="text-primary text-xl" />
-                            <h2 className="card-title mb-0 text-gray-900">Filter by status</h2>
-                        </div>
-                        <div className="tabs tabs-boxed w-fit">
-                            {statusTabs.map((tab) => (
-                                <button
-                                    key={tab.key}
-                                    className={`tab ${statusFilter === tab.key ? 'tab-active' : ''}`}
-                                    onClick={() => setStatusFilter(tab.key)}
-                                >
-                                    {tab.label}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                </div>
+                {/* RIGHT: Chat Window */}
+                <div className="flex-1 flex flex-col">
 
-                {feedback.text && (
-                    <div className={`alert ${feedback.type === 'success' ? 'alert-success' : 'alert-error'}`}>
-                        {feedback.text}
-                    </div>
-                )}
-
-                {loading ? (
-                    <div className="flex justify-center py-20">
-                        <span className="loading loading-spinner loading-lg text-primary"></span>
-                    </div>
-                ) : messages.length === 0 ? (
-                    <div className="card bg-gradient-to-br from-white via-primary/10 to-secondary/10 shadow-xl border-2 border-primary/20">
-                        <div className="card-body text-center py-16">
-                            <FaInbox className="text-5xl text-primary mx-auto mb-4" />
-                            <h3 className="text-xl font-semibold mb-2 text-gray-900">No messages in this view</h3>
-                            <p className="text-gray-700 font-medium">Try switching the filter to see other conversations.</p>
+                    {!selectedMessage ? (
+                        <div className="flex-1 flex items-center justify-center text-gray-400">
+                            Select a conversation
                         </div>
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        {messages.map((message) => (
-                            <div key={message.id} className="card bg-gradient-to-br from-white via-primary/10 to-secondary/10 shadow-xl border-2 border-primary/20 hover:border-primary/40 hover:shadow-2xl hover:scale-[1.02] transition-all">
-                                <div className="card-body">
-                                    <div className="flex items-start justify-between gap-4">
-                                        <div>
-                                            <p className="text-sm text-gray-500">
-                                                {message.subject} • {new Date(message.createdAt).toLocaleString()}
-                                            </p>
-                                            <h3 className="text-lg font-semibold">{message.senderName}</h3>
-                                            <p className="text-xs text-gray-500">{message.senderEmail}</p>
-                                        </div>
-                                        <span
-                                            className={`badge ${
-                                                message.status === 'closed'
-                                                    ? 'badge-ghost'
-                                                    : message.status === 'responded'
-                                                        ? 'badge-success'
-                                                        : 'badge-warning'
+                    ) : (
+                        <>
+                            {/* Header */}
+                            <div className="p-4 border-b border-white/10">
+                                <h3 className="font-semibold text-white">
+                                    {selectedMessage.senderName}
+                                </h3>
+                                <p className="text-xs text-gray-400">
+                                    {selectedMessage.senderEmail}
+                                </p>
+                            </div>
+
+                            {/* Messages */}
+                            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                                {/* Original message */}
+                                <div className="flex justify-start">
+                                    <div className="bg-white/10 text-white p-3 rounded-2xl max-w-md">
+                                        {selectedMessage.message}
+                                    </div>
+                                </div>
+
+                                {/* Replies */}
+                                {selectedMessage.replies?.map((reply, idx) => (
+                                    <div
+                                        key={idx}
+                                        className={`flex ${
+                                            reply.actorType === 'admin'
+                                                ? 'justify-end'
+                                                : 'justify-start'
+                                        }`}
+                                    >
+                                        <div
+                                            className={`p-3 rounded-2xl max-w-md text-sm ${
+                                                reply.actorType === 'admin'
+                                                    ? 'bg-blue-500 text-white'
+                                                    : 'bg-white/10 text-white'
                                             }`}
                                         >
-                                            {message.status}
-                                        </span>
-                                    </div>
-                                    <p className="mt-4 text-gray-800 text-base leading-relaxed">{message.message}</p>
-
-                                    {message.replies?.length > 0 && (
-                                        <div className="mt-4 p-3 rounded-xl bg-base-200/80 space-y-2 max-h-48 overflow-y-auto border border-base-300">
-                                            {message.replies.map((reply, idx) => (
-                                                <div key={idx}>
-                                                    <p className="text-sm font-semibold text-primary">
-                                                        {reply.actorType === 'admin' ? 'Admin' : 'User'} • {new Date(reply.createdAt).toLocaleString()}
-                                                    </p>
-                                                    <p className="text-sm text-gray-700 leading-relaxed">{reply.message}</p>
-                                                </div>
-                                            ))}
+                                            {reply.message}
                                         </div>
-                                    )}
-
-                                    <div className="card-actions mt-4 flex-col gap-2">
-                                        <div className="flex gap-2">
-                                            <button
-                                                className="btn btn-primary btn-sm flex-1"
-                                                onClick={() => openReplyModal(message)}
-                                                disabled={!message.canReply}
-                                            >
-                                                <FaReply />
-                                                Reply
-                                            </button>
-                                            {message.status !== 'closed' && (
-                                                <button
-                                                    className="btn btn-ghost btn-sm"
-                                                    onClick={() => handleStatusChange(message.id, 'closed')}
-                                                >
-                                                    Close
-                                                </button>
-                                            )}
-                                        </div>
-                                        {!message.canReply && (
-                                            <p className="text-xs text-warning text-center">
-                                                Guest message — replies not available.
-                                            </p>
-                                        )}
                                     </div>
-                                </div>
+                                ))}
                             </div>
-                        ))}
-                    </div>
-                )}
 
-                {selectedMessage && (
-                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                        <div className="bg-gradient-to-br from-white via-primary/10 to-secondary/10 rounded-lg w-full max-w-xl shadow-2xl border-2 border-primary/30">
-                            <div className="p-6 space-y-4">
-                                <div className="flex justify-between items-center">
-                                    <h3 className="text-xl text-black font-bold">Reply to {selectedMessage.senderName}</h3>
-                                    <button className="btn btn-sm btn-ghost" onClick={closeModal}>
-                                        ✕
-                                    </button>
-                                </div>
-                                <p className="text-sm text-black">{selectedMessage.subject}</p>
-                                <p className="p-3 bg-base-200 text-black rounded text-sm">{selectedMessage.message}</p>
-                                <form className="space-y-4" onSubmit={handleReplySubmit}>
-                                    <div className="form-control">
-                                        <label className="label">
-                                            <span className="label-text text-black font-semibold">Your reply</span>
-                                        </label>
-                                        <textarea
-                                            className="textarea textarea-bordered text-black h-32"
-                                            value={replyText}
-                                            onChange={(e) => setReplyText(e.target.value)}
-                                            required
-                                        />
-                                    </div>
-                                    <button className="btn btn-primary w-full" disabled={processing}>
-                                        {processing ? (
-                                            <>
-                                                <span className="loading loading-spinner"></span>
-                                                Sending...
-                                            </>
-                                        ) : (
-                                            <>
-                                                <FaPaperPlane />
-                                                Send Reply
-                                            </>
-                                        )}
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                )}
+                            {/* Input */}
+                            <form
+                                onSubmit={handleReplySubmit}
+                                className="p-4 border-t border-white/10 flex gap-2"
+                            >
+                                <input
+                                    type="text"
+                                    className="input bg-black/60 border border-white/20 text-white flex-1"
+                                    placeholder="Type a message…"
+                                    value={replyText}
+                                    onChange={(e) => setReplyText(e.target.value)}
+                                />
+                                <button
+                                    className="btn btn-primary"
+                                    disabled={processing}
+                                >
+                                    <FaPaperPlane />
+                                </button>
+                            </form>
+                        </>
+                    )}
+                </div>
             </div>
         </>
     );
 };
 
 export default AdminMessages;
-

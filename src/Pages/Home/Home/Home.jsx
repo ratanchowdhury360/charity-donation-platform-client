@@ -111,8 +111,13 @@ const Home = () => {
                     return endDate >= now;
                 });
 
-                // Calculate total raised
-                const totalRaised = allCampaigns.reduce((sum, c) => sum + (c.currentAmount || 0), 0);
+                // Calculate total raised. Prefer summing donations for accuracy; fallback to campaign totals.
+                let totalRaised = 0;
+                if (Array.isArray(donations) && donations.length > 0) {
+                    totalRaised = donations.reduce((sum, d) => sum + (Number(d.amount) || 0), 0);
+                } else {
+                    totalRaised = allCampaigns.reduce((sum, c) => sum + (Number(c.currentAmount) || 0), 0);
+                }
 
                 // Count unique charities
                 const uniqueCharities = new Set(allCampaigns.map(c => c.charityId));
@@ -221,41 +226,45 @@ const Home = () => {
 
       <div className="text-center p-6 rounded-xl shadow-md bg-gradient-to-br from-primary to-primary-focus text-white hover:scale-105 transition-transform">
         <FaHeart className="text-4xl mx-auto mb-3 text-white" />
-        <div className="text-3xl font-bold mb-1">
-          ৳{stats.totalRaised.toLocaleString()}
-        </div>
+                <div className="text-3xl font-bold mb-1">
+                    {loading ? (
+                        <span className="loading loading-spinner loading-md inline-block" aria-hidden="true"></span>
+                    ) : (
+                        `৳${Number(stats.totalRaised || 0).toLocaleString()}`
+                    )}
+                </div>
         <div className="text-sm text-white/80">Total Raised</div>
       </div>
 
       <div className="text-center p-6 rounded-xl shadow-md bg-gradient-to-br from-secondary to-secondary-focus text-white hover:scale-105 transition-transform">
         <FaChartLine className="text-4xl mx-auto mb-3 text-white" />
-        <div className="text-3xl font-bold mb-1">
-          {stats.activeCampaigns}
-        </div>
+                <div className="text-3xl font-bold mb-1">
+                    {loading ? <span className="loading loading-spinner loading-sm inline-block" aria-hidden="true"></span> : stats.activeCampaigns}
+                </div>
         <div className="text-sm text-white/80">Active Campaigns</div>
       </div>
 
       <div className="text-center p-6 rounded-xl shadow-md bg-gradient-to-br from-accent to-accent-focus text-white hover:scale-105 transition-transform">
         <FaUsers className="text-4xl mx-auto mb-3 text-white" />
-        <div className="text-3xl font-bold mb-1">
-          {stats.totalDonors}
-        </div>
-        <div className="text-sm text-white/80">Donors</div>
+                <div className="text-3xl font-bold mb-1">
+                    {loading ? <span className="loading loading-spinner loading-sm inline-block" aria-hidden="true"></span> : stats.totalDonors}
+                </div>
+        <div className="text-sm text-white/80"> Number of Donations </div>
       </div>
 
       <div className="text-center p-6 rounded-xl shadow-md bg-gradient-to-br from-info to-info-focus text-white hover:scale-105 transition-transform">
         <FaBuilding className="text-4xl mx-auto mb-3 text-white" />
-        <div className="text-3xl font-bold mb-1">
-          {stats.totalCharities}
-        </div>
+                <div className="text-3xl font-bold mb-1">
+                    {loading ? <span className="loading loading-spinner loading-sm inline-block" aria-hidden="true"></span> : stats.totalCharities}
+                </div>
         <div className="text-sm text-white/80">Charities</div>
       </div>
 
       <div className="text-center p-6 rounded-xl shadow-md bg-gradient-to-br from-success to-success-focus text-white hover:scale-105 transition-transform">
         <FaStar className="text-4xl mx-auto mb-3 text-white" />
-        <div className="text-3xl font-bold mb-1">
-          {stats.successRate}%
-        </div>
+                <div className="text-3xl font-bold mb-1">
+                    {loading ? <span className="loading loading-spinner loading-sm inline-block" aria-hidden="true"></span> : `${stats.successRate}%`}
+                </div>
         <div className="text-sm text-white/80">Success Rate</div>
       </div>
 
@@ -277,7 +286,7 @@ const Home = () => {
                                 <div className="flex justify-between items-center">
                                     <div>
                                         <p className="uppercase text-xs tracking-wide text-white/80">Completed targets</p>
-                                        <h3 className="text-4xl font-black mt-2">{stats.completedCampaigns}</h3>
+                                        <h3 className="text-4xl font-black mt-2">{loading ? <span className="loading loading-spinner inline-block" aria-hidden="true"></span> : stats.completedCampaigns}</h3>
                                         <p className="text-sm text-white/80">Campaigns that hit 100% of their goals</p>
                                     </div>
                                     <FaCheckCircle className="text-5xl opacity-70" />
@@ -294,7 +303,7 @@ const Home = () => {
                                 <div className="flex justify-between items-center">
                                     <div>
                                         <p className="uppercase text-xs tracking-wide text-white/80">Time-ended campaigns</p>
-                                        <h3 className="text-4xl font-black mt-2">{stats.archivedCampaigns}</h3>
+                                        <h3 className="text-4xl font-black mt-2">{loading ? <span className="loading loading-spinner inline-block" aria-hidden="true"></span> : stats.archivedCampaigns}</h3>
                                         <p className="text-sm text-white/80">Ready for admin review & extensions</p>
                                     </div>
                                     <FaHourglassEnd className="text-5xl opacity-70" />

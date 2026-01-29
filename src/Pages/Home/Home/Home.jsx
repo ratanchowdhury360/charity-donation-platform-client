@@ -363,10 +363,13 @@ const Home = () => {
                                             ></progress>
                                             <div className="flex justify-between text-sm mt-2">
                                                 <span>{Math.round(((campaign.currentAmount || 0) / campaign.goalAmount) * 100)}% funded</span>
-                                                <span className="flex items-center gap-1">
+                                                <Link 
+                                                    to={`/campaigns/${campaign.id}/donors`}
+                                                    className="flex items-center gap-1 hover:text-primary transition-colors cursor-pointer"
+                                                >
                                                     <FaUsers className="text-xs" />
                                                     {donorCounts[campaign.id] || 0} donors
-                                                </span>
+                                                </Link>
                                             </div>
                                             <div className="text-xs text-gray-500 mt-1 text-right">
                                                 Ends: {new Date(campaign.endDate).toLocaleDateString()}

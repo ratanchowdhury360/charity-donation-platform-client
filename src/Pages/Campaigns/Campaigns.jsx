@@ -267,7 +267,12 @@ const Campaigns = () => {
                                         <progress className="progress progress-success w-full h-2" value={campaign.currentAmount} max={campaign.goalAmount}></progress>
                                         <div className="flex justify-between text-sm mt-2">
                                             <span className="font-bold text-2xl  text-white">{Math.round((campaign.currentAmount / campaign.goalAmount) * 100)}% funded</span>
-                                            <span className="flex items-center gap-1 font-medium"><FaUsers className="text-primary" />{donorCounts[campaign.id] || 0} {(donorCounts[campaign.id] || 0) === 1 ? 'donor' : 'donors'}</span>
+                                            <Link 
+                                                to={`/campaigns/${campaign.id}/donors`}
+                                                className="flex items-center gap-1 font-medium hover:text-primary transition-colors cursor-pointer"
+                                            >
+                                                <FaUsers className="text-primary" />{donorCounts[campaign.id] || 0} {(donorCounts[campaign.id] || 0) === 1 ? 'donor' : 'donors'}
+                                            </Link>
                                         </div>
                                     </div>
                                     <div className="card-actions justify-between mt-4">

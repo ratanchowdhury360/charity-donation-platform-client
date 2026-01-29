@@ -6,6 +6,7 @@ import Login from "../Pages/Login/Login";
 import SignUp from "../Pages/SignUp/SignUp";
 import Campaigns from "../Pages/Campaigns/Campaigns";
 import CampaignDetails from "../Pages/Campaigns/CampaignDetails";
+import CampaignDonors from "../Pages/Campaigns/CampaignDonors";
 import Donate from "../Pages/Campaigns/Donate";
 import CreateCampaign from "../Pages/Campaigns/CreateCampaign";
 import Charities from "../Pages/Charities/Charities";
@@ -56,6 +57,10 @@ export const router = createBrowserRouter([
       {
         path: "/campaigns/:id",
         element: <CampaignDetails />
+      },
+      {
+        path: "/campaigns/:id/donors",
+        element: <CampaignDonors />
       },
       {
         path: "/campaigns/:id/donate",

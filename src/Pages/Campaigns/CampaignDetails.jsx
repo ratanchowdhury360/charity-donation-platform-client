@@ -156,11 +156,14 @@ const CampaignDetails = () => {
                                             </span>
                                         </div>
 
-                                        <div className="flex items-center justify-center gap-2 mt-3 p-2 bg-base-200 rounded-lg">
+                                        <Link 
+                                            to={`/campaigns/${campaign.id}/donors`}
+                                            className="flex items-center justify-center gap-2 mt-3 p-2 bg-base-200 rounded-lg hover:bg-base-300 transition-colors cursor-pointer"
+                                        >
                                             <FaUsers className="text-primary" />
-                                            <span className="font-semibold">{donorCount}</span>
+                                            <span className="font-semibold text-blue-800">{donorCount}</span>
                                             <span className="text-sm text-gray-600">{donorCount === 1 ? 'donor' : 'donors'}</span>
-                                        </div>
+                                        </Link>
                                     </div>
 
                                     {(() => {
